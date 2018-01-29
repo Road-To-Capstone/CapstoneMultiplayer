@@ -711,386 +711,6 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports) {
-
-
-module.exports = function(a, b){
-  var fn = function(){};
-  fn.prototype = b.prototype;
-  a.prototype = new fn;
-  a.prototype.constructor = a;
-};
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(process) {
-/**
- * This is the web browser implementation of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = __webpack_require__(43);
-exports.log = log;
-exports.formatArgs = formatArgs;
-exports.save = save;
-exports.load = load;
-exports.useColors = useColors;
-exports.storage = 'undefined' != typeof chrome
-               && 'undefined' != typeof chrome.storage
-                  ? chrome.storage.local
-                  : localstorage();
-
-/**
- * Colors.
- */
-
-exports.colors = [
-  'lightseagreen',
-  'forestgreen',
-  'goldenrod',
-  'dodgerblue',
-  'darkorchid',
-  'crimson'
-];
-
-/**
- * Currently only WebKit-based Web Inspectors, Firefox >= v31,
- * and the Firebug extension (any Firefox version) are known
- * to support "%c" CSS customizations.
- *
- * TODO: add a `localStorage` variable to explicitly enable/disable colors
- */
-
-function useColors() {
-  // is webkit? http://stackoverflow.com/a/16459606/376773
-  // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
-  return (typeof document !== 'undefined' && 'WebkitAppearance' in document.documentElement.style) ||
-    // is firebug? http://stackoverflow.com/a/398120/376773
-    (window.console && (console.firebug || (console.exception && console.table))) ||
-    // is firefox >= v31?
-    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-    (navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31);
-}
-
-/**
- * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
- */
-
-exports.formatters.j = function(v) {
-  try {
-    return JSON.stringify(v);
-  } catch (err) {
-    return '[UnexpectedJSONParseError]: ' + err.message;
-  }
-};
-
-
-/**
- * Colorize log arguments if enabled.
- *
- * @api public
- */
-
-function formatArgs() {
-  var args = arguments;
-  var useColors = this.useColors;
-
-  args[0] = (useColors ? '%c' : '')
-    + this.namespace
-    + (useColors ? ' %c' : ' ')
-    + args[0]
-    + (useColors ? '%c ' : ' ')
-    + '+' + exports.humanize(this.diff);
-
-  if (!useColors) return args;
-
-  var c = 'color: ' + this.color;
-  args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
-
-  // the final "%c" is somewhat tricky, because there could be other
-  // arguments passed either before or after the %c, so we need to
-  // figure out the correct index to insert the CSS into
-  var index = 0;
-  var lastC = 0;
-  args[0].replace(/%[a-z%]/g, function(match) {
-    if ('%%' === match) return;
-    index++;
-    if ('%c' === match) {
-      // we only are interested in the *last* %c
-      // (the user may have provided their own)
-      lastC = index;
-    }
-  });
-
-  args.splice(lastC, 0, c);
-  return args;
-}
-
-/**
- * Invokes `console.log()` when available.
- * No-op when `console.log` is not a "function".
- *
- * @api public
- */
-
-function log() {
-  // this hackery is required for IE8/9, where
-  // the `console.log` function doesn't have 'apply'
-  return 'object' === typeof console
-    && console.log
-    && Function.prototype.apply.call(console.log, console, arguments);
-}
-
-/**
- * Save `namespaces`.
- *
- * @param {String} namespaces
- * @api private
- */
-
-function save(namespaces) {
-  try {
-    if (null == namespaces) {
-      exports.storage.removeItem('debug');
-    } else {
-      exports.storage.debug = namespaces;
-    }
-  } catch(e) {}
-}
-
-/**
- * Load `namespaces`.
- *
- * @return {String} returns the previously persisted debug modes
- * @api private
- */
-
-function load() {
-  var r;
-  try {
-    return exports.storage.debug;
-  } catch(e) {}
-
-  // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
-  if (typeof process !== 'undefined' && 'env' in process) {
-    return process.env.DEBUG;
-  }
-}
-
-/**
- * Enable namespaces listed in `localStorage.debug` initially.
- */
-
-exports.enable(load());
-
-/**
- * Localstorage attempts to return the localstorage.
- *
- * This is necessary because safari throws
- * when a user disables cookies/localstorage
- * and you attempt to access it.
- *
- * @return {LocalStorage}
- * @api private
- */
-
-function localstorage(){
-  try {
-    return window.localStorage;
-  } catch (e) {}
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(process) {
-/**
- * This is the web browser implementation of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = __webpack_require__(53);
-exports.log = log;
-exports.formatArgs = formatArgs;
-exports.save = save;
-exports.load = load;
-exports.useColors = useColors;
-exports.storage = 'undefined' != typeof chrome
-               && 'undefined' != typeof chrome.storage
-                  ? chrome.storage.local
-                  : localstorage();
-
-/**
- * Colors.
- */
-
-exports.colors = [
-  'lightseagreen',
-  'forestgreen',
-  'goldenrod',
-  'dodgerblue',
-  'darkorchid',
-  'crimson'
-];
-
-/**
- * Currently only WebKit-based Web Inspectors, Firefox >= v31,
- * and the Firebug extension (any Firefox version) are known
- * to support "%c" CSS customizations.
- *
- * TODO: add a `localStorage` variable to explicitly enable/disable colors
- */
-
-function useColors() {
-  // is webkit? http://stackoverflow.com/a/16459606/376773
-  // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
-  return (typeof document !== 'undefined' && 'WebkitAppearance' in document.documentElement.style) ||
-    // is firebug? http://stackoverflow.com/a/398120/376773
-    (window.console && (console.firebug || (console.exception && console.table))) ||
-    // is firefox >= v31?
-    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-    (navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31);
-}
-
-/**
- * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
- */
-
-exports.formatters.j = function(v) {
-  try {
-    return JSON.stringify(v);
-  } catch (err) {
-    return '[UnexpectedJSONParseError]: ' + err.message;
-  }
-};
-
-
-/**
- * Colorize log arguments if enabled.
- *
- * @api public
- */
-
-function formatArgs() {
-  var args = arguments;
-  var useColors = this.useColors;
-
-  args[0] = (useColors ? '%c' : '')
-    + this.namespace
-    + (useColors ? ' %c' : ' ')
-    + args[0]
-    + (useColors ? '%c ' : ' ')
-    + '+' + exports.humanize(this.diff);
-
-  if (!useColors) return args;
-
-  var c = 'color: ' + this.color;
-  args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
-
-  // the final "%c" is somewhat tricky, because there could be other
-  // arguments passed either before or after the %c, so we need to
-  // figure out the correct index to insert the CSS into
-  var index = 0;
-  var lastC = 0;
-  args[0].replace(/%[a-z%]/g, function(match) {
-    if ('%%' === match) return;
-    index++;
-    if ('%c' === match) {
-      // we only are interested in the *last* %c
-      // (the user may have provided their own)
-      lastC = index;
-    }
-  });
-
-  args.splice(lastC, 0, c);
-  return args;
-}
-
-/**
- * Invokes `console.log()` when available.
- * No-op when `console.log` is not a "function".
- *
- * @api public
- */
-
-function log() {
-  // this hackery is required for IE8/9, where
-  // the `console.log` function doesn't have 'apply'
-  return 'object' === typeof console
-    && console.log
-    && Function.prototype.apply.call(console.log, console, arguments);
-}
-
-/**
- * Save `namespaces`.
- *
- * @param {String} namespaces
- * @api private
- */
-
-function save(namespaces) {
-  try {
-    if (null == namespaces) {
-      exports.storage.removeItem('debug');
-    } else {
-      exports.storage.debug = namespaces;
-    }
-  } catch(e) {}
-}
-
-/**
- * Load `namespaces`.
- *
- * @return {String} returns the previously persisted debug modes
- * @api private
- */
-
-function load() {
-  var r;
-  try {
-    return exports.storage.debug;
-  } catch(e) {}
-
-  // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
-  if (typeof process !== 'undefined' && 'env' in process) {
-    return process.env.DEBUG;
-  }
-}
-
-/**
- * Enable namespaces listed in `localStorage.debug` initially.
- */
-
-exports.enable(load());
-
-/**
- * Localstorage attempts to return the localstorage.
- *
- * This is necessary because safari throws
- * when a user disables cookies/localstorage
- * and you attempt to access it.
- *
- * @return {LocalStorage}
- * @api private
- */
-
-function localstorage(){
-  try {
-    return window.localStorage;
-  } catch (e) {}
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
-
-/***/ }),
-/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {/**
@@ -81457,6 +81077,386 @@ PIXI.TextureSilentFail = true;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
 
 /***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+
+module.exports = function(a, b){
+  var fn = function(){};
+  fn.prototype = b.prototype;
+  a.prototype = new fn;
+  a.prototype.constructor = a;
+};
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(process) {
+/**
+ * This is the web browser implementation of `debug()`.
+ *
+ * Expose `debug()` as the module.
+ */
+
+exports = module.exports = __webpack_require__(43);
+exports.log = log;
+exports.formatArgs = formatArgs;
+exports.save = save;
+exports.load = load;
+exports.useColors = useColors;
+exports.storage = 'undefined' != typeof chrome
+               && 'undefined' != typeof chrome.storage
+                  ? chrome.storage.local
+                  : localstorage();
+
+/**
+ * Colors.
+ */
+
+exports.colors = [
+  'lightseagreen',
+  'forestgreen',
+  'goldenrod',
+  'dodgerblue',
+  'darkorchid',
+  'crimson'
+];
+
+/**
+ * Currently only WebKit-based Web Inspectors, Firefox >= v31,
+ * and the Firebug extension (any Firefox version) are known
+ * to support "%c" CSS customizations.
+ *
+ * TODO: add a `localStorage` variable to explicitly enable/disable colors
+ */
+
+function useColors() {
+  // is webkit? http://stackoverflow.com/a/16459606/376773
+  // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
+  return (typeof document !== 'undefined' && 'WebkitAppearance' in document.documentElement.style) ||
+    // is firebug? http://stackoverflow.com/a/398120/376773
+    (window.console && (console.firebug || (console.exception && console.table))) ||
+    // is firefox >= v31?
+    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+    (navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31);
+}
+
+/**
+ * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
+ */
+
+exports.formatters.j = function(v) {
+  try {
+    return JSON.stringify(v);
+  } catch (err) {
+    return '[UnexpectedJSONParseError]: ' + err.message;
+  }
+};
+
+
+/**
+ * Colorize log arguments if enabled.
+ *
+ * @api public
+ */
+
+function formatArgs() {
+  var args = arguments;
+  var useColors = this.useColors;
+
+  args[0] = (useColors ? '%c' : '')
+    + this.namespace
+    + (useColors ? ' %c' : ' ')
+    + args[0]
+    + (useColors ? '%c ' : ' ')
+    + '+' + exports.humanize(this.diff);
+
+  if (!useColors) return args;
+
+  var c = 'color: ' + this.color;
+  args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
+
+  // the final "%c" is somewhat tricky, because there could be other
+  // arguments passed either before or after the %c, so we need to
+  // figure out the correct index to insert the CSS into
+  var index = 0;
+  var lastC = 0;
+  args[0].replace(/%[a-z%]/g, function(match) {
+    if ('%%' === match) return;
+    index++;
+    if ('%c' === match) {
+      // we only are interested in the *last* %c
+      // (the user may have provided their own)
+      lastC = index;
+    }
+  });
+
+  args.splice(lastC, 0, c);
+  return args;
+}
+
+/**
+ * Invokes `console.log()` when available.
+ * No-op when `console.log` is not a "function".
+ *
+ * @api public
+ */
+
+function log() {
+  // this hackery is required for IE8/9, where
+  // the `console.log` function doesn't have 'apply'
+  return 'object' === typeof console
+    && console.log
+    && Function.prototype.apply.call(console.log, console, arguments);
+}
+
+/**
+ * Save `namespaces`.
+ *
+ * @param {String} namespaces
+ * @api private
+ */
+
+function save(namespaces) {
+  try {
+    if (null == namespaces) {
+      exports.storage.removeItem('debug');
+    } else {
+      exports.storage.debug = namespaces;
+    }
+  } catch(e) {}
+}
+
+/**
+ * Load `namespaces`.
+ *
+ * @return {String} returns the previously persisted debug modes
+ * @api private
+ */
+
+function load() {
+  var r;
+  try {
+    return exports.storage.debug;
+  } catch(e) {}
+
+  // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
+  if (typeof process !== 'undefined' && 'env' in process) {
+    return process.env.DEBUG;
+  }
+}
+
+/**
+ * Enable namespaces listed in `localStorage.debug` initially.
+ */
+
+exports.enable(load());
+
+/**
+ * Localstorage attempts to return the localstorage.
+ *
+ * This is necessary because safari throws
+ * when a user disables cookies/localstorage
+ * and you attempt to access it.
+ *
+ * @return {LocalStorage}
+ * @api private
+ */
+
+function localstorage(){
+  try {
+    return window.localStorage;
+  } catch (e) {}
+}
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(process) {
+/**
+ * This is the web browser implementation of `debug()`.
+ *
+ * Expose `debug()` as the module.
+ */
+
+exports = module.exports = __webpack_require__(53);
+exports.log = log;
+exports.formatArgs = formatArgs;
+exports.save = save;
+exports.load = load;
+exports.useColors = useColors;
+exports.storage = 'undefined' != typeof chrome
+               && 'undefined' != typeof chrome.storage
+                  ? chrome.storage.local
+                  : localstorage();
+
+/**
+ * Colors.
+ */
+
+exports.colors = [
+  'lightseagreen',
+  'forestgreen',
+  'goldenrod',
+  'dodgerblue',
+  'darkorchid',
+  'crimson'
+];
+
+/**
+ * Currently only WebKit-based Web Inspectors, Firefox >= v31,
+ * and the Firebug extension (any Firefox version) are known
+ * to support "%c" CSS customizations.
+ *
+ * TODO: add a `localStorage` variable to explicitly enable/disable colors
+ */
+
+function useColors() {
+  // is webkit? http://stackoverflow.com/a/16459606/376773
+  // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
+  return (typeof document !== 'undefined' && 'WebkitAppearance' in document.documentElement.style) ||
+    // is firebug? http://stackoverflow.com/a/398120/376773
+    (window.console && (console.firebug || (console.exception && console.table))) ||
+    // is firefox >= v31?
+    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+    (navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31);
+}
+
+/**
+ * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
+ */
+
+exports.formatters.j = function(v) {
+  try {
+    return JSON.stringify(v);
+  } catch (err) {
+    return '[UnexpectedJSONParseError]: ' + err.message;
+  }
+};
+
+
+/**
+ * Colorize log arguments if enabled.
+ *
+ * @api public
+ */
+
+function formatArgs() {
+  var args = arguments;
+  var useColors = this.useColors;
+
+  args[0] = (useColors ? '%c' : '')
+    + this.namespace
+    + (useColors ? ' %c' : ' ')
+    + args[0]
+    + (useColors ? '%c ' : ' ')
+    + '+' + exports.humanize(this.diff);
+
+  if (!useColors) return args;
+
+  var c = 'color: ' + this.color;
+  args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
+
+  // the final "%c" is somewhat tricky, because there could be other
+  // arguments passed either before or after the %c, so we need to
+  // figure out the correct index to insert the CSS into
+  var index = 0;
+  var lastC = 0;
+  args[0].replace(/%[a-z%]/g, function(match) {
+    if ('%%' === match) return;
+    index++;
+    if ('%c' === match) {
+      // we only are interested in the *last* %c
+      // (the user may have provided their own)
+      lastC = index;
+    }
+  });
+
+  args.splice(lastC, 0, c);
+  return args;
+}
+
+/**
+ * Invokes `console.log()` when available.
+ * No-op when `console.log` is not a "function".
+ *
+ * @api public
+ */
+
+function log() {
+  // this hackery is required for IE8/9, where
+  // the `console.log` function doesn't have 'apply'
+  return 'object' === typeof console
+    && console.log
+    && Function.prototype.apply.call(console.log, console, arguments);
+}
+
+/**
+ * Save `namespaces`.
+ *
+ * @param {String} namespaces
+ * @api private
+ */
+
+function save(namespaces) {
+  try {
+    if (null == namespaces) {
+      exports.storage.removeItem('debug');
+    } else {
+      exports.storage.debug = namespaces;
+    }
+  } catch(e) {}
+}
+
+/**
+ * Load `namespaces`.
+ *
+ * @return {String} returns the previously persisted debug modes
+ * @api private
+ */
+
+function load() {
+  var r;
+  try {
+    return exports.storage.debug;
+  } catch(e) {}
+
+  // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
+  if (typeof process !== 'undefined' && 'env' in process) {
+    return process.env.DEBUG;
+  }
+}
+
+/**
+ * Enable namespaces listed in `localStorage.debug` initially.
+ */
+
+exports.enable(load());
+
+/**
+ * Localstorage attempts to return the localstorage.
+ *
+ * This is necessary because safari throws
+ * when a user disables cookies/localstorage
+ * and you attempt to access it.
+ *
+ * @return {LocalStorage}
+ * @api private
+ */
+
+function localstorage(){
+  try {
+    return window.localStorage;
+  } catch (e) {}
+}
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
+
+/***/ }),
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -82575,9 +82575,9 @@ function polling (opts) {
 var Transport = __webpack_require__(6);
 var parseqs = __webpack_require__(9);
 var parser = __webpack_require__(1);
-var inherit = __webpack_require__(2);
+var inherit = __webpack_require__(3);
 var yeast = __webpack_require__(26);
-var debug = __webpack_require__(3)('engine.io-client:polling');
+var debug = __webpack_require__(4)('engine.io-client:polling');
 
 /**
  * Module exports.
@@ -82998,7 +82998,7 @@ var Emitter = __webpack_require__(23);
 var parser = __webpack_require__(11);
 var on = __webpack_require__(21);
 var bind = __webpack_require__(12);
-var debug = __webpack_require__(4)('socket.io-client:manager');
+var debug = __webpack_require__(5)('socket.io-client:manager');
 var indexOf = __webpack_require__(16);
 var Backoff = __webpack_require__(33);
 
@@ -83593,7 +83593,7 @@ var Emitter = __webpack_require__(23);
 var toArray = __webpack_require__(59);
 var on = __webpack_require__(21);
 var bind = __webpack_require__(12);
-var debug = __webpack_require__(4)('socket.io-client:socket');
+var debug = __webpack_require__(5)('socket.io-client:socket');
 var hasBin = __webpack_require__(15);
 
 /**
@@ -84322,11 +84322,13 @@ module.exports = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_socket_io_client__ = __webpack_require__(51);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_socket_io_client__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__player__ = __webpack_require__(63);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__zombie__ = __webpack_require__(64);
+
 
 
 
@@ -84341,17 +84343,16 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Tilemap.TILED_JSON)
 		this.load.image('tiles', './assets/tiles.png')
 		this.load.image('player', './assets/playerplaceholder.jpg')
+		this.load.image('building', './assets/buildingplaceholder.jpg')
+		this.load.image('zombie', './assets/zombieplaceholder.png')
 	}
 	create(){
 		this.setUpMap()
+		// this.setUpZombie(); // test if single zombie shows up
 		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default.a.connect();
 		this.io.on('connect', data=>{
 			this.createOnConnection(data);
 		});
-
-
-
-
 	   
 	}
 	update(){
@@ -84373,7 +84374,20 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
+			console.log('inside update ======');
+			if(this.zombies.length <= 20) {
+				let randomSpawn = Math.ceil(Math.random() * 10)
+				if (randomSpawn <= 4) {
+ 					return this.makeZombies(625 + Math.ceil(Math.random() * 100), 116 + Math.ceil(Math.random() * 100))
+				} else if (randomSpawn <= 7) {
+					return this.makeZombies(1806 - Math.ceil(Math.random() * 100), 1048 + Math.ceil(Math.random() * 100))
+				} else {
+					return this.makeZombies(624 + Math.ceil(Math.random() * 100), 1821 - Math.ceil(Math.random() * 100))
+				}
+			}
 		}
+
+		
 	}
 
 
@@ -84388,12 +84402,30 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		layer = map.createLayer('Tile Layer 3')
 		layer.resizeWorld()
 	  }
+	
+	//Testing for single zombie to show up
+	// setUpZombie() {
+	// 	this.zombie = new Zombie(this, 0, 0);
+	// }
+
+	makeZombies(x, y) {
+		let zombie = new __WEBPACK_IMPORTED_MODULE_3__zombie__["a" /* default */](this, x, y);
+		this.zombies.push(zombie);
+		this.io.emit('client:create-zombies', zombie);
+		return zombie
+	};
+
 	/* 
 		SOCKET HELPER FUNCTIONS
 	*/
 	createOnConnection(data){
+		//Zombies
+		window.zombies = [];
+		this.zombies = zombies;
+
 		window.players = [];
 		this.players = players;
+
 		window.io = this.io;//meafffdd
 
 		this.socketCreateListeners();
@@ -84439,7 +84471,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 
 	   	this.io.on('server:player-moved',data=>{
 	   		this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
-	   	});
+		});
+
+		this.io.on('server:create-zombies',data => {
+			console.log('broadcast zomebie client =====')
+			this.zombies.push(data);
+		})
 	}
 
 	getPlayerById(id){
@@ -84991,7 +85028,7 @@ module.exports.parser = __webpack_require__(1);
 
 var transports = __webpack_require__(13);
 var Emitter = __webpack_require__(8);
-var debug = __webpack_require__(3)('engine.io-client:socket');
+var debug = __webpack_require__(4)('engine.io-client:socket');
 var index = __webpack_require__(16);
 var parser = __webpack_require__(1);
 var parseuri = __webpack_require__(18);
@@ -85736,7 +85773,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
  */
 
 var Polling = __webpack_require__(14);
-var inherit = __webpack_require__(2);
+var inherit = __webpack_require__(3);
 
 /**
  * Module exports.
@@ -85975,8 +86012,8 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 var XMLHttpRequest = __webpack_require__(7);
 var Polling = __webpack_require__(14);
 var Emitter = __webpack_require__(8);
-var inherit = __webpack_require__(2);
-var debug = __webpack_require__(3)('engine.io-client:polling-xhr');
+var inherit = __webpack_require__(3);
+var debug = __webpack_require__(4)('engine.io-client:polling-xhr');
 
 /**
  * Module exports.
@@ -86406,14 +86443,14 @@ function unloadHandler () {
 var Transport = __webpack_require__(6);
 var parser = __webpack_require__(1);
 var parseqs = __webpack_require__(9);
-var inherit = __webpack_require__(2);
+var inherit = __webpack_require__(3);
 var yeast = __webpack_require__(26);
-var debug = __webpack_require__(3)('engine.io-client:websocket');
+var debug = __webpack_require__(4)('engine.io-client:websocket');
 var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 var NodeWebSocket;
 if (typeof window === 'undefined') {
   try {
-    NodeWebSocket = __webpack_require__(64);
+    NodeWebSocket = __webpack_require__(65);
   } catch (e) { }
 }
 
@@ -88068,7 +88105,7 @@ module.exports = "/**\n* @author       Richard Davey <rich@photonstorm.com>\n* @
 var url = __webpack_require__(52);
 var parser = __webpack_require__(11);
 var Manager = __webpack_require__(20);
-var debug = __webpack_require__(4)('socket.io-client');
+var debug = __webpack_require__(5)('socket.io-client');
 
 /**
  * Module exports.
@@ -88181,7 +88218,7 @@ exports.Socket = __webpack_require__(22);
  */
 
 var parseuri = __webpack_require__(18);
-var debug = __webpack_require__(4)('socket.io-client:url');
+var debug = __webpack_require__(5)('socket.io-client:url');
 
 /**
  * Module exports.
@@ -89548,7 +89585,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_pixi___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_pixi__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_p2__ = __webpack_require__(27);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_p2___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_p2__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_phaser__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_phaser__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_phaser__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config__ = __webpack_require__(29);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__config__);
@@ -89577,7 +89614,7 @@ const newgame = new game();
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
@@ -89664,83 +89701,55 @@ class Player{
 /* harmony export (immutable) */ __webpack_exports__["a"] = Player;
 
 
-/*
-import Phaser from 'phaser'
-
-class player extends Phaser.Sprite {
-  constructor (game, x, y) {
-    super(game, x, y, 'player')
-
-    this.game.physics.arcade.enableBody(this)
-
-    this.anchor.setTo(0.5, 0.5)
-    this.scale.setTo(0.15, 0.15)
-    this.x = this.game.width / 2
-    this.y = this.game.height / 2
-
-    this.checkWorldBounds = true
-    this.body.collideWorldBounds = true
-
-    // Controls
-    this.controls = {
-      right: this.game.input.keyboard.addKey(Phaser.Keyboard.D),
-      left: this.game.input.keyboard.addKey(Phaser.Keyboard.A),
-      up: this.game.input.keyboard.addKey(Phaser.Keyboard.W),
-      down: this.game.input.keyboard.addKey(Phaser.Keyboard.S)
-    }
-
-    this.item = []
-
-    this.playerSpeedY = 100
-    this.playerSpeedX = 200
-
-    this.playerHealth = 100
-    this.playerMaxHealth = 100
-  }
-
-  update () {
-    // Handle Player controls
-    if (this.controls.up.isDown) {
-      this.body.velocity.y = -this.playerSpeedY
-    // this.y -= this.playerSpeedY
-    }
-    if (this.controls.down.isDown) {
-      this.body.velocity.y = this.playerSpeedY
-    // this.y += this.playerSpeedY
-    }
-    if (this.controls.left.isDown) {
-      this.body.velocity.x = -this.playerSpeedX
-    // this.x -= this.playerSpeedX
-    }
-    if (this.controls.right.isDown) {
-      this.body.velocity.x = this.playerSpeedX
-    // this.x += this.playerSpeedX
-    }
-    if (!this.controls.right.isDown && !this.controls.left.isDown) {
-      this.body.velocity.x = 0
-    }
-    if (this.controls.right.isDown && this.controls.left.isDown) {
-      this.body.velocity.x = 0
-    }
-    if (!this.controls.down.isDown && !this.controls.up.isDown) {
-      this.body.velocity.y = 0
-    }
-    if (this.controls.down.isDown && this.controls.up.isDown) {
-      this.body.velocity.y = 0
-    }
-  }
-
-  getPosition () {
-    return [this.player.x, this.player.y]
-  }
-}
-
-export default player
-
-*/
 
 /***/ }),
 /* 64 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
+
+
+class zombie {
+  constructor (game, x, y) {
+    this.game = game;
+
+    this.sprite = this.game.add.sprite(50, 0, 'zombie');
+    this.game.physics.arcade.enableBody(this.sprite);
+
+    this.sprite.anchor.setTo(0.5, 0.5);
+    this.sprite.scale.setTo(0.06, 0.06);
+    this.sprite.checkWorldBounds = true
+    this.sprite.body.collideWorldBounds = true;
+
+    this.sprite.x = x;
+    this.sprite.y = y;
+
+    this.sprite.SPEED = 200; // Invader speed pixels/second
+    this.sprite.TURN_RATE = 10; // turn rate in degrees/frame
+    this.sprite.health = 100;
+    this.sprite.hasOverlapped = false;
+  }
+
+  update () {
+  }
+
+  setZombieX(x){
+    this.sprite.x = x;
+    return this;
+  }
+  setZombieY(y){
+    this.sprite.y = y;
+    return this;
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = zombie;
+
+
+
+/***/ }),
+/* 65 */
 /***/ (function(module, exports) {
 
 /* (ignored) */

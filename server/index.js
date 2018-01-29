@@ -11,6 +11,7 @@ const io = socketio(server);
 app.use('/',express.static(config.publicDir));
 //-socket
 const players = require('./players.js');
+// const zombies = require('./zombies.js'); //not sure if I'm using it
 
 io.on('connection', socket => {
 	players.add(socket.id); console.log(`${socket.id} added`);
@@ -28,6 +29,11 @@ io.on('connection', socket => {
 	socket.on('disconnect', ()=>{
 		players.delete(socket.id);
 		io.emit('server:player-disconnected',socket.id); console.log(`${socket.id} disconnected`);
+	});
+
+	socket.on('client:create-zombies', data => {
+		console.log('server broadcast zombie');
+		socket.broadcast.emit('server:create-zombies', data);
 	});
 });
 //=socket
