@@ -1,7 +1,8 @@
 import Phaser from 'phaser'
 
 export default class zombie {
-  constructor (game, x, y) {
+  constructor (id, game, x, y) {
+    this.id = id;
     this.game = game;
 
     this.sprite = this.game.add.sprite(50, 0, 'zombie');

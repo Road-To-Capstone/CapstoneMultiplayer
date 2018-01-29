@@ -84340,14 +84340,14 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	}
 	preload(){
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
-		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Tilemap.TILED_JSON)
-		this.load.image('tiles', './assets/tiles.png')
+		// this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
+		// this.load.image('tiles', './assets/tiles.png')
 		this.load.image('player', './assets/playerplaceholder.jpg')
 		this.load.image('building', './assets/buildingplaceholder.jpg')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
 	}
 	create(){
-		this.setUpMap()
+		// this.setUpMap()
 		// this.setUpZombie(); // test if single zombie shows up
 		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default.a.connect();
 		this.io.on('connect', data=>{
@@ -84374,20 +84374,10 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
-			console.log('inside update ======');
-			if(this.zombies.length <= 20) {
-				let randomSpawn = Math.ceil(Math.random() * 10)
-				if (randomSpawn <= 4) {
- 					return this.makeZombies(625 + Math.ceil(Math.random() * 100), 116 + Math.ceil(Math.random() * 100))
-				} else if (randomSpawn <= 7) {
-					return this.makeZombies(1806 - Math.ceil(Math.random() * 100), 1048 + Math.ceil(Math.random() * 100))
-				} else {
-					return this.makeZombies(624 + Math.ceil(Math.random() * 100), 1821 - Math.ceil(Math.random() * 100))
-				}
+			if(this.zombies.length < 5) {
+				this.io.emit('client:ask-to-create-zombie');
 			}
 		}
-
-		
 	}
 
 
@@ -84408,11 +84398,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	// 	this.zombie = new Zombie(this, 0, 0);
 	// }
 
-	makeZombies(x, y) {
-		let zombie = new __WEBPACK_IMPORTED_MODULE_3__zombie__["a" /* default */](this, x, y);
-		this.zombies.push(zombie);
-		this.io.emit('client:create-zombies', zombie);
-		return zombie
+	makeZombies(id, x, y) {
+		this.zombie = new __WEBPACK_IMPORTED_MODULE_3__zombie__["a" /* default */](id, this, x, y);
+		this.zombies.push(this.zombie);
 	};
 
 	/* 
@@ -84446,13 +84434,23 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	socketCreateListeners(){
 		const me = this.getPlayerById(this.io.id);
 		//load all existing players
-	   	this.io.emit('client:give-me-players'); //ask for it
+		this.io.emit('client:give-me-players'); //ask for it
+		this.io.emit('client:give-me-zombies'); //ask for zombies  
+		
 	   	this.io.on('server:all-players',data=>{ //the data is the players from the server side
 	   		data.forEach(e=>{
 	   			if(e.id != this.io.id) //this will prevent loading our player two times
 	   			players.push(new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](e.id, this, e.posX, e.posY, e.angle));
 	   		});
-	   	});
+		});
+		   
+		this.io.on('server:all-zombies', data => {
+			console.log('=====server all-zombies', data, this.zombies);
+			this.zombies = [...data];
+			this.zombies.forEach(zombie => {
+				this.makeZombies(zombie.id, zombie.posX, zombie.posY);
+			});
+		})
 		   
 		//load your player
 	   	this.io.on('server:player-added',data=>{
@@ -84473,9 +84471,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	   		this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
 		});
 
-		this.io.on('server:create-zombies',data => {
-			console.log('broadcast zomebie client =====')
-			this.zombies.push(data);
+		this.io.on('server:zombie-added', newZombie => {
+			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
 		})
 	}
 
@@ -89712,7 +89709,8 @@ class Player{
 
 
 class zombie {
-  constructor (game, x, y) {
+  constructor (id, game, x, y) {
+    this.id = id;
     this.game = game;
 
     this.sprite = this.game.add.sprite(50, 0, 'zombie');
