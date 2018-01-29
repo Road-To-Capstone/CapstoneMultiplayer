@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
 import socketio from 'socket.io-client';
 import Player from './../player';
+import Missile from './../missile'
 
-var map,layer;
+var map,layer, missileGroup, zombieGroup, singleMissile;
 export default class GameState extends Phaser.State{
 	constructor(){
 		super();
@@ -13,15 +14,17 @@ export default class GameState extends Phaser.State{
 		this.load.image('tiles', './assets/tiles.png')
 		this.load.image('player', './assets/playerplaceholder.jpg')
 		this.load.image('building', './assets/buildingplaceholder.jpg')
+		this.load.image('missile', '/assets/missileplaceholder.png')
 	}
 	create(){
 		this.setUpMap()
+		//this.setupMissilesGroup()
 		this.io = socketio.connect();
 		this.io.on('connect', data=>{
 			this.createOnConnection(data);
 		});
 
-
+		//singleMissile = new Missile(this)
 
 
 	   
@@ -45,6 +48,10 @@ export default class GameState extends Phaser.State{
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
+			if (this.input.activePointer.isDown) {
+				this.getMissiles().melee(player.getX(), player.getY(), this.input.activePointer.x,this.input.activePointer.y)
+				this.io.emit('client:missile-fired', this.getMissiles())
+			}
 		}
 	}
 
@@ -60,12 +67,21 @@ export default class GameState extends Phaser.State{
 		layer = map.createLayer('Tile Layer 3')
 		layer.resizeWorld()
 	  }
+
+	
+	 
+
 	/* 
 		SOCKET HELPER FUNCTIONS
 	*/
 	createOnConnection(data){
 		window.players = [];
 		this.players = players;
+
+		window.missiles = {};
+		this.missiles = missiles;
+
+		this.missiles = new Missile(this)
 		window.io = this.io;//meafffdd
 
 		this.socketCreateListeners();
@@ -111,12 +127,19 @@ export default class GameState extends Phaser.State{
 
 	   	this.io.on('server:player-moved',data=>{
 	   		this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
-	   	});
+		});
+		   
+		this.io.on('server:missile-fired', data => {
+			this.missiles = data;
+		});
 	}
 
 	getPlayerById(id){
 		for(let i=0;i<this.players.length;i++)
 			if(this.players[i].id == id) return this.players[i];
-	
+	}
+
+	getMissiles(){
+		return this.missiles;
 	}
 }
