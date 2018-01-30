@@ -90,7 +90,6 @@ export default class GameState extends Phaser.State{
 
 	fire(posX,posY){
 		this.missile = new Missile(this,posX,posY,this.input.activePointer.x,this.input.activePointer.y)
-		//this.missiles.melee(posX, posY, this.input.activePointer.x,this.input.activePointer.y)
 		this.missiles.push(this.missile);
 	}
 
