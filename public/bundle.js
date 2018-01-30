@@ -84396,7 +84396,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 			if(this.zombies !== []) {
 				// console.log('this.zombies', this.zombies);
 				this.zombies.forEach(e => {
-					e.sprite.health -= 1;
+					// e.sprite.health -= 1;
 					this.zombieAI(e);
 					if(e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
 					// this.physics.arcade.collide(e, this.zombies);
@@ -84543,9 +84543,10 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 
 	zombieAI(zombie) {
 		// console.log('this.players=====', this.players[0]);
+		let mindex = this.findClosestPlayer(zombie);
 		var targetAngle = this.math.angleBetween(
 			zombie.sprite.position.x, zombie.sprite.position.y,
-			this.players[0].sprite.position.x, this.players[0].sprite.position.y // this needs to be player x and y that updates dynamically
+			this.players[mindex].sprite.position.x, this.players[mindex].sprite.position.y // this needs to be player x and y that updates dynamically
 		  )
 	  
 		  // Gradually (this.TURN_RATE) aim the Invader towards the target angle
@@ -84576,6 +84577,21 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		zombie.sprite.body.velocity.x = xVelocity
 		zombie.sprite.body.velocity.y = yVelocity
 	  }
+
+	findClosestPlayer(zombie) {
+		let minSet = {dist: 1920}, distance, playerPosX, playerPoxY;
+		for(let i = 0; i < this.players.length; i++) {
+			playerPosX = players[i].sprite.position.x;
+			playerPoxY = players[i].sprite.position.y;
+			distance = Math.sqrt(Math.pow(playerPosX - zombie.sprite.position.x, 2)
+				+ Math.pow(playerPoxY - zombie.sprite.position.y, 2));
+			if(distance < minSet.dist) {
+				minSet['index'] = i;
+				minSet['dist'] = distance;
+			}
+		}
+		return minSet.index? minSet.index: 0;
+	}
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = GameState;
 
