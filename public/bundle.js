@@ -84402,14 +84402,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				this.io.emit('client:ask-to-create-zombie');
 			}
 
-			// console.log('playerss =====', this.players);
-			// console.log('zombies=====', this.zombies);
-
 			if(this.zombies !== []) {
 			//	console.log('this.zombies', this.zombies);
 				this.zombies.forEach(e => {
-					this.zombieAI(e)
-					this.physics.arcade.collide(e, this.zombies);
+					// e.sprite.health -= 1;
+					this.zombieAI(e);
+					if(e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
+					// this.physics.arcade.collide(e, this.zombies);
 				})
 			}
 
@@ -84497,7 +84496,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		});
 		   
 		this.io.on('server:all-zombies', data => {
-			console.log('=====server all-zombies', data, this.zombies);
+			// console.log('=====server all-zombies', data, this.zombies);
 			// this.zombies = [...data];
 			data.forEach(newZombie => {
 				this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
@@ -84527,12 +84526,22 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		});
 		   
 		this.io.on('server:missile-fired', data => {
-			console.log("data is ", data)
+			// console.log("data is ", data)
 			this.missiles = data;
 		});
 
 		this.io.on('server:zombie-added', newZombie => {
 			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
+		});
+
+		this.io.on('server:kill-this-zombie', id => {
+			console.log(`Zombie ${id} died`);
+			for(let i = 0; i < this.zombies.length; i++) {
+				if(this.zombies[i].id === id) {
+					this.zombies[i].sprite.destroy();
+					this.zombies.splice(i, 1);
+				}
+			}
 		})
 
 		this.io.on('server:missile-added', newMissile => {
@@ -84552,9 +84561,10 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 
 	zombieAI(zombie) {
 		// console.log('this.players=====', this.players[0]);
+		let mindex = this.findClosestPlayer(zombie);
 		var targetAngle = this.math.angleBetween(
 			zombie.sprite.position.x, zombie.sprite.position.y,
-			this.players[0].sprite.position.x, this.players[0].sprite.position.y // this needs to be player x and y that updates dynamically
+			this.players[mindex].sprite.position.x, this.players[mindex].sprite.position.y // this needs to be player x and y that updates dynamically
 		  )
 	  
 		  // Gradually (this.TURN_RATE) aim the Invader towards the target angle
@@ -84585,6 +84595,21 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		zombie.sprite.body.velocity.x = xVelocity
 		zombie.sprite.body.velocity.y = yVelocity
 	  }
+
+	findClosestPlayer(zombie) {
+		let minSet = {dist: 1920}, distance, playerPosX, playerPoxY;
+		for(let i = 0; i < this.players.length; i++) {
+			playerPosX = players[i].sprite.position.x;
+			playerPoxY = players[i].sprite.position.y;
+			distance = Math.sqrt(Math.pow(playerPosX - zombie.sprite.position.x, 2)
+				+ Math.pow(playerPoxY - zombie.sprite.position.y, 2));
+			if(distance < minSet.dist) {
+				minSet['index'] = i;
+				minSet['dist'] = distance;
+			}
+		}
+		return minSet.index? minSet.index: 0;
+	}
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = GameState;
 
@@ -89702,8 +89727,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 class game extends __WEBPACK_IMPORTED_MODULE_2_phaser___default.a.Game{
 	constructor(){
 		const docElement = document.documentElement
-		const width = docElement.clientWidth-100
-		const height = docElement.clientHeight-100
+		const width = docElement.clientWidth
+		const height = docElement.clientHeight
 	
 		super(width,height,__WEBPACK_IMPORTED_MODULE_2_phaser___default.a.AUTO);
 		this.state.add('GameState',__WEBPACK_IMPORTED_MODULE_4__states_game__["a" /* default */]);
