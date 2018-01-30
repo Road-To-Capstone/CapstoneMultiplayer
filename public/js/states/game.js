@@ -31,7 +31,6 @@ export default class GameState extends Phaser.State{
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
-		this.setUpHealthBar()
 		this.spawnBuilding(652, 961)
 		this.spawnBuilding(821, 1480)
 		this.spawnBuilding(1400, 1003)
@@ -41,6 +40,7 @@ export default class GameState extends Phaser.State{
 		if(this.doneLoading){
 			if(!cameraSet){
 				this.camera.follow(this.getPlayerById(this.io.id).sprite)
+				this.setUpHealthBar()
 				cameraSet = true;			
 			}
 			const player = this.getPlayerById(this.io.id);
