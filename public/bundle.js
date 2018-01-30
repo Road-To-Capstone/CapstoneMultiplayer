@@ -84340,14 +84340,14 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	}
 	preload(){
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
-		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Tilemap.TILED_JSON)
-		this.load.image('tiles', './assets/tiles.png')
+		//this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
+		//this.load.image('tiles', './assets/tiles.png')
 		this.load.image('player', './assets/playerplaceholder.jpg')
 		this.load.image('building', './assets/buildingplaceholder.jpg')
 		this.load.image('missile', '/assets/missileplaceholder.png')
 	}
 	create(){
-		this.setUpMap()
+		//this.setUpMap()
 		//this.setupMissilesGroup()
 		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default.a.connect();
 		this.io.on('connect', data=>{
@@ -84379,8 +84379,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
 			if (this.input.activePointer.isDown) {
+				console.log("missles is ", this.missiles)
 				this.getMissiles().melee(player.getX(), player.getY(), this.input.activePointer.x,this.input.activePointer.y)
-				this.io.emit('client:missile-fired', this.getMissiles())
+				this.io.emit('client:missile-fired', this.getMissiles()[0])
 			}
 		}
 	}

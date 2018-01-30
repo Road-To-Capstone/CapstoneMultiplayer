@@ -3,7 +3,6 @@ module.exports = new (class Missiles{
 	constructor(){
 		this.missiles = {};
 	}
-	
 	get(){
 		return this.missiles;
     }
