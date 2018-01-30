@@ -4,7 +4,7 @@ import Player from './../player';
 import Missile from './../missile'
 import Zombie from './../zombie';
 
-var map,layer, missileGroup, zombieGroup, singleMissile;
+var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500, cameraSet = false;
 export default class GameState extends Phaser.State{
 	constructor(){
 		super();
@@ -21,17 +21,25 @@ export default class GameState extends Phaser.State{
 	create(){
 		//this.setUpMap()
 		//this.setupMissilesGroup()
+		this.world.setBounds(0, 0, 1920, 1920)
 
 		this.io = socketio.connect();
 		this.io.on('connect', data=>{
 			this.createOnConnection(data);
 		});
 
+		//console.log("camera is ", this.camera)
+		//this.camera.setSize(800.)
 		//singleMissile = new Missile(this)
 
 	}
 	update(){
+	
 		if(this.doneLoading){
+			if(!cameraSet){
+				this.camera.follow(this.getPlayerById(this.io.id).sprite)
+				cameraSet = true;			
+			}
 			const player = this.getPlayerById(this.io.id);
 			this.io.emit('client:player-moved', {
 				id:this.io.id,
@@ -54,7 +62,8 @@ export default class GameState extends Phaser.State{
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
-			if (this.input.activePointer.isDown) {
+			if (this.input.activePointer.isDown && this.time.now > nextFire) {
+				nextFire = this.time.now + fireRate;
 				this.io.emit('client:ask-to-create-missile', {id: this.io.id, posX: player.sprite.x, posY: player.sprite.y})
 				this.fire()
 			}
@@ -63,7 +72,7 @@ export default class GameState extends Phaser.State{
 			}
 
 			if(this.zombies !== []) {
-				// console.log('this.zombies', this.zombies);
+			//	console.log('this.zombies', this.zombies);
 				this.zombies.forEach(e => {
 					// e.sprite.health -= 1;
 					this.zombieAI(e);
@@ -71,6 +80,9 @@ export default class GameState extends Phaser.State{
 					// this.physics.arcade.collide(e, this.zombies);
 				})
 			}
+
+			//this.physics.arcade.overlap(this.zombies, this.missiles, this.handleMissileCollision, null, this)
+			
 		}
 	}
 
@@ -102,6 +114,10 @@ export default class GameState extends Phaser.State{
 		this.missiles.push(this.missile);
 	}
 
+	/*render() {
+		this.debug.cameraInfo(game.camera,32,32)
+	}*/
+
 	/* 
 		SOCKET HELPER FUNCTIONS
 	*/
@@ -128,13 +144,15 @@ export default class GameState extends Phaser.State{
 	   		10, 
 	   		10, 
 	   		'', 
-	   		{ font: "12px Arial", fill: "rgba(0, 0, 0, 0.64)" });
+			   { font: "12px Arial", fill: "rgba(0, 0, 0, 0.64)" });
+			   
 	   	
 	    this.doneLoading = 1;
 	}
 
 	socketCreateListeners(){
 		const me = this.getPlayerById(this.io.id);
+
 		//load all existing players
 		this.io.emit('client:give-me-players'); //ask for it
 		this.io.emit('client:give-me-zombies'); //ask for zombies  

@@ -8,7 +8,11 @@ import GameState from './states/game';
 
 class game extends Phaser.Game{
 	constructor(){
-		super(config.width,config.height,Phaser.AUTO);
+		const docElement = document.documentElement
+		const width = docElement.clientWidth
+		const height = docElement.clientHeight
+	
+		super(width,height,Phaser.AUTO);
 		this.state.add('GameState',GameState);
 		this.state.start('GameState');
 	}
