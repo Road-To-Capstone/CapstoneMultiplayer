@@ -1,29 +1,34 @@
 import Phaser from 'phaser';
 import socketio from 'socket.io-client';
 import Player from './../player';
+import Missile from './../missile'
 import Zombie from './../zombie';
 
-var map,layer;
+var map,layer, missileGroup, zombieGroup, singleMissile;
 export default class GameState extends Phaser.State{
 	constructor(){
 		super();
 	}
 	preload(){
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
-		// this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
-		// this.load.image('tiles', './assets/tiles.png')
+		//this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
+		//this.load.image('tiles', './assets/tiles.png')
 		this.load.image('player', './assets/playerplaceholder.jpg')
 		this.load.image('building', './assets/buildingplaceholder.jpg')
+		this.load.image('missile', '/assets/missileplaceholder.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
 	}
 	create(){
-		// this.setUpMap()
-		// this.setUpZombie(); // test if single zombie shows up
+		//this.setUpMap()
+		//this.setupMissilesGroup()
+
 		this.io = socketio.connect();
 		this.io.on('connect', data=>{
 			this.createOnConnection(data);
 		});
-	   
+
+		//singleMissile = new Missile(this)
+
 	}
 	update(){
 		if(this.doneLoading){
@@ -36,6 +41,11 @@ export default class GameState extends Phaser.State{
 				posY: player.sprite.y
 				//angle: player.sprite.angle
 			});
+
+			const missile = this.getMissileByPlayerId(this.io.id)
+
+			//this.io.emit('client:missile-fired', {id: this.io.id, posX: this.missiles.sprite.x, posY: this.missiles.sprite.y, velocityX: this.missiles.sprite.body.velocity.x, velocityY: this.missiles.sprite.body.velocity.y})
+			
 			
 			this.getPlayerById(this.io.id).update();
 
@@ -44,6 +54,10 @@ export default class GameState extends Phaser.State{
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
+			if (this.input.activePointer.isDown) {
+				this.io.emit('client:ask-to-create-missile', {id: this.io.id, posX: player.sprite.x, posY: player.sprite.y})
+				this.fire()
+			}
 			if(this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie');
 			}
@@ -82,7 +96,12 @@ export default class GameState extends Phaser.State{
 	makeZombies(id, x, y) {
 		this.zombie = new Zombie(id, this, x, y);
 		this.zombies.push(this.zombie);
-	};
+	}
+
+	fire(posX,posY){
+		this.missile = new Missile(this,posX,posY,this.input.activePointer.x,this.input.activePointer.y)
+		this.missiles.push(this.missile);
+	}
 
 	/* 
 		SOCKET HELPER FUNCTIONS
@@ -94,6 +113,9 @@ export default class GameState extends Phaser.State{
 
 		window.players = [];
 		this.players = players;
+
+		window.missiles = [];
+		this.missiles = missiles;
 
 		window.io = this.io;//meafffdd
 
@@ -138,7 +160,7 @@ export default class GameState extends Phaser.State{
 		   
 		//load your player
 	   	this.io.on('server:player-added',data=>{
-			console.log(`New ${data.id} added to x: ${data.posX}, y: ${data.posY}`);
+			//console.log(`New ${data.id} added to x: ${data.posX}, y: ${data.posY}`);
 	   		players.push(new Player(data.id, this, data.posX, data.posY, data.angle));
 	   	});
 
@@ -154,16 +176,29 @@ export default class GameState extends Phaser.State{
 	   	this.io.on('server:player-moved',data=>{
 	   		this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
 		});
+		   
+		this.io.on('server:missile-fired', data => {
+			console.log("data is ", data)
+			this.missiles = data;
+		});
 
 		this.io.on('server:zombie-added', newZombie => {
 			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
 		})
+
+		this.io.on('server:missile-added', newMissile => {
+			this.fire(newMissile.posX, newMissile.posY)
+		});
 	}
 
 	getPlayerById(id){
 		for(let i=0;i<this.players.length;i++)
 			if(this.players[i].id == id) return this.players[i];
-	
+	}
+
+	getMissileByPlayerId(id){
+		for(let i=0;i<this.missiles.length;i++)
+		if(this.missiles[i].id == id) return this.missiles[i];
 	}
 
 	zombieAI(zombie) {

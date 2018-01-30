@@ -79,4 +79,11 @@ export default class Player{
 		this.sprite.angle = deg;
 		return this;
 	}
+
+	getX(x){
+		return this.sprite.x
+	}
+	getY(y){
+		return this.sprite.y
+	}
 }

@@ -84326,34 +84326,40 @@ module.exports = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_socket_io_client__ = __webpack_require__(51);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_socket_io_client__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__player__ = __webpack_require__(63);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__zombie__ = __webpack_require__(64);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__player__ = __webpack_require__(64);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__missile__ = __webpack_require__(63);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__zombie__ = __webpack_require__(65);
 
 
 
 
 
-var map,layer;
+
+var map,layer, missileGroup, zombieGroup, singleMissile;
 class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	constructor(){
 		super();
 	}
 	preload(){
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
-		// this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
-		// this.load.image('tiles', './assets/tiles.png')
+		//this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
+		//this.load.image('tiles', './assets/tiles.png')
 		this.load.image('player', './assets/playerplaceholder.jpg')
 		this.load.image('building', './assets/buildingplaceholder.jpg')
+		this.load.image('missile', '/assets/missileplaceholder.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
 	}
 	create(){
-		// this.setUpMap()
-		// this.setUpZombie(); // test if single zombie shows up
+		//this.setUpMap()
+		//this.setupMissilesGroup()
+
 		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default.a.connect();
 		this.io.on('connect', data=>{
 			this.createOnConnection(data);
 		});
-	   
+
+		//singleMissile = new Missile(this)
+
 	}
 	update(){
 		if(this.doneLoading){
@@ -84366,6 +84372,11 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				posY: player.sprite.y
 				//angle: player.sprite.angle
 			});
+
+			const missile = this.getMissileByPlayerId(this.io.id)
+
+			//this.io.emit('client:missile-fired', {id: this.io.id, posX: this.missiles.sprite.x, posY: this.missiles.sprite.y, velocityX: this.missiles.sprite.body.velocity.x, velocityY: this.missiles.sprite.body.velocity.y})
+			
 			
 			this.getPlayerById(this.io.id).update();
 
@@ -84374,6 +84385,10 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
+			if (this.input.activePointer.isDown) {
+				this.io.emit('client:ask-to-create-missile', {id: this.io.id, posX: player.sprite.x, posY: player.sprite.y})
+				this.fire()
+			}
 			if(this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie');
 			}
@@ -84410,9 +84425,14 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	// }
 
 	makeZombies(id, x, y) {
-		this.zombie = new __WEBPACK_IMPORTED_MODULE_3__zombie__["a" /* default */](id, this, x, y);
+		this.zombie = new __WEBPACK_IMPORTED_MODULE_4__zombie__["a" /* default */](id, this, x, y);
 		this.zombies.push(this.zombie);
-	};
+	}
+
+	fire(posX,posY){
+		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this,posX,posY,this.input.activePointer.x,this.input.activePointer.y)
+		this.missiles.push(this.missile);
+	}
 
 	/* 
 		SOCKET HELPER FUNCTIONS
@@ -84424,6 +84444,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 
 		window.players = [];
 		this.players = players;
+
+		window.missiles = [];
+		this.missiles = missiles;
 
 		window.io = this.io;//meafffdd
 
@@ -84468,7 +84491,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		   
 		//load your player
 	   	this.io.on('server:player-added',data=>{
-			console.log(`New ${data.id} added to x: ${data.posX}, y: ${data.posY}`);
+			//console.log(`New ${data.id} added to x: ${data.posX}, y: ${data.posY}`);
 	   		players.push(new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](data.id, this, data.posX, data.posY, data.angle));
 	   	});
 
@@ -84484,16 +84507,29 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	   	this.io.on('server:player-moved',data=>{
 	   		this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
 		});
+		   
+		this.io.on('server:missile-fired', data => {
+			console.log("data is ", data)
+			this.missiles = data;
+		});
 
 		this.io.on('server:zombie-added', newZombie => {
 			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
 		})
+
+		this.io.on('server:missile-added', newMissile => {
+			this.fire(newMissile.posX, newMissile.posY)
+		});
 	}
 
 	getPlayerById(id){
 		for(let i=0;i<this.players.length;i++)
 			if(this.players[i].id == id) return this.players[i];
-	
+	}
+
+	getMissileByPlayerId(id){
+		for(let i=0;i<this.missiles.length;i++)
+		if(this.missiles[i].id == id) return this.missiles[i];
 	}
 
 	zombieAI(zombie) {
@@ -86497,7 +86533,7 @@ var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 var NodeWebSocket;
 if (typeof window === 'undefined') {
   try {
-    NodeWebSocket = __webpack_require__(65);
+    NodeWebSocket = __webpack_require__(66);
   } catch (e) { }
 }
 
@@ -89665,6 +89701,71 @@ const newgame = new game();
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
+var nextFire = 300, fireRate = 500;
+class Missile{
+	constructor(game, x, y, mouseX, mouseY){
+        this.game = game;
+        this.mouseX = mouseX
+        this.mouseY = mouseY
+
+        this.sprite = this.game.add.sprite(0, 0, 'missile');
+        this.game.physics.arcade.enableBody(this.sprite);
+        this.sprite.physicsBodyType = __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Physics.ARCADE
+    
+
+        this.sprite.checkWorldBounds = true
+        this.sprite.outOfBoundsKill = true;
+        this.sprite.anchor.setTo(0.5, 0.5);
+        this.sprite.scale.setTo(0.3, 0.3);
+
+        this.sprite.x = x;
+        this.sprite.y = y;
+
+        
+       
+        console.log(this.mouseX)
+        this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, 100)
+        this.sprite.lifespan = 2000
+	}
+	
+	update(){
+    }
+    
+    melee (playerX, playerY, X,Y) {
+       // console.log("hello melee")
+		if (this.game.time.now > nextFire) {
+		  nextFire = this.game.time.now + fireRate
+		  /*zombieGroup.forEach((e) => {
+			e.hasOverlapped = false
+		  })*/
+		  //var missile = this.sprite.getFirstDead()
+		  this.sprite.reset(playerX, playerY)
+		  this.game.physics.arcade.moveToXY(this.sprite, X,Y,100)
+          this.sprite.lifespan = 2000
+		}
+      }
+    /*  
+    setMissileGroup(group){
+        missileGroup = group;
+    }
+
+    getMissileGroup(){
+        return missileGroup
+    }*/
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Missile;
+
+
+
+/***/ }),
+/* 64 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
+
+
 class Player{
 	constructor(id, game, x, y, angle){
 		this.id = id;
@@ -89744,13 +89845,20 @@ class Player{
 		this.sprite.angle = deg;
 		return this;
 	}
+
+	getX(x){
+		return this.sprite.x
+	}
+	getY(y){
+		return this.sprite.y
+	}
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Player;
 
 
 
 /***/ }),
-/* 64 */
+/* 65 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -89797,7 +89905,7 @@ class zombie {
 
 
 /***/ }),
-/* 65 */
+/* 66 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
