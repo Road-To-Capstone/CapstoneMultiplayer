@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { HealthBar } from './HealthBar.standalone'
 
 export default class Player{
 	constructor(id, game, x, y, angle){
@@ -7,6 +8,7 @@ export default class Player{
 
 		this.sprite = this.game.add.sprite(0, 0, 'player',100);
 		this.game.physics.arcade.enable(this.sprite);
+		
 	
 		this.sprite.anchor.setTo(0.5, 0.5)
 		this.sprite.scale.setTo(0.15, 0.15)
@@ -36,7 +38,6 @@ export default class Player{
 	}
 	
 	update(){
-		
 		// Handle Player controls
 		if (this.sprite.controls.up.isDown) {
 			this.sprite.body.velocity.y = -this.sprite.playerSpeedY
