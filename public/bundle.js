@@ -84393,14 +84393,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				this.io.emit('client:ask-to-create-zombie');
 			}
 
-			// console.log('playerss =====', this.players);
-			// console.log('zombies=====', this.zombies);
-
 			if(this.zombies !== []) {
-				console.log('this.zombies', this.zombies);
+				// console.log('this.zombies', this.zombies);
 				this.zombies.forEach(e => {
-					this.zombieAI(e)
-					this.physics.arcade.collide(e, this.zombies);
+					e.sprite.health -= 1;
+					this.zombieAI(e);
+					if(e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
+					// this.physics.arcade.collide(e, this.zombies);
 				})
 			}
 		}
@@ -84479,7 +84478,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		});
 		   
 		this.io.on('server:all-zombies', data => {
-			console.log('=====server all-zombies', data, this.zombies);
+			// console.log('=====server all-zombies', data, this.zombies);
 			// this.zombies = [...data];
 			data.forEach(newZombie => {
 				this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
@@ -84509,12 +84508,22 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		});
 		   
 		this.io.on('server:missile-fired', data => {
-			console.log("data is ", data)
+			// console.log("data is ", data)
 			this.missiles = data;
 		});
 
 		this.io.on('server:zombie-added', newZombie => {
 			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
+		});
+
+		this.io.on('server:kill-this-zombie', id => {
+			console.log(`Zombie ${id} died`);
+			for(let i = 0; i < this.zombies.length; i++) {
+				if(this.zombies[i].id === id) {
+					this.zombies[i].sprite.destroy();
+					this.zombies.splice(i, 1);
+				}
+			}
 		})
 
 		this.io.on('server:missile-added', newMissile => {
