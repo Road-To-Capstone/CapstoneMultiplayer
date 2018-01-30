@@ -47,18 +47,22 @@ io.on('connection', socket => {
 	})
 
 	socket.on('client:ask-to-create-zombie', () => {
-		let newZombie = zombies.add(newZombieId());
-		io.emit('server:zombie-added', newZombie);
+		if(zombies.getLength() < 2) {
+			let newZombie = zombies.add(newZombieId());
+			io.emit('server:zombie-added', newZombie);
+		}
+		return;
 	})
 
 	socket.on('client:ask-to-create-missile', (data) => {
 		let newMissile = missiles.add(data.id, data.posX, data.posY);
 		io.emit('server:missile-added', newMissile);
+	});
+
+	socket.on('client:kill-this-zombie', id => {
+		zombies.delete(id);
+		io.emit('server:kill-this-zombie', id);
 	})
-	// socket.on('client:create-zombies', () => {
-	// 	console.log('server broadcast zombi======');
-	// 	socket.broadcast.emit('server:create-zombies');
-	// });
 
 });
 //=socket
