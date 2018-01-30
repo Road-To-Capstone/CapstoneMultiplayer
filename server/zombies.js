@@ -24,6 +24,9 @@ module.exports = new (class Zombies{
 			return e;
 		});
 	}
+	getLength() {
+		return this.zombies.length;
+	}
 	delete(id){
 		for(let i=0; i<this.zombies.length; i++)
 			if(this.zombies[i].id == id) this.zombies.splice(i,1);

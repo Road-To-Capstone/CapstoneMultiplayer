@@ -20,6 +20,7 @@ export default class zombie {
     this.sprite.TURN_RATE = 10; // turn rate in degrees/frame
     this.sprite.health = 100;
     this.sprite.hasOverlapped = false;
+    this.sprite.health = 100;
   }
 
   update () {

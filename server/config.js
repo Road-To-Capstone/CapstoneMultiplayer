@@ -3,6 +3,6 @@ module.exports = {
 	port: 3000,
 	publicDir: path.join(__dirname,'../public'),
 	game: {
-		start: { x: 0, y: 0}
+		start: { x: 400, y: 400}
 	}
 }
