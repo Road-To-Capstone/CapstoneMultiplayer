@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import socketio from 'socket.io-client';
 import Player from './../player';
 import Missile from './../missile'
+import Zombie from './../zombie';
 
 var map,layer, missileGroup, zombieGroup, singleMissile;
 export default class GameState extends Phaser.State{
@@ -15,10 +16,12 @@ export default class GameState extends Phaser.State{
 		this.load.image('player', './assets/playerplaceholder.jpg')
 		this.load.image('building', './assets/buildingplaceholder.jpg')
 		this.load.image('missile', '/assets/missileplaceholder.png')
+		this.load.image('zombie', './assets/zombieplaceholder.png')
 	}
 	create(){
 		//this.setUpMap()
 		//this.setupMissilesGroup()
+
 		this.io = socketio.connect();
 		this.io.on('connect', data=>{
 			this.createOnConnection(data);
@@ -26,8 +29,6 @@ export default class GameState extends Phaser.State{
 
 		//singleMissile = new Missile(this)
 
-
-	   
 	}
 	update(){
 		if(this.doneLoading){
@@ -40,6 +41,11 @@ export default class GameState extends Phaser.State{
 				posY: player.sprite.y
 				//angle: player.sprite.angle
 			});
+
+			const missile = this.getMissileByPlayerId(this.io.id)
+
+			//this.io.emit('client:missile-fired', {id: this.io.id, posX: this.missiles.sprite.x, posY: this.missiles.sprite.y, velocityX: this.missiles.sprite.body.velocity.x, velocityY: this.missiles.sprite.body.velocity.y})
+			
 			
 			this.getPlayerById(this.io.id).update();
 
@@ -49,10 +55,13 @@ export default class GameState extends Phaser.State{
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
 			if (this.input.activePointer.isDown) {
-				console.log("missles is ", this.missiles)
-				this.getMissiles().melee(player.getX(), player.getY(), this.input.activePointer.x,this.input.activePointer.y)
-				this.io.emit('client:missile-fired', this.getMissiles()[0])
+				this.io.emit('client:ask-to-create-missile', {id: this.io.id, posX: player.sprite.x, posY: player.sprite.y})
+				this.fire()
 			}
+			if(this.zombies.length < 5) {
+				this.io.emit('client:ask-to-create-zombie');
+			}
+			
 		}
 	}
 
@@ -68,21 +77,37 @@ export default class GameState extends Phaser.State{
 		layer = map.createLayer('Tile Layer 3')
 		layer.resizeWorld()
 	  }
-
 	
-	 
+	//Testing for single zombie to show up
+	// setUpZombie() {
+	// 	this.zombie = new Zombie(this, 0, 0);
+	// }
+
+	makeZombies(id, x, y) {
+		this.zombie = new Zombie(id, this, x, y);
+		this.zombies.push(this.zombie);
+	}
+
+	fire(posX,posY){
+		this.missile = new Missile(this,posX,posY,this.input.activePointer.x,this.input.activePointer.y)
+		//this.missiles.melee(posX, posY, this.input.activePointer.x,this.input.activePointer.y)
+		this.missiles.push(this.missile);
+	}
 
 	/* 
 		SOCKET HELPER FUNCTIONS
 	*/
 	createOnConnection(data){
+		//Zombies
+		window.zombies = [];
+		this.zombies = zombies;
+
 		window.players = [];
 		this.players = players;
 
-		window.missiles = {};
+		window.missiles = [];
 		this.missiles = missiles;
 
-		this.missiles = new Missile(this)
 		window.io = this.io;//meafffdd
 
 		this.socketCreateListeners();
@@ -103,17 +128,27 @@ export default class GameState extends Phaser.State{
 	socketCreateListeners(){
 		const me = this.getPlayerById(this.io.id);
 		//load all existing players
-	   	this.io.emit('client:give-me-players'); //ask for it
+		this.io.emit('client:give-me-players'); //ask for it
+		this.io.emit('client:give-me-zombies'); //ask for zombies  
+		
 	   	this.io.on('server:all-players',data=>{ //the data is the players from the server side
 	   		data.forEach(e=>{
 	   			if(e.id != this.io.id) //this will prevent loading our player two times
 	   			players.push(new Player(e.id, this, e.posX, e.posY, e.angle));
 	   		});
-	   	});
+		});
+		   
+		this.io.on('server:all-zombies', data => {
+			console.log('=====server all-zombies', data, this.zombies);
+			this.zombies = [...data];
+			this.zombies.forEach(zombie => {
+				this.makeZombies(zombie.id, zombie.posX, zombie.posY);
+			});
+		})
 		   
 		//load your player
 	   	this.io.on('server:player-added',data=>{
-			console.log(`New ${data.id} added to x: ${data.posX}, y: ${data.posY}`);
+			//console.log(`New ${data.id} added to x: ${data.posX}, y: ${data.posY}`);
 	   		players.push(new Player(data.id, this, data.posX, data.posY, data.angle));
 	   	});
 
@@ -131,7 +166,16 @@ export default class GameState extends Phaser.State{
 		});
 		   
 		this.io.on('server:missile-fired', data => {
+			console.log("data is ", data)
 			this.missiles = data;
+		});
+
+		this.io.on('server:zombie-added', newZombie => {
+			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
+		})
+
+		this.io.on('server:missile-added', newMissile => {
+			this.fire(newMissile.posX, newMissile.posY)
 		});
 	}
 
@@ -140,7 +184,8 @@ export default class GameState extends Phaser.State{
 			if(this.players[i].id == id) return this.players[i];
 	}
 
-	getMissiles(){
-		return this.missiles;
+	getMissileByPlayerId(id){
+		for(let i=0;i<this.missiles.length;i++)
+		if(this.missiles[i].id == id) return this.missiles[i];
 	}
 }

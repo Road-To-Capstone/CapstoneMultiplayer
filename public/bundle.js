@@ -84328,6 +84328,8 @@ module.exports = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_socket_io_client__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__player__ = __webpack_require__(64);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__missile__ = __webpack_require__(63);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__zombie__ = __webpack_require__(65);
+
 
 
 
@@ -84345,10 +84347,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		this.load.image('player', './assets/playerplaceholder.jpg')
 		this.load.image('building', './assets/buildingplaceholder.jpg')
 		this.load.image('missile', '/assets/missileplaceholder.png')
+		this.load.image('zombie', './assets/zombieplaceholder.png')
 	}
 	create(){
 		//this.setUpMap()
 		//this.setupMissilesGroup()
+
 		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default.a.connect();
 		this.io.on('connect', data=>{
 			this.createOnConnection(data);
@@ -84356,8 +84360,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 
 		//singleMissile = new Missile(this)
 
-
-	   
 	}
 	update(){
 		if(this.doneLoading){
@@ -84370,6 +84372,11 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				posY: player.sprite.y
 				//angle: player.sprite.angle
 			});
+
+			const missile = this.getMissileByPlayerId(this.io.id)
+
+			//this.io.emit('client:missile-fired', {id: this.io.id, posX: this.missiles.sprite.x, posY: this.missiles.sprite.y, velocityX: this.missiles.sprite.body.velocity.x, velocityY: this.missiles.sprite.body.velocity.y})
+			
 			
 			this.getPlayerById(this.io.id).update();
 
@@ -84379,10 +84386,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
 			if (this.input.activePointer.isDown) {
-				console.log("missles is ", this.missiles)
-				this.getMissiles().melee(player.getX(), player.getY(), this.input.activePointer.x,this.input.activePointer.y)
-				this.io.emit('client:missile-fired', this.getMissiles()[0])
+				this.io.emit('client:ask-to-create-missile', {id: this.io.id, posX: player.sprite.x, posY: player.sprite.y})
+				this.fire()
 			}
+			if(this.zombies.length < 5) {
+				this.io.emit('client:ask-to-create-zombie');
+			}
+			
 		}
 	}
 
@@ -84398,21 +84408,37 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		layer = map.createLayer('Tile Layer 3')
 		layer.resizeWorld()
 	  }
-
 	
-	 
+	//Testing for single zombie to show up
+	// setUpZombie() {
+	// 	this.zombie = new Zombie(this, 0, 0);
+	// }
+
+	makeZombies(id, x, y) {
+		this.zombie = new __WEBPACK_IMPORTED_MODULE_4__zombie__["a" /* default */](id, this, x, y);
+		this.zombies.push(this.zombie);
+	}
+
+	fire(posX,posY){
+		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this,posX,posY,this.input.activePointer.x,this.input.activePointer.y)
+		//this.missiles.melee(posX, posY, this.input.activePointer.x,this.input.activePointer.y)
+		this.missiles.push(this.missile);
+	}
 
 	/* 
 		SOCKET HELPER FUNCTIONS
 	*/
 	createOnConnection(data){
+		//Zombies
+		window.zombies = [];
+		this.zombies = zombies;
+
 		window.players = [];
 		this.players = players;
 
-		window.missiles = {};
+		window.missiles = [];
 		this.missiles = missiles;
 
-		this.missiles = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this)
 		window.io = this.io;//meafffdd
 
 		this.socketCreateListeners();
@@ -84433,17 +84459,27 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	socketCreateListeners(){
 		const me = this.getPlayerById(this.io.id);
 		//load all existing players
-	   	this.io.emit('client:give-me-players'); //ask for it
+		this.io.emit('client:give-me-players'); //ask for it
+		this.io.emit('client:give-me-zombies'); //ask for zombies  
+		
 	   	this.io.on('server:all-players',data=>{ //the data is the players from the server side
 	   		data.forEach(e=>{
 	   			if(e.id != this.io.id) //this will prevent loading our player two times
 	   			players.push(new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](e.id, this, e.posX, e.posY, e.angle));
 	   		});
-	   	});
+		});
+		   
+		this.io.on('server:all-zombies', data => {
+			console.log('=====server all-zombies', data, this.zombies);
+			this.zombies = [...data];
+			this.zombies.forEach(zombie => {
+				this.makeZombies(zombie.id, zombie.posX, zombie.posY);
+			});
+		})
 		   
 		//load your player
 	   	this.io.on('server:player-added',data=>{
-			console.log(`New ${data.id} added to x: ${data.posX}, y: ${data.posY}`);
+			//console.log(`New ${data.id} added to x: ${data.posX}, y: ${data.posY}`);
 	   		players.push(new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](data.id, this, data.posX, data.posY, data.angle));
 	   	});
 
@@ -84461,7 +84497,16 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		});
 		   
 		this.io.on('server:missile-fired', data => {
+			console.log("data is ", data)
 			this.missiles = data;
+		});
+
+		this.io.on('server:zombie-added', newZombie => {
+			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
+		})
+
+		this.io.on('server:missile-added', newMissile => {
+			this.fire(newMissile.posX, newMissile.posY)
 		});
 	}
 
@@ -84470,8 +84515,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 			if(this.players[i].id == id) return this.players[i];
 	}
 
-	getMissiles(){
-		return this.missiles;
+	getMissileByPlayerId(id){
+		for(let i=0;i<this.missiles.length;i++)
+		if(this.missiles[i].id == id) return this.missiles[i];
 	}
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = GameState;
@@ -86439,7 +86485,7 @@ var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 var NodeWebSocket;
 if (typeof window === 'undefined') {
   try {
-    NodeWebSocket = __webpack_require__(65);
+    NodeWebSocket = __webpack_require__(66);
   } catch (e) { }
 }
 
@@ -89607,28 +89653,31 @@ const newgame = new game();
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
-var nextFire = 300, fireRate = 500, missileGroup;
+var nextFire = 300, fireRate = 500;
 class Missile{
-	constructor(game, x, y, angle){
+	constructor(game, x, y, mouseX, mouseY){
         this.game = game;
+        this.mouseX = mouseX
+        this.mouseY = mouseY
 
-        missileGroup = this.game.add.group()
-        missileGroup.enableBody = true
-        missileGroup.physicsBodyType = __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Physics.ARCADE
+        this.sprite = this.game.add.sprite(0, 0, 'missile');
+        this.game.physics.arcade.enableBody(this.sprite);
+        this.sprite.physicsBodyType = __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Physics.ARCADE
     
-        missileGroup.createMultiple(50, 'missile')
-        missileGroup.setAll('checkWorldBounds', true)
-        missileGroup.setAll('outOfBoundsKill', true)
-        missileGroup.setAll('anchor.x', 0.5)
-        missileGroup.setAll('anchor.y', 0.5)
-        missileGroup.setAll('scale.x', 0.3)
-        missileGroup.setAll('scale.y', 0.3)
 
-    
+        this.sprite.checkWorldBounds = true
+        this.sprite.outOfBoundsKill = true;
+        this.sprite.anchor.setTo(0.5, 0.5);
+        this.sprite.scale.setTo(0.3, 0.3);
+
+        this.sprite.x = x;
+        this.sprite.y = y;
+
         
-		
-
-
+       
+        console.log(this.mouseX)
+        this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, 100)
+        this.sprite.lifespan = 2000
 	}
 	
 	update(){
@@ -89641,20 +89690,20 @@ class Missile{
 		  /*zombieGroup.forEach((e) => {
 			e.hasOverlapped = false
 		  })*/
-		  var missile = missileGroup.getFirstDead()
-		  missile.reset(playerX, playerY)
-		  this.game.physics.arcade.moveToXY(missile, X,Y,100)
-		  missile.lifespan = 2000
+		  //var missile = this.sprite.getFirstDead()
+		  this.sprite.reset(playerX, playerY)
+		  this.game.physics.arcade.moveToXY(this.sprite, X,Y,100)
+          this.sprite.lifespan = 2000
 		}
       }
-      
+    /*  
     setMissileGroup(group){
         missileGroup = group;
     }
 
     getMissileGroup(){
         return missileGroup
-    }
+    }*/
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Missile;
 
@@ -89762,6 +89811,53 @@ class Player{
 
 /***/ }),
 /* 65 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
+
+
+class zombie {
+  constructor (id, game, x, y) {
+    this.id = id;
+    this.game = game;
+
+    this.sprite = this.game.add.sprite(50, 0, 'zombie');
+    this.game.physics.arcade.enableBody(this.sprite);
+
+    this.sprite.anchor.setTo(0.5, 0.5);
+    this.sprite.scale.setTo(0.06, 0.06);
+    this.sprite.checkWorldBounds = true
+    this.sprite.body.collideWorldBounds = true;
+
+    this.sprite.x = x;
+    this.sprite.y = y;
+
+    this.sprite.SPEED = 200; // Invader speed pixels/second
+    this.sprite.TURN_RATE = 10; // turn rate in degrees/frame
+    this.sprite.health = 100;
+    this.sprite.hasOverlapped = false;
+  }
+
+  update () {
+  }
+
+  setZombieX(x){
+    this.sprite.x = x;
+    return this;
+  }
+  setZombieY(y){
+    this.sprite.y = y;
+    return this;
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = zombie;
+
+
+
+/***/ }),
+/* 66 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
