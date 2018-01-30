@@ -59,6 +59,7 @@ io.on('connection', socket => {
 	// 	console.log('server broadcast zombi======');
 	// 	socket.broadcast.emit('server:create-zombies');
 	// });
+
 });
 //=socket
 server.listen(config.port, ()=>{
