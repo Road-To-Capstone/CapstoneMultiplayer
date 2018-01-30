@@ -40,12 +40,7 @@ io.on('connection', socket => {
 	socket.on('client:ask-to-create-zombie', () => {
 		let newZombie = zombies.add(newZombieId());
 		io.emit('server:zombie-added', newZombie);
-	})
-
-	// socket.on('client:create-zombies', () => {
-	// 	console.log('server broadcast zombi======');
-	// 	socket.broadcast.emit('server:create-zombies');
-	// });
+	});
 });
 //=socket
 server.listen(config.port, ()=>{

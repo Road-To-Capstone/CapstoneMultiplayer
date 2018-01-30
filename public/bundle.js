@@ -84374,8 +84374,19 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
-			if(this.zombies.length < 5) {
+			if(this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie');
+			}
+
+			// console.log('playerss =====', this.players);
+			// console.log('zombies=====', this.zombies);
+
+			if(this.zombies !== []) {
+				console.log('this.zombies', this.zombies);
+				this.zombies.forEach(e => {
+					this.zombieAI(e)
+					this.physics.arcade.collide(e, this.zombies);
+				})
 			}
 		}
 	}
@@ -84446,10 +84457,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		   
 		this.io.on('server:all-zombies', data => {
 			console.log('=====server all-zombies', data, this.zombies);
-			this.zombies = [...data];
-			this.zombies.forEach(zombie => {
-				this.makeZombies(zombie.id, zombie.posX, zombie.posY);
-			});
+			// this.zombies = [...data];
+			data.forEach(newZombie => {
+				this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
+			})
+			// this.zombies.forEach(zombie => {
+			// 	this.makeZombies(zombie.id, zombie.posX, zombie.posY);
+			// });
 		})
 		   
 		//load your player
@@ -84481,6 +84495,42 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 			if(this.players[i].id == id) return this.players[i];
 	
 	}
+
+	zombieAI(zombie) {
+		// console.log('this.players=====', this.players[0]);
+		var targetAngle = this.math.angleBetween(
+			zombie.sprite.position.x, zombie.sprite.position.y,
+			this.players[0].sprite.position.x, this.players[0].sprite.position.y // this needs to be player x and y that updates dynamically
+		  )
+	  
+		  // Gradually (this.TURN_RATE) aim the Invader towards the target angle
+		  if (zombie.sprite.rotation !== targetAngle) {
+		  // Calculate difference between the current angle and targetAngle
+			var delta = targetAngle - zombie.sprite.rotation
+	  
+			// Keep it in range from -180 to 180 to make the most efficient turns.
+			if (delta > Math.PI) delta -= Math.PI * 2
+			if (delta < -Math.PI) delta += Math.PI * 2
+	  
+			if (delta > 0) {
+			  // Turn clockwise
+			  zombie.sprite.angle += zombie.sprite.TURN_RATE
+			} else {
+			  // Turn counter-clockwise
+			  zombie.sprite.angle -= zombie.sprite.TURN_RATE
+			}
+	  
+			// Just set angle to target angle if they are close
+			if (Math.abs(delta) < this.math.degToRad(zombie.sprite.TURN_RATE)) {
+			  zombie.sprite.rotation = targetAngle
+			}
+		  }
+		  this.updateVelocity(Math.cos(zombie.sprite.rotation) * zombie.sprite.SPEED, Math.sin(zombie.sprite.rotation) * zombie.sprite.SPEED, zombie)
+	}
+	updateVelocity (xVelocity, yVelocity, zombie) {
+		zombie.sprite.body.velocity.x = xVelocity
+		zombie.sprite.body.velocity.y = yVelocity
+	  }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = GameState;
 
