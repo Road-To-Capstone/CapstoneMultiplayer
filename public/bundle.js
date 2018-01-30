@@ -84569,7 +84569,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				posY: player.sprite.y
 				//angle: player.sprite.angle
 			});
-			this.physics.arcade.collide(player, building)
+			this.physics.arcade.collide(player, building)  //
 			const missile = this.getMissileByPlayerId(this.io.id)
 
 			//this.io.emit('client:missile-fired', {id: this.io.id, posX: this.missiles.sprite.x, posY: this.missiles.sprite.y, velocityX: this.missiles.sprite.body.velocity.x, velocityY: this.missiles.sprite.body.velocity.y})
