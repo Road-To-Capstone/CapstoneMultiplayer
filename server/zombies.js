@@ -5,7 +5,6 @@ module.exports = new (class Zombies{
 	}
 	add(id){
 		const { posX, posY } = zombieLocation();
-		console.log('posX, posY ===', posX, posY);
 		const newZombie = {id, posX, posY};
 		this.zombies.push(newZombie);
 		return newZombie;

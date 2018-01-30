@@ -3,8 +3,10 @@ import socketio from 'socket.io-client';
 import Player from './../player';
 import Missile from './../missile'
 import Zombie from './../zombie';
+import { HealthBar } from './../HealthBar.standalone'
+import Building from './../building'
 
-var map,layer, missileGroup, zombieGroup, singleMissile;
+var map,layer, missileGroup, zombieGroup, singleMissile, building;
 export default class GameState extends Phaser.State{
 	constructor(){
 		super();
@@ -14,7 +16,7 @@ export default class GameState extends Phaser.State{
 		//this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
 		//this.load.image('tiles', './assets/tiles.png')
 		this.load.image('player', './assets/playerplaceholder.jpg')
-		this.load.image('building', './assets/buildingplaceholder.jpg')
+		this.load.image('building', './assets/buildingplaceholder.png')
 		this.load.image('missile', '/assets/missileplaceholder.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
 	}
@@ -26,9 +28,10 @@ export default class GameState extends Phaser.State{
 		this.io.on('connect', data=>{
 			this.createOnConnection(data);
 		});
-
-		//singleMissile = new Missile(this)
-
+		this.setUpHealthBar()
+	    this.spawnBuilding(652, 961)
+        this.spawnBuilding(821, 1480)
+        this.spawnBuilding(1400, 1003) 
 	}
 	update(){
 		if(this.doneLoading){
@@ -41,7 +44,7 @@ export default class GameState extends Phaser.State{
 				posY: player.sprite.y
 				//angle: player.sprite.angle
 			});
-
+			this.physics.arcade.collide(player, building)
 			const missile = this.getMissileByPlayerId(this.io.id)
 
 			//this.io.emit('client:missile-fired', {id: this.io.id, posX: this.missiles.sprite.x, posY: this.missiles.sprite.y, velocityX: this.missiles.sprite.body.velocity.x, velocityY: this.missiles.sprite.body.velocity.y})
@@ -86,6 +89,16 @@ export default class GameState extends Phaser.State{
 		layer = map.createLayer('Tile Layer 2')
 		layer = map.createLayer('Tile Layer 3')
 		layer.resizeWorld()
+	  }
+
+	  setUpHealthBar () {
+		this.myHealthBar = new HealthBar(this.game, {x: 145, y: this.game.height - 1250})
+		this.myHealthBar.setFixedToCamera(true)
+	  }
+
+	  spawnBuilding (x, y) {
+		building = new Building(this.game, x, y)
+		return building
 	  }
 	
 	//Testing for single zombie to show up
