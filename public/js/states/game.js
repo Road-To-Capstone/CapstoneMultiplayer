@@ -105,7 +105,7 @@ export default class GameState extends Phaser.State{
 	setUpHealthBar() {
 		this.myHealthBar = new HealthBar(this.game, {
 			x: 145,
-			y: this.game.height - 1250
+			y: this.game.height - 40
 		})
 		this.myHealthBar.setFixedToCamera(true)
 	}
