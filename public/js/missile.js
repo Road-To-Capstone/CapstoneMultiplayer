@@ -21,8 +21,7 @@ export default class Missile{
         this.sprite.y = y;
 
         
-       
-        console.log(this.mouseX)
+    
         this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, 100)
         this.sprite.lifespan = 2000
 	}
@@ -30,25 +29,4 @@ export default class Missile{
 	update(){
     }
     
-    melee (playerX, playerY, X,Y) {
-       // console.log("hello melee")
-		if (this.game.time.now > nextFire) {
-		  nextFire = this.game.time.now + fireRate
-		  /*zombieGroup.forEach((e) => {
-			e.hasOverlapped = false
-		  })*/
-		  //var missile = this.sprite.getFirstDead()
-		  this.sprite.reset(playerX, playerY)
-		  this.game.physics.arcade.moveToXY(this.sprite, X,Y,100)
-          this.sprite.lifespan = 2000
-		}
-      }
-    /*  
-    setMissileGroup(group){
-        missileGroup = group;
-    }
-
-    getMissileGroup(){
-        return missileGroup
-    }*/
 }

@@ -4,7 +4,7 @@ import Player from './../player';
 import Missile from './../missile'
 import Zombie from './../zombie';
 
-var map,layer, missileGroup, zombieGroup, singleMissile;
+var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500;
 export default class GameState extends Phaser.State{
 	constructor(){
 		super();
@@ -66,12 +66,15 @@ export default class GameState extends Phaser.State{
 			// console.log('zombies=====', this.zombies);
 
 			if(this.zombies !== []) {
-				console.log('this.zombies', this.zombies);
+			//	console.log('this.zombies', this.zombies);
 				this.zombies.forEach(e => {
 					this.zombieAI(e)
 					this.physics.arcade.collide(e, this.zombies);
 				})
 			}
+
+			//this.physics.arcade.overlap(this.zombies, this.missiles, this.handleMissileCollision, null, this)
+			
 		}
 	}
 
@@ -99,8 +102,19 @@ export default class GameState extends Phaser.State{
 	}
 
 	fire(posX,posY){
+		//console.log("time now", this.time.now, "nextFire", nextFire)
+		
+		if (this.time.now > nextFire) {
+			console.log("hello")
+			this.missile = new Missile(this,posX,posY,this.input.activePointer.x,this.input.activePointer.y)
+			this.missiles.push(this.missile);
+			console.log("hello its me")
+			nextFire = this.time.now + fireRate
+		}
+		/*
 		this.missile = new Missile(this,posX,posY,this.input.activePointer.x,this.input.activePointer.y)
-		this.missiles.push(this.missile);
+			this.missiles.push(this.missile);
+			*/
 	}
 
 	/* 

@@ -84335,7 +84335,7 @@ module.exports = {
 
 
 
-var map,layer, missileGroup, zombieGroup, singleMissile;
+var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500;
 class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	constructor(){
 		super();
@@ -84397,12 +84397,15 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 			// console.log('zombies=====', this.zombies);
 
 			if(this.zombies !== []) {
-				console.log('this.zombies', this.zombies);
+			//	console.log('this.zombies', this.zombies);
 				this.zombies.forEach(e => {
 					this.zombieAI(e)
 					this.physics.arcade.collide(e, this.zombies);
 				})
 			}
+
+			//this.physics.arcade.overlap(this.zombies, this.missiles, this.handleMissileCollision, null, this)
+			
 		}
 	}
 
@@ -84430,8 +84433,19 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	}
 
 	fire(posX,posY){
-		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this,posX,posY,this.input.activePointer.x,this.input.activePointer.y)
-		this.missiles.push(this.missile);
+		//console.log("time now", this.time.now, "nextFire", nextFire)
+		
+		if (this.time.now > nextFire) {
+			console.log("hello")
+			this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this,posX,posY,this.input.activePointer.x,this.input.activePointer.y)
+			this.missiles.push(this.missile);
+			console.log("hello its me")
+			nextFire = this.time.now + fireRate
+		}
+		/*
+		this.missile = new Missile(this,posX,posY,this.input.activePointer.x,this.input.activePointer.y)
+			this.missiles.push(this.missile);
+			*/
 	}
 
 	/* 
@@ -89722,8 +89736,7 @@ class Missile{
         this.sprite.y = y;
 
         
-       
-        console.log(this.mouseX)
+    
         this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, 100)
         this.sprite.lifespan = 2000
 	}
@@ -89731,27 +89744,6 @@ class Missile{
 	update(){
     }
     
-    melee (playerX, playerY, X,Y) {
-       // console.log("hello melee")
-		if (this.game.time.now > nextFire) {
-		  nextFire = this.game.time.now + fireRate
-		  /*zombieGroup.forEach((e) => {
-			e.hasOverlapped = false
-		  })*/
-		  //var missile = this.sprite.getFirstDead()
-		  this.sprite.reset(playerX, playerY)
-		  this.game.physics.arcade.moveToXY(this.sprite, X,Y,100)
-          this.sprite.lifespan = 2000
-		}
-      }
-    /*  
-    setMissileGroup(group){
-        missileGroup = group;
-    }
-
-    getMissileGroup(){
-        return missileGroup
-    }*/
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Missile;
 
@@ -89886,6 +89878,7 @@ class zombie {
     this.sprite.TURN_RATE = 10; // turn rate in degrees/frame
     this.sprite.health = 100;
     this.sprite.hasOverlapped = false;
+    this.sprite.health = 100;
   }
 
   update () {
