@@ -22,7 +22,7 @@ export default class GameState extends Phaser.State{
 		this.load.image('missile', '/assets/missileplaceholder.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
 	}
-	
+
 	create() {
 		//this.setUpMap()
 		//this.setupMissilesGroup()
@@ -57,7 +57,7 @@ export default class GameState extends Phaser.State{
 				posY: player.sprite.y
 				//angle: player.sprite.angle
 			});
-			this.physics.arcade.collide(player, building) //
+			this.physics.arcade.overlap(player.sprite, zombieGroup)
 			const missile = this.getMissileByPlayerId(this.io.id)
 
 			//this.io.emit('client:missile-fired', {id: this.io.id, posX: this.missiles.sprite.x, posY: this.missiles.sprite.y, velocityX: this.missiles.sprite.body.velocity.x, velocityY: this.missiles.sprite.body.velocity.y})
