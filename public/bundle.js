@@ -84342,16 +84342,17 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	}
 	preload(){
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
-		//this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
-		//this.load.image('tiles', './assets/tiles.png')
+		// this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
+		// this.load.image('tiles', './assets/tiles.png')
 		this.load.image('player', './assets/playerplaceholder.jpg')
 		this.load.image('building', './assets/buildingplaceholder.jpg')
 		this.load.image('missile', '/assets/missileplaceholder.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
 	}
 	create(){
-		//this.setUpMap()
+		// this.setUpMap()
 		//this.setupMissilesGroup()
+
 		this.world.setBounds(0, 0, 1920, 1920)
 
 		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default.a.connect();
@@ -84359,6 +84360,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 			this.createOnConnection(data);
 		});
 
+		zombieGroup = this.add.group();
 		//console.log("camera is ", this.camera)
 		//this.camera.setSize(800.)
 		//singleMissile = new Missile(this)
@@ -84402,14 +84404,15 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				this.io.emit('client:ask-to-create-zombie');
 			}
 
-			if(this.zombies !== []) {
+			if(!!this.zombies.length) {
 			//	console.log('this.zombies', this.zombies);
 				this.zombies.forEach(e => {
 					// e.sprite.health -= 1;
 					this.zombieAI(e);
 					if(e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
-					// this.physics.arcade.collide(e, this.zombies);
-				})
+					this.physics.arcade.collide(e.sprite, zombieGroup);
+				});
+
 			}
 
 			//this.physics.arcade.overlap(this.zombies, this.missiles, this.handleMissileCollision, null, this)
@@ -84438,6 +84441,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	makeZombies(id, x, y) {
 		this.zombie = new __WEBPACK_IMPORTED_MODULE_4__zombie__["a" /* default */](id, this, x, y);
 		this.zombies.push(this.zombie);
+		zombieGroup.add(this.zombie.sprite)
 	}
 
 	fire(posX,posY){
