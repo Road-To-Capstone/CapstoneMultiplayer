@@ -28,7 +28,6 @@ export default class GameState extends Phaser.State{
 		//this.setupMissilesGroup()
 
 		this.world.setBounds(0, 0, 1920, 1920)
-
 		this.io = socketio.connect();
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
@@ -40,8 +39,8 @@ export default class GameState extends Phaser.State{
 		this.spawnBuilding(821, 1480)
 		this.spawnBuilding(1400, 1003)
 	}
+
 	update(){
-	
 		if(this.doneLoading){
 			if(!cameraSet){
 				this.camera.follow(this.getPlayerById(this.io.id).sprite)
@@ -51,20 +50,12 @@ export default class GameState extends Phaser.State{
 			const player = this.getPlayerById(this.io.id);
 			this.io.emit('client:player-moved', {
 				id: this.io.id,
-				//posX: player.sprite.worldPosition.x,
-				//posY: player.sprite.worldPosition.y,
 				posX: player.sprite.x,
 				posY: player.sprite.y
-				//angle: player.sprite.angle
 			});
 			this.physics.arcade.overlap(player.sprite, zombieGroup)
 			const missile = this.getMissileByPlayerId(this.io.id)
-
-			//this.io.emit('client:missile-fired', {id: this.io.id, posX: this.missiles.sprite.x, posY: this.missiles.sprite.y, velocityX: this.missiles.sprite.body.velocity.x, velocityY: this.missiles.sprite.body.velocity.y})
-
-
 			this.getPlayerById(this.io.id).update();
-
 			this.topText.setText(`Your ID: ${this.io.id}
 				${this.players.length} players
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
@@ -73,7 +64,7 @@ export default class GameState extends Phaser.State{
 			if (this.input.activePointer.isDown && this.time.now > nextFire) {
 				nextFire = this.time.now + fireRate;
 				this.io.emit('client:ask-to-create-missile', {id: this.io.id, posX: player.sprite.x, posY: player.sprite.y})
-				this.fire()
+				
 			}
 			if (this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie');
@@ -82,7 +73,6 @@ export default class GameState extends Phaser.State{
 			if(!!this.zombies.length) {
 			//	console.log('this.zombies', this.zombies);
 				this.zombies.forEach(e => {
-					// e.sprite.health -= 1;
 					this.zombieAI(e);
 					if(e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
 					this.physics.arcade.collide(e.sprite, zombieGroup);
@@ -94,7 +84,6 @@ export default class GameState extends Phaser.State{
 			
 		}
 	}
-
 
 	/* 
 		SETUP FUNCTIONS
@@ -121,25 +110,16 @@ export default class GameState extends Phaser.State{
 		return building
 	}
 
-	//Testing for single zombie to show up
-	// setUpZombie() {
-	// 	this.zombie = new Zombie(this, 0, 0);
-	// }
-
 	makeZombies(id, x, y) {
 		this.zombie = new Zombie(id, this, x, y);
 		this.zombies.push(this.zombie);
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-	fire(posX, posY) {
-		this.missile = new Missile(this, posX, posY, this.input.activePointer.x, this.input.activePointer.y)
+	fire(posX, posY, itemName) {
+		this.missile = new Missile(this, posX, posY, this.input.activePointer.x, this.input.activePointer.y, itemName)
 		this.missiles.push(this.missile);
 	}
-
-	/*render() {
-		this.debug.cameraInfo(game.camera,32,32)
-	}*/
 
 	/* 
 		SOCKET HELPER FUNCTIONS
@@ -188,19 +168,13 @@ export default class GameState extends Phaser.State{
 		});
 
 		this.io.on('server:all-zombies', data => {
-			// console.log('=====server all-zombies', data, this.zombies);
-			// this.zombies = [...data];
 			data.forEach(newZombie => {
 				this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
 			})
-			// this.zombies.forEach(zombie => {
-			// 	this.makeZombies(zombie.id, zombie.posX, zombie.posY);
-			// });
 		})
 
 		//load your player
 		this.io.on('server:player-added', data => {
-			//console.log(`New ${data.id} added to x: ${data.posX}, y: ${data.posY}`);
 			players.push(new Player(data.id, this, data.posX, data.posY, data.angle));
 		});
 
@@ -218,7 +192,6 @@ export default class GameState extends Phaser.State{
 		});
 
 		this.io.on('server:missile-fired', data => {
-			// console.log("data is ", data)
 			this.missiles = data;
 		});
 
@@ -227,7 +200,6 @@ export default class GameState extends Phaser.State{
 		});
 
 		this.io.on('server:kill-this-zombie', id => {
-			console.log(`Zombie ${id} died`);
 			for(let i = 0; i < this.zombies.length; i++) {
 				if(this.zombies[i].id === id) {
 					this.zombies[i].sprite.destroy();
@@ -237,7 +209,7 @@ export default class GameState extends Phaser.State{
 		})
 
 		this.io.on('server:missile-added', newMissile => {
-			this.fire(newMissile.posX, newMissile.posY)
+			this.fire(newMissile.posX, newMissile.posY, this.players[0].sprite.selectedItem)
 		});
 	}
 
@@ -252,7 +224,6 @@ export default class GameState extends Phaser.State{
 	}
 
 	zombieAI(zombie) {
-		// console.log('this.players=====', this.players[0]);
 		let mindex = this.findClosestPlayer(zombie);
 		var targetAngle = this.math.angleBetween(
 			zombie.sprite.position.x, zombie.sprite.position.y,

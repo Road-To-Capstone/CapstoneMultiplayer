@@ -84551,7 +84551,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		//this.setupMissilesGroup()
 
 		this.world.setBounds(0, 0, 1920, 1920)
-
 		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default.a.connect();
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
@@ -84563,8 +84562,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		this.spawnBuilding(821, 1480)
 		this.spawnBuilding(1400, 1003)
 	}
+
 	update(){
-	
 		if(this.doneLoading){
 			if(!cameraSet){
 				this.camera.follow(this.getPlayerById(this.io.id).sprite)
@@ -84574,20 +84573,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 			const player = this.getPlayerById(this.io.id);
 			this.io.emit('client:player-moved', {
 				id: this.io.id,
-				//posX: player.sprite.worldPosition.x,
-				//posY: player.sprite.worldPosition.y,
 				posX: player.sprite.x,
 				posY: player.sprite.y
-				//angle: player.sprite.angle
 			});
-			this.physics.arcade.collide(player.sprite, zombieGroup)
+			this.physics.arcade.overlap(player.sprite, zombieGroup)
 			const missile = this.getMissileByPlayerId(this.io.id)
-
-			//this.io.emit('client:missile-fired', {id: this.io.id, posX: this.missiles.sprite.x, posY: this.missiles.sprite.y, velocityX: this.missiles.sprite.body.velocity.x, velocityY: this.missiles.sprite.body.velocity.y})
-
-
 			this.getPlayerById(this.io.id).update();
-
 			this.topText.setText(`Your ID: ${this.io.id}
 				${this.players.length} players
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
@@ -84596,7 +84587,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 			if (this.input.activePointer.isDown && this.time.now > nextFire) {
 				nextFire = this.time.now + fireRate;
 				this.io.emit('client:ask-to-create-missile', {id: this.io.id, posX: player.sprite.x, posY: player.sprite.y})
-				this.fire()
+				
 			}
 			if (this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie');
@@ -84605,7 +84596,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 			if(!!this.zombies.length) {
 			//	console.log('this.zombies', this.zombies);
 				this.zombies.forEach(e => {
-					// e.sprite.health -= 1;
 					this.zombieAI(e);
 					if(e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
 					this.physics.arcade.collide(e.sprite, zombieGroup);
@@ -84617,7 +84607,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 			
 		}
 	}
-
 
 	/* 
 		SETUP FUNCTIONS
@@ -84644,25 +84633,16 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		return building
 	}
 
-	//Testing for single zombie to show up
-	// setUpZombie() {
-	// 	this.zombie = new Zombie(this, 0, 0);
-	// }
-
 	makeZombies(id, x, y) {
 		this.zombie = new __WEBPACK_IMPORTED_MODULE_4__zombie__["a" /* default */](id, this, x, y);
 		this.zombies.push(this.zombie);
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-	fire(posX, posY) {
-		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this, posX, posY, this.input.activePointer.x, this.input.activePointer.y)
+	fire(posX, posY, itemName) {
+		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this, posX, posY, this.input.activePointer.x, this.input.activePointer.y, itemName)
 		this.missiles.push(this.missile);
 	}
-
-	/*render() {
-		this.debug.cameraInfo(game.camera,32,32)
-	}*/
 
 	/* 
 		SOCKET HELPER FUNCTIONS
@@ -84711,19 +84691,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		});
 
 		this.io.on('server:all-zombies', data => {
-			// console.log('=====server all-zombies', data, this.zombies);
-			// this.zombies = [...data];
 			data.forEach(newZombie => {
 				this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
 			})
-			// this.zombies.forEach(zombie => {
-			// 	this.makeZombies(zombie.id, zombie.posX, zombie.posY);
-			// });
 		})
 
 		//load your player
 		this.io.on('server:player-added', data => {
-			//console.log(`New ${data.id} added to x: ${data.posX}, y: ${data.posY}`);
 			players.push(new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](data.id, this, data.posX, data.posY, data.angle));
 		});
 
@@ -84741,7 +84715,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		});
 
 		this.io.on('server:missile-fired', data => {
-			// console.log("data is ", data)
 			this.missiles = data;
 		});
 
@@ -84750,7 +84723,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		});
 
 		this.io.on('server:kill-this-zombie', id => {
-			console.log(`Zombie ${id} died`);
 			for(let i = 0; i < this.zombies.length; i++) {
 				if(this.zombies[i].id === id) {
 					this.zombies[i].sprite.destroy();
@@ -84760,7 +84732,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		})
 
 		this.io.on('server:missile-added', newMissile => {
-			this.fire(newMissile.posX, newMissile.posY)
+			this.fire(newMissile.posX, newMissile.posY, this.players[0].sprite.selectedItem)
 		});
 	}
 
@@ -84775,7 +84747,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	}
 
 	zombieAI(zombie) {
-		// console.log('this.players=====', this.players[0]);
 		let mindex = this.findClosestPlayer(zombie);
 		var targetAngle = this.math.angleBetween(
 			zombie.sprite.position.x, zombie.sprite.position.y,
@@ -89993,10 +89964,11 @@ const newgame = new game();
 
 var nextFire = 300, fireRate = 500;
 class Missile{
-	constructor(game, x, y, mouseX, mouseY){
+	constructor(game, x, y, mouseX, mouseY, itemName){
         this.game = game;
         this.mouseX = mouseX
         this.mouseY = mouseY
+        this.itemName = itemName
 
         this.sprite = this.game.add.sprite(0, 0, 'missile');
         this.game.physics.arcade.enableBody(this.sprite);
@@ -90005,16 +89977,35 @@ class Missile{
 
         this.sprite.checkWorldBounds = true
         this.sprite.outOfBoundsKill = true;
+        switch (itemName) {
+            case 'Melee':
+            this.sprite.scale.setTo(0.25, 0.25);
+            this.sprite.lifespan = 250;
+            break;
+            case 'Machine Gun':
+            this.sprite.scale.setTo(0.15, 0.15);
+            this.sprite.lifespan = 1000;
+            break;
+            case 'Flame Thrower':
+            this.sprite.scale.setTo(0.5, 0.5);
+            this.sprite.lifespan = 250;
+            break;
+            case 'Rocket Launcher':
+            this.sprite.scale.setTo(0.7, 0.7);
+            this.sprite.lifespan = 1000;
+            break;
+            default:
+            this.sprite.scale.setTo(0.25, 0.25);
+            this.sprite.lifespan = 250;
+            break;
+        }
         this.sprite.anchor.setTo(0.5, 0.5);
-        this.sprite.scale.setTo(0.3, 0.3);
-
         this.sprite.x = x;
         this.sprite.y = y;
 
         
     
         this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, 100)
-        this.sprite.lifespan = 2000
 	}
 	
 	update(){
@@ -90035,6 +90026,8 @@ class Missile{
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__HealthBar_standalone__ = __webpack_require__(27);
 
 
+
+var itemCount = 0;
 
 class Player{
 	constructor(id, game, x, y, angle){
@@ -90059,11 +90052,13 @@ class Player{
 			right: this.game.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.D),
 			left: this.game.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.A),
 			up: this.game.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.W),
-			down: this.game.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.S)
+			down: this.game.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.S),
+			selectItem: this.game.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.B)
 		  }
 	  
 
-		this.sprite.item = []
+		this.sprite.items = ['Melee','Machine Gun','Flame Thrower', 'Rocket Launcher']
+		this.sprite.selectedItem = ''
 		  
 		this.sprite.playerSpeedY = 100
 		this.sprite.playerSpeedX = 200
@@ -90101,7 +90096,11 @@ class Player{
 		  }
 		  if (this.sprite.controls.down.isDown && this.sprite.controls.up.isDown) {
 			this.sprite.body.velocity.y = 0
-		  }
+			}
+			if (this.sprite.controls.selectItem.isDown) {
+				itemCount++;
+			  this.sprite.selectedItem = this.sprite.items[itemCount % this.sprite.items.length]
+			}
 	}
 	setX(x){
 		this.sprite.x = x;
