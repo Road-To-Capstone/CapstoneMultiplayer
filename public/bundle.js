@@ -84445,7 +84445,7 @@ HealthBar.prototype.setBarColor = function (newColor) {
 }
 
 HealthBar.prototype.setWidth = function (newWidth) {
-  this.game.add.tween(this.barSprite).to({ width: newWidth }, this.config.animationDuration, Phaser.Easing.Linear.None, true)
+  this.game.add.tween(this.barSprite).to({ width: newWidth }, this.config.animationDuration, null, true)
 }
 
 HealthBar.prototype.setFixedToCamera = function (fixedToCamera) {
@@ -84531,7 +84531,9 @@ module.exports = {
 
 
 
-var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500, cameraSet = false, buildingGroup, nextMissileCollision = 0, missileCollisionRate = 1000, missileGroup;
+var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500
+, cameraSet = false, buildingGroup, nextMissileCollision = 0, missileCollisionRate = 1000
+, missileGroup, zombiesCoolDown = 1000, zombiesAttack = 1000;
 class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	constructor(){
 		super();
@@ -84545,7 +84547,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		this.load.image('missile', '/assets/missileplaceholder.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
 	}
-	
+
 	create() {
 		//this.setUpMap()
 		//this.setupMissilesGroup()
@@ -84558,10 +84560,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 
 		zombieGroup = this.add.group();
 		missileGroup = this.add.group();
+		buildingGroup = this.add.group();
 
 		this.spawnBuilding(652, 961)
 		this.spawnBuilding(821, 1480)
 		this.spawnBuilding(1400, 1003)
+
 	}
 
 	update(){
@@ -84577,9 +84581,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				posX: player.sprite.x,
 				posY: player.sprite.y
 			});
-
-			this.physics.arcade.collide(player,  buildingGroup, ()=> {console.log("hello")}) //
-			
+			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
+			this.physics.arcade.collide(player.sprite, buildingGroup);
 
 			const missile = this.getMissileByPlayerId(this.io.id)
 			this.getPlayerById(this.io.id).update();
@@ -84603,6 +84606,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 					this.zombieAI(e);
 					if(e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
 					this.physics.arcade.collide(e.sprite, zombieGroup);
+					this.physics.arcade.collide(e.sprite, buildingGroup);
 				});
 
 			}
@@ -84643,10 +84647,10 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		this.myHealthBar.setFixedToCamera(true)
 	}
 
-	spawnBuilding (x, y) {
-		var building = new __WEBPACK_IMPORTED_MODULE_6__building__["a" /* default */](this.game,x,y)
-		return building;
-	  }
+	spawnBuilding(x, y) {
+		this.building = new __WEBPACK_IMPORTED_MODULE_6__building__["a" /* default */](this.game, x, y)
+		buildingGroup.add(this.building.sprite);
+	}
 
 	makeZombies(id, x, y) {
 		this.zombie = new __WEBPACK_IMPORTED_MODULE_4__zombie__["a" /* default */](id, this, x, y);
@@ -84822,6 +84826,16 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		}
 		return minSet.index? minSet.index: 0;
 	}
+
+	handleCollideZombie (player, zombie) {
+		if (this.time.now > zombiesCoolDown) {
+		  zombiesCoolDown = zombiesAttack + this.time.now
+		  player.playerHealth -= 1;
+		  if (player.playerHealth === 0) {
+			console.log('GAME OVER') // This should make the game over state
+		  }
+		}
+	  }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = GameState;
 
@@ -89929,7 +89943,8 @@ class Building{
     this.game = game
 
     this.sprite = this.game.add.sprite(0, 0, 'building',100);
-    this.sprite.game.physics.arcade.enableBody(this)
+    this.sprite.game.physics.arcade.enableBody(this.sprite);
+    this.sprite.body.immovable = true;
     this.sprite.anchor.setTo(0.5, 0.5)
     this.sprite.scale.setTo(0.5, 0.5)
     this.sprite.x = x
