@@ -2,6 +2,8 @@ const config = require('./config');
 const express = require('express');
 const socketio = require('socket.io');
 const http = require('http');
+const db = require('./db');
+const bodyParser = require('body-parser');
 
 
 const app = express();
@@ -9,6 +11,17 @@ const server = http.createServer(app);
 const io = socketio(server);
 
 app.use('/',express.static(config.publicDir));
+
+db.sync({force: false}).then(() => {
+	//console.log('Database is synced')
+});
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use('/api', require('./api'));
+
+
 //-socket
 const players = require('./players.js');
 const missiles = require('./missiles.js');
@@ -82,3 +95,11 @@ function newZombieId(){
 	// console.log('======== id',id.getTime());
 	return id.getTime();
   }
+
+//500 error middlewear
+app.use(function (err, req, res, next) {
+	console.error(err);
+	console.error(err.stack);
+	res.status(err.status || 500).send(err.message || 'Internal server error.');
+});
+  
