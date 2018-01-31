@@ -84533,7 +84533,7 @@ module.exports = {
 
 var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500
 , cameraSet = false, buildingGroup, nextMissileCollision = 0, missileCollisionRate = 1000
-, missileGroup, zombiesCoolDown = 1000, zombiesAttack = 1000;
+, missileGroup, zombiesCoolDown = 1000, zombiesAttack = 1000, text;
 class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	constructor(){
 		super();
@@ -84549,9 +84549,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	}
 
 	create() {
-		this.setUpMap()
+		//this.setUpMap()
+		
 		//this.setupMissilesGroup()
-
+		text = this.add.text(300, this.game.height-55, "Melee | X ", {fill:'#ffffff'})
+		text.fixedToCamera = true;
+		
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default.a.connect();
 		this.io.on('connect', data => {
@@ -84565,6 +84568,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		this.spawnBuilding(652, 961)
 		this.spawnBuilding(821, 1480)
 		this.spawnBuilding(1400, 1003)
+
+		
 
 	}
 
@@ -84589,7 +84594,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
 			this.physics.arcade.collide(player.sprite, buildingGroup);
 
-			const missile = this.getMissileByPlayerId(this.io.id)
+			//const missile = this.getMissileByPlayerId(this.io.id)
 			this.getPlayerById(this.io.id).update();
 			this.topText.setText(`Your ID: ${this.io.id}
 				${this.players.length} players
@@ -84621,9 +84626,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 					z.sprite.hasOverlapped = true;
 				})
 			}
+	
 
 			this.physics.arcade.overlap(zombieGroup, missileGroup, this.handleMissileCollision, null, this)
 			this.setHealthBarPercent();
+			//console.log(this.getMissileByPlayerId(this.io.id))
+			text.setText(player.sprite.selectedItem + " | " + player.sprite.ammo[player.sprite.ammoIndex])
+			
 		}
 	}
 
@@ -84660,13 +84669,16 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-	fire(posX, posY, itemName) {
-		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this, posX, posY, this.input.activePointer.x, this.input.activePointer.y, itemName)
-		this.missiles.push(this.missile);
+	fire(posX, posY, itemName,id) {
+		console.log("id in fire is", id)
+		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this, posX, posY, this.input.activePointer.x, this.input.activePointer.y, itemName,id)
+		this.missiles.push(this.missile);		
 		missileGroup.add(this.missile.sprite)
 		zombieGroup.forEach((e) => {
 			e.hasOverlapped = false
 		})
+		this.getPlayerById(this.io.id).consumeAmmo()
+		
 	}
 
 	handleMissileCollision (zombie, missile) {
@@ -84772,7 +84784,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		})
 
 		this.io.on('server:missile-added', newMissile => {
-			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName)
+			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName, newMissile.id)
 		});
 	}
 
@@ -90020,11 +90032,12 @@ const newgame = new game();
 
 var nextFire = 300, fireRate = 500;
 class Missile{
-	constructor(game, x, y, mouseX, mouseY, itemName){
+	constructor(game, x, y, mouseX, mouseY, itemName,id){
         this.game = game;
         this.mouseX = mouseX
         this.mouseY = mouseY
         this.itemName = itemName
+        this.id = id;
 
         this.sprite = this.game.add.sprite(0, 0, 'missile');
         this.game.physics.arcade.enableBody(this.sprite);
@@ -90044,7 +90057,7 @@ class Missile{
             break;
             case 'Flame Thrower':
             this.sprite.scale.setTo(0.5, 0.5);
-            this.sprite.lifespan = 250;
+            this.sprite.lifespan = 250
             break;
             case 'Rocket Launcher':
             this.sprite.scale.setTo(0.7, 0.7);
@@ -90059,7 +90072,7 @@ class Missile{
         this.sprite.y = y;
 
         
-        console.log(this.mouseX)
+       // console.log(this.mouseX)
         this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, 100)
 	}
 	
@@ -90119,7 +90132,9 @@ class Player{
 	  
 
 		this.sprite.items = ['Melee','Machine Gun','Flame Thrower', 'Rocket Launcher']
-		this.sprite.selectedItem = ''
+		this.sprite.selectedItem = 'Melee'
+		this.sprite.ammo = [Infinity, 100,500,5]
+		this.sprite.ammoIndex = 0;
 		  
 		this.sprite.playerSpeedY = 100
 		this.sprite.playerSpeedX = 200
@@ -90160,7 +90175,8 @@ class Player{
 			}
 			if (this.sprite.controls.selectItem.isDown) {
 				itemCount++;
-			  this.sprite.selectedItem = this.sprite.items[itemCount % this.sprite.items.length]
+				this.sprite.selectedItem = this.sprite.items[itemCount % this.sprite.items.length]
+				this.sprite.ammoIndex = itemCount % this.sprite.items.length
 			}
 	}
 	setX(x){
@@ -90181,6 +90197,10 @@ class Player{
 	}
 	getY(y){
 		return this.sprite.y
+	}
+
+	consumeAmmo(){
+		--this.sprite.ammo[this.sprite.ammoIndex]
 	}
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Player;

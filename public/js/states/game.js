@@ -10,7 +10,7 @@ import Building from './../building'
 
 var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500
 , cameraSet = false, buildingGroup, nextMissileCollision = 0, missileCollisionRate = 1000
-, missileGroup, zombiesCoolDown = 1000, zombiesAttack = 1000;
+, missileGroup, zombiesCoolDown = 1000, zombiesAttack = 1000, text;
 export default class GameState extends Phaser.State{
 	constructor(){
 		super();
@@ -26,9 +26,12 @@ export default class GameState extends Phaser.State{
 	}
 
 	create() {
-		this.setUpMap()
+		//this.setUpMap()
+		
 		//this.setupMissilesGroup()
-
+		text = this.add.text(300, this.game.height-55, "Melee | X ", {fill:'#ffffff'})
+		text.fixedToCamera = true;
+		
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = socketio.connect();
 		this.io.on('connect', data => {
@@ -42,6 +45,8 @@ export default class GameState extends Phaser.State{
 		this.spawnBuilding(652, 961)
 		this.spawnBuilding(821, 1480)
 		this.spawnBuilding(1400, 1003)
+
+		
 
 	}
 
@@ -66,7 +71,7 @@ export default class GameState extends Phaser.State{
 			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
 			this.physics.arcade.collide(player.sprite, buildingGroup);
 
-			const missile = this.getMissileByPlayerId(this.io.id)
+			//const missile = this.getMissileByPlayerId(this.io.id)
 			this.getPlayerById(this.io.id).update();
 			this.topText.setText(`Your ID: ${this.io.id}
 				${this.players.length} players
@@ -98,9 +103,13 @@ export default class GameState extends Phaser.State{
 					z.sprite.hasOverlapped = true;
 				})
 			}
+	
 
 			this.physics.arcade.overlap(zombieGroup, missileGroup, this.handleMissileCollision, null, this)
 			this.setHealthBarPercent();
+			//console.log(this.getMissileByPlayerId(this.io.id))
+			text.setText(player.sprite.selectedItem + " | " + player.sprite.ammo[player.sprite.ammoIndex])
+			
 		}
 	}
 
@@ -137,13 +146,16 @@ export default class GameState extends Phaser.State{
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-	fire(posX, posY, itemName) {
-		this.missile = new Missile(this, posX, posY, this.input.activePointer.x, this.input.activePointer.y, itemName)
-		this.missiles.push(this.missile);
+	fire(posX, posY, itemName,id) {
+		console.log("id in fire is", id)
+		this.missile = new Missile(this, posX, posY, this.input.activePointer.x, this.input.activePointer.y, itemName,id)
+		this.missiles.push(this.missile);		
 		missileGroup.add(this.missile.sprite)
 		zombieGroup.forEach((e) => {
 			e.hasOverlapped = false
 		})
+		this.getPlayerById(this.io.id).consumeAmmo()
+		
 	}
 
 	handleMissileCollision (zombie, missile) {
@@ -249,7 +261,7 @@ export default class GameState extends Phaser.State{
 		})
 
 		this.io.on('server:missile-added', newMissile => {
-			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName)
+			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName, newMissile.id)
 		});
 	}
 

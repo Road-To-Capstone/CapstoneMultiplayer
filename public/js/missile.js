@@ -2,11 +2,12 @@ import Phaser from 'phaser';
 
 var nextFire = 300, fireRate = 500;
 export default class Missile{
-	constructor(game, x, y, mouseX, mouseY, itemName){
+	constructor(game, x, y, mouseX, mouseY, itemName,id){
         this.game = game;
         this.mouseX = mouseX
         this.mouseY = mouseY
         this.itemName = itemName
+        this.id = id;
 
         this.sprite = this.game.add.sprite(0, 0, 'missile');
         this.game.physics.arcade.enableBody(this.sprite);
@@ -26,7 +27,7 @@ export default class Missile{
             break;
             case 'Flame Thrower':
             this.sprite.scale.setTo(0.5, 0.5);
-            this.sprite.lifespan = 250;
+            this.sprite.lifespan = 250
             break;
             case 'Rocket Launcher':
             this.sprite.scale.setTo(0.7, 0.7);
@@ -41,7 +42,7 @@ export default class Missile{
         this.sprite.y = y;
 
         
-        console.log(this.mouseX)
+       // console.log(this.mouseX)
         this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, 100)
 	}
 	
