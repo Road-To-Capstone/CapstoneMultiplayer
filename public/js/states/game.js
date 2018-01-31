@@ -15,27 +15,38 @@ export default class GameState extends Phaser.State{
 	}
 	preload() {
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
-		//this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
-		//this.load.image('tiles', './assets/tiles.png')
+		// this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
+		// this.load.image('tiles', './assets/tiles.png')
 		this.load.image('player', './assets/playerplaceholder.jpg')
 		this.load.image('building', './assets/buildingplaceholder.png')
 		this.load.image('missile', '/assets/missileplaceholder.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
 	}
+	
 	create() {
 		//this.setUpMap()
 		//this.setupMissilesGroup()
+
 		this.world.setBounds(0, 0, 1920, 1920)
 
 		this.io = socketio.connect();
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
+<<<<<<< HEAD
 		//buildingGroup = this.add.group()
 
 		buildingGroup = this.spawnBuilding(821, 1480)
 		//this.spawnBuilding(1400, 1003)
 		//this.spawnBuilding(652, 961)
+=======
+
+		zombieGroup = this.add.group();
+
+		this.spawnBuilding(652, 961)
+		this.spawnBuilding(821, 1480)
+		this.spawnBuilding(1400, 1003)
+>>>>>>> master
 	}
 	update(){
 	
@@ -79,14 +90,15 @@ export default class GameState extends Phaser.State{
 				this.io.emit('client:ask-to-create-zombie');
 			}
 
-			if(this.zombies !== []) {
+			if(!!this.zombies.length) {
 			//	console.log('this.zombies', this.zombies);
 				this.zombies.forEach(e => {
 					// e.sprite.health -= 1;
 					this.zombieAI(e);
 					if(e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
-					// this.physics.arcade.collide(e, this.zombies);
-				})
+					this.physics.arcade.collide(e.sprite, zombieGroup);
+				});
+
 			}
 
 			if (this.time.now > nextMissileCollision){
@@ -155,6 +167,7 @@ export default class GameState extends Phaser.State{
 	makeZombies(id, x, y) {
 		this.zombie = new Zombie(id, this, x, y);
 		this.zombies.push(this.zombie);
+		zombieGroup.add(this.zombie.sprite)
 	}
 
 	fire(posX, posY) {
