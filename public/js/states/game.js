@@ -3,60 +3,66 @@ import socketio from 'socket.io-client';
 import Player from './../player';
 import Missile from './../missile'
 import Zombie from './../zombie';
+import {
+	HealthBar
+} from './../HealthBar.standalone'
+import Building from './../building'
 
-var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500, cameraSet = false;
+var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500, cameraSet = false, building;
 export default class GameState extends Phaser.State{
 	constructor(){
 		super();
 	}
-	preload(){
+	preload() {
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
 		// this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
 		// this.load.image('tiles', './assets/tiles.png')
 		this.load.image('player', './assets/playerplaceholder.jpg')
-		this.load.image('building', './assets/buildingplaceholder.jpg')
+		this.load.image('building', './assets/buildingplaceholder.png')
 		this.load.image('missile', '/assets/missileplaceholder.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
 	}
-	create(){
-		// this.setUpMap()
+	
+	create() {
+		//this.setUpMap()
 		//this.setupMissilesGroup()
 
 		this.world.setBounds(0, 0, 1920, 1920)
 
 		this.io = socketio.connect();
-		this.io.on('connect', data=>{
+		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
 
 		zombieGroup = this.add.group();
-		//console.log("camera is ", this.camera)
-		//this.camera.setSize(800.)
-		//singleMissile = new Missile(this)
 
+		this.spawnBuilding(652, 961)
+		this.spawnBuilding(821, 1480)
+		this.spawnBuilding(1400, 1003)
 	}
 	update(){
 	
 		if(this.doneLoading){
 			if(!cameraSet){
 				this.camera.follow(this.getPlayerById(this.io.id).sprite)
+				this.setUpHealthBar()
 				cameraSet = true;			
 			}
 			const player = this.getPlayerById(this.io.id);
 			this.io.emit('client:player-moved', {
-				id:this.io.id,
+				id: this.io.id,
 				//posX: player.sprite.worldPosition.x,
 				//posY: player.sprite.worldPosition.y,
 				posX: player.sprite.x,
 				posY: player.sprite.y
 				//angle: player.sprite.angle
 			});
-
+			this.physics.arcade.collide(player, building) //
 			const missile = this.getMissileByPlayerId(this.io.id)
 
 			//this.io.emit('client:missile-fired', {id: this.io.id, posX: this.missiles.sprite.x, posY: this.missiles.sprite.y, velocityX: this.missiles.sprite.body.velocity.x, velocityY: this.missiles.sprite.body.velocity.y})
-			
-			
+
+
 			this.getPlayerById(this.io.id).update();
 
 			this.topText.setText(`Your ID: ${this.io.id}
@@ -69,7 +75,7 @@ export default class GameState extends Phaser.State{
 				this.io.emit('client:ask-to-create-missile', {id: this.io.id, posX: player.sprite.x, posY: player.sprite.y})
 				this.fire()
 			}
-			if(this.zombies.length < 2) {
+			if (this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie');
 			}
 
@@ -93,15 +99,28 @@ export default class GameState extends Phaser.State{
 	/* 
 		SETUP FUNCTIONS
 	*/
-	setUpMap () {
+	setUpMap() {
 		map = this.add.tilemap('BaseMap')
 		map.addTilesetImage('Map tiles.tsx', 'tiles')
 		layer = map.createLayer('Tile Layer 1')
 		layer = map.createLayer('Tile Layer 2')
 		layer = map.createLayer('Tile Layer 3')
 		layer.resizeWorld()
-	  }
-	
+	}
+
+	setUpHealthBar() {
+		this.myHealthBar = new HealthBar(this.game, {
+			x: 145,
+			y: this.game.height - 40
+		})
+		this.myHealthBar.setFixedToCamera(true)
+	}
+
+	spawnBuilding(x, y) {
+		building = new Building(this.game, x, y)
+		return building
+	}
+
 	//Testing for single zombie to show up
 	// setUpZombie() {
 	// 	this.zombie = new Zombie(this, 0, 0);
@@ -113,8 +132,8 @@ export default class GameState extends Phaser.State{
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-	fire(posX,posY){
-		this.missile = new Missile(this,posX,posY,this.input.activePointer.x,this.input.activePointer.y)
+	fire(posX, posY) {
+		this.missile = new Missile(this, posX, posY, this.input.activePointer.x, this.input.activePointer.y)
 		this.missiles.push(this.missile);
 	}
 
@@ -125,7 +144,7 @@ export default class GameState extends Phaser.State{
 	/* 
 		SOCKET HELPER FUNCTIONS
 	*/
-	createOnConnection(data){
+	createOnConnection(data) {
 		//Zombies
 		window.zombies = [];
 		this.zombies = zombies;
@@ -136,7 +155,7 @@ export default class GameState extends Phaser.State{
 		window.missiles = [];
 		this.missiles = missiles;
 
-		window.io = this.io;//meafffdd
+		window.io = this.io; //meafffdd
 
 		this.socketCreateListeners();
 
@@ -154,20 +173,20 @@ export default class GameState extends Phaser.State{
 	    this.doneLoading = 1;
 	}
 
-	socketCreateListeners(){
+	socketCreateListeners() {
 		const me = this.getPlayerById(this.io.id);
 
 		//load all existing players
 		this.io.emit('client:give-me-players'); //ask for it
 		this.io.emit('client:give-me-zombies'); //ask for zombies  
-		
-	   	this.io.on('server:all-players',data=>{ //the data is the players from the server side
-	   		data.forEach(e=>{
-	   			if(e.id != this.io.id) //this will prevent loading our player two times
-	   			players.push(new Player(e.id, this, e.posX, e.posY, e.angle));
-	   		});
+
+		this.io.on('server:all-players', data => { //the data is the players from the server side
+			data.forEach(e => {
+				if (e.id != this.io.id) //this will prevent loading our player two times
+					players.push(new Player(e.id, this, e.posX, e.posY, e.angle));
+			});
 		});
-		   
+
 		this.io.on('server:all-zombies', data => {
 			// console.log('=====server all-zombies', data, this.zombies);
 			// this.zombies = [...data];
@@ -178,26 +197,26 @@ export default class GameState extends Phaser.State{
 			// 	this.makeZombies(zombie.id, zombie.posX, zombie.posY);
 			// });
 		})
-		   
-		//load your player
-	   	this.io.on('server:player-added',data=>{
-			//console.log(`New ${data.id} added to x: ${data.posX}, y: ${data.posY}`);
-	   		players.push(new Player(data.id, this, data.posX, data.posY, data.angle));
-	   	});
 
-	   	this.io.on('server:player-disconnected',id=>{ //if a player has disconnected
-	   		console.log(`Player ${id} disconnected`);
-	   		for(let i=0; i<this.players.length; i++) //loop through all players
-				if(this.players[i].id == id){ // found the player
-					this.players[i].sprite.destroy();//phaser sprite destroy function
-					this.players.splice(i,1); //unset from the players array
+		//load your player
+		this.io.on('server:player-added', data => {
+			//console.log(`New ${data.id} added to x: ${data.posX}, y: ${data.posY}`);
+			players.push(new Player(data.id, this, data.posX, data.posY, data.angle));
+		});
+
+		this.io.on('server:player-disconnected', id => { //if a player has disconnected
+			console.log(`Player ${id} disconnected`);
+			for (let i = 0; i < this.players.length; i++) //loop through all players
+				if (this.players[i].id == id) { // found the player
+					this.players[i].sprite.destroy(); //phaser sprite destroy function
+					this.players.splice(i, 1); //unset from the players array
 				}
 		});
 
-	   	this.io.on('server:player-moved',data=>{
-	   		this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
+		this.io.on('server:player-moved', data => {
+			this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
 		});
-		   
+
 		this.io.on('server:missile-fired', data => {
 			// console.log("data is ", data)
 			this.missiles = data;
@@ -222,14 +241,14 @@ export default class GameState extends Phaser.State{
 		});
 	}
 
-	getPlayerById(id){
-		for(let i=0;i<this.players.length;i++)
-			if(this.players[i].id == id) return this.players[i];
+	getPlayerById(id) {
+		for (let i = 0; i < this.players.length; i++)
+			if (this.players[i].id == id) return this.players[i];
 	}
 
-	getMissileByPlayerId(id){
-		for(let i=0;i<this.missiles.length;i++)
-		if(this.missiles[i].id == id) return this.missiles[i];
+	getMissileByPlayerId(id) {
+		for (let i = 0; i < this.missiles.length; i++)
+			if (this.missiles[i].id == id) return this.missiles[i];
 	}
 
 	zombieAI(zombie) {
@@ -244,27 +263,27 @@ export default class GameState extends Phaser.State{
 		  if (zombie.sprite.rotation !== targetAngle) {
 		  // Calculate difference between the current angle and targetAngle
 			var delta = targetAngle - zombie.sprite.rotation
-	  
+
 			// Keep it in range from -180 to 180 to make the most efficient turns.
 			if (delta > Math.PI) delta -= Math.PI * 2
 			if (delta < -Math.PI) delta += Math.PI * 2
-	  
+
 			if (delta > 0) {
-			  // Turn clockwise
-			  zombie.sprite.angle += zombie.sprite.TURN_RATE
+				// Turn clockwise
+				zombie.sprite.angle += zombie.sprite.TURN_RATE
 			} else {
-			  // Turn counter-clockwise
-			  zombie.sprite.angle -= zombie.sprite.TURN_RATE
+				// Turn counter-clockwise
+				zombie.sprite.angle -= zombie.sprite.TURN_RATE
 			}
-	  
+
 			// Just set angle to target angle if they are close
 			if (Math.abs(delta) < this.math.degToRad(zombie.sprite.TURN_RATE)) {
-			  zombie.sprite.rotation = targetAngle
+				zombie.sprite.rotation = targetAngle
 			}
-		  }
-		  this.updateVelocity(Math.cos(zombie.sprite.rotation) * zombie.sprite.SPEED, Math.sin(zombie.sprite.rotation) * zombie.sprite.SPEED, zombie)
+		}
+		this.updateVelocity(Math.cos(zombie.sprite.rotation) * zombie.sprite.SPEED, Math.sin(zombie.sprite.rotation) * zombie.sprite.SPEED, zombie)
 	}
-	updateVelocity (xVelocity, yVelocity, zombie) {
+	updateVelocity(xVelocity, yVelocity, zombie) {
 		zombie.sprite.body.velocity.x = xVelocity
 		zombie.sprite.body.velocity.y = yVelocity
 	  }
