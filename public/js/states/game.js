@@ -8,7 +8,8 @@ import {
 } from './../HealthBar.standalone'
 import Building from './../building'
 
-var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500, cameraSet = false, building;
+var map,layer, missileGroup, zombieGroup, singleMissile, buildingGroup, nextFire = 0, fireRate = 500, cameraSet = false;
+var zombiesCoolDown = 1000, zombiesAttack = 1000;
 export default class GameState extends Phaser.State{
 	constructor(){
 		super();
@@ -34,10 +35,12 @@ export default class GameState extends Phaser.State{
 		});
 
 		zombieGroup = this.add.group();
+		buildingGroup = this.add.group();
 
 		this.spawnBuilding(652, 961)
 		this.spawnBuilding(821, 1480)
 		this.spawnBuilding(1400, 1003)
+
 	}
 
 	update(){
@@ -53,7 +56,9 @@ export default class GameState extends Phaser.State{
 				posX: player.sprite.x,
 				posY: player.sprite.y
 			});
-			this.physics.arcade.overlap(player.sprite, zombieGroup)
+			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
+			this.physics.arcade.collide(player.sprite, buildingGroup);
+
 			const missile = this.getMissileByPlayerId(this.io.id)
 			this.getPlayerById(this.io.id).update();
 			this.topText.setText(`Your ID: ${this.io.id}
@@ -76,6 +81,7 @@ export default class GameState extends Phaser.State{
 					this.zombieAI(e);
 					if(e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
 					this.physics.arcade.collide(e.sprite, zombieGroup);
+					this.physics.arcade.collide(e.sprite, buildingGroup);
 				});
 
 			}
@@ -106,8 +112,9 @@ export default class GameState extends Phaser.State{
 	}
 
 	spawnBuilding(x, y) {
-		building = new Building(this.game, x, y)
-		return building
+		this.building = new Building(this.game, x, y)
+		buildingGroup.add(this.building.sprite);
+		// return building
 	}
 
 	makeZombies(id, x, y) {
@@ -273,4 +280,14 @@ export default class GameState extends Phaser.State{
 		}
 		return minSet.index? minSet.index: 0;
 	}
+
+	handleCollideZombie (player, zombie) {
+		if (this.time.now > zombiesCoolDown) {
+		  zombiesCoolDown = zombiesAttack + this.time.now
+		  player.playerHealth -= 1;
+		  if (player.playerHealth === 0) {
+			console.log('GAME OVER') // This should make the game over state
+		  }
+		}
+	  }
 }
