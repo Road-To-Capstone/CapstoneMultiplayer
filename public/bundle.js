@@ -90031,7 +90031,7 @@ class Missile{
         this.sprite = this.game.add.sprite(0, 0, 'missile');
         this.game.physics.arcade.enableBody(this.sprite);
         this.sprite.physicsBodyType = __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Physics.ARCADE
-    
+        this.sprite.anchor.setTo(0.5, 0.5);
 
         this.sprite.checkWorldBounds = true
         this.sprite.outOfBoundsKill = true;
@@ -90057,12 +90057,11 @@ class Missile{
             this.sprite.lifespan = 250;
             break;
         }
-        this.sprite.anchor.setTo(0.5, 0.5);
         this.sprite.x = x;
         this.sprite.y = y;
 
         
-    
+        console.log(this.mouseX)
         this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, 100)
 	}
 	
