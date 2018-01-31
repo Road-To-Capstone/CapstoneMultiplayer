@@ -15,26 +15,18 @@ export default class GameState extends Phaser.State{
 	}
 	preload() {
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
-<<<<<<< HEAD
-=======
 		// this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
 		// this.load.image('tiles', './assets/tiles.png')
->>>>>>> master
 		this.load.image('player', './assets/playerplaceholder.jpg')
 		this.load.image('building', './assets/buildingplaceholder.png')
 		this.load.image('missile', '/assets/missileplaceholder.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
 	}
-<<<<<<< HEAD
-
-	create() {
-=======
 	
 	create() {
 		//this.setUpMap()
 		//this.setupMissilesGroup()
 
->>>>>>> master
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = socketio.connect();
 		this.io.on('connect', data => {
@@ -77,20 +69,12 @@ export default class GameState extends Phaser.State{
 			if (this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie');
 			}
-<<<<<<< HEAD
-			if(this.zombies !== []) {
-=======
 
 			if(!!this.zombies.length) {
 			//	console.log('this.zombies', this.zombies);
->>>>>>> master
 				this.zombies.forEach(e => {
 					this.zombieAI(e);
 					if(e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
-<<<<<<< HEAD
-				})
-			}	
-=======
 					this.physics.arcade.collide(e.sprite, zombieGroup);
 				});
 
@@ -98,7 +82,6 @@ export default class GameState extends Phaser.State{
 
 			//this.physics.arcade.overlap(this.zombies, this.missiles, this.handleMissileCollision, null, this)
 			
->>>>>>> master
 		}
 	}
 
