@@ -84445,7 +84445,7 @@ HealthBar.prototype.setBarColor = function (newColor) {
 }
 
 HealthBar.prototype.setWidth = function (newWidth) {
-  this.game.add.tween(this.barSprite).to({ width: newWidth }, this.config.animationDuration, Phaser.Easing.Linear.None, true)
+  this.game.add.tween(this.barSprite).to({ width: newWidth }, this.config.animationDuration, null, true)
 }
 
 HealthBar.prototype.setFixedToCamera = function (fixedToCamera) {
@@ -84531,8 +84531,9 @@ module.exports = {
 
 
 
-var map,layer, missileGroup, zombieGroup, singleMissile, buildingGroup, nextFire = 0, fireRate = 500, cameraSet = false;
-var zombiesCoolDown = 1000, zombiesAttack = 1000;
+var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500
+, cameraSet = false, buildingGroup, nextMissileCollision = 0, missileCollisionRate = 1000
+, missileGroup, zombiesCoolDown = 1000, zombiesAttack = 1000;
 class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	constructor(){
 		super();
@@ -84558,6 +84559,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		});
 
 		zombieGroup = this.add.group();
+		missileGroup = this.add.group();
 		buildingGroup = this.add.group();
 
 		this.spawnBuilding(652, 961)
@@ -84609,8 +84611,15 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 
 			}
 
-			//this.physics.arcade.overlap(this.zombies, this.missiles, this.handleMissileCollision, null, this)
-			
+			if (this.time.now > nextMissileCollision){
+				nextMissileCollision = this.time.now + missileCollisionRate;
+				this.zombies.forEach(z=> {
+					z.sprite.hasOverlapped = true;
+				})
+			}
+
+			this.physics.arcade.overlap(zombieGroup, missileGroup, this.handleMissileCollision, null, this)
+			this.setHealthBarPercent();
 		}
 	}
 
@@ -84626,6 +84635,10 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		layer.resizeWorld()
 	}
 
+	setHealthBarPercent () {
+		this.myHealthBar.setPercent(this.players[0].sprite.playerHealth)
+	}
+
 	setUpHealthBar() {
 		this.myHealthBar = new __WEBPACK_IMPORTED_MODULE_5__HealthBar_standalone__["a" /* HealthBar */](this.game, {
 			x: 145,
@@ -84637,7 +84650,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	spawnBuilding(x, y) {
 		this.building = new __WEBPACK_IMPORTED_MODULE_6__building__["a" /* default */](this.game, x, y)
 		buildingGroup.add(this.building.sprite);
-		// return building
 	}
 
 	makeZombies(id, x, y) {
@@ -84649,7 +84661,18 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	fire(posX, posY, itemName) {
 		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this, posX, posY, this.input.activePointer.x, this.input.activePointer.y, itemName)
 		this.missiles.push(this.missile);
+		missileGroup.add(this.missile.sprite)
+		zombieGroup.forEach((e) => {
+			e.hasOverlapped = false
+		})
 	}
+
+	handleMissileCollision (zombie, missile) {
+		if (!zombie.hasOverlapped) {
+		  zombie.hasOverlapped = true
+		  zombie.health -= 100
+		}
+	  }
 
 	/* 
 		SOCKET HELPER FUNCTIONS
@@ -90177,6 +90200,13 @@ class zombie {
   }
 
   update () {
+  }
+
+  damage(dmg){
+    if (!this.sprite.hasOverlapped){
+      this.sprite.health -= dmg;
+      this.sprite.hasOverlapped = true;
+    }
   }
 
   setZombieX(x){

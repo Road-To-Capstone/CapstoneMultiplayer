@@ -8,8 +8,9 @@ import {
 } from './../HealthBar.standalone'
 import Building from './../building'
 
-var map,layer, missileGroup, zombieGroup, singleMissile, buildingGroup, nextFire = 0, fireRate = 500, cameraSet = false;
-var zombiesCoolDown = 1000, zombiesAttack = 1000;
+var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500
+, cameraSet = false, buildingGroup, nextMissileCollision = 0, missileCollisionRate = 1000
+, missileGroup, zombiesCoolDown = 1000, zombiesAttack = 1000;
 export default class GameState extends Phaser.State{
 	constructor(){
 		super();
@@ -35,6 +36,7 @@ export default class GameState extends Phaser.State{
 		});
 
 		zombieGroup = this.add.group();
+		missileGroup = this.add.group();
 		buildingGroup = this.add.group();
 
 		this.spawnBuilding(652, 961)
@@ -86,8 +88,15 @@ export default class GameState extends Phaser.State{
 
 			}
 
-			//this.physics.arcade.overlap(this.zombies, this.missiles, this.handleMissileCollision, null, this)
-			
+			if (this.time.now > nextMissileCollision){
+				nextMissileCollision = this.time.now + missileCollisionRate;
+				this.zombies.forEach(z=> {
+					z.sprite.hasOverlapped = true;
+				})
+			}
+
+			this.physics.arcade.overlap(zombieGroup, missileGroup, this.handleMissileCollision, null, this)
+			this.setHealthBarPercent();
 		}
 	}
 
@@ -103,6 +112,10 @@ export default class GameState extends Phaser.State{
 		layer.resizeWorld()
 	}
 
+	setHealthBarPercent () {
+		this.myHealthBar.setPercent(this.players[0].sprite.playerHealth)
+	}
+
 	setUpHealthBar() {
 		this.myHealthBar = new HealthBar(this.game, {
 			x: 145,
@@ -114,7 +127,6 @@ export default class GameState extends Phaser.State{
 	spawnBuilding(x, y) {
 		this.building = new Building(this.game, x, y)
 		buildingGroup.add(this.building.sprite);
-		// return building
 	}
 
 	makeZombies(id, x, y) {
@@ -126,7 +138,18 @@ export default class GameState extends Phaser.State{
 	fire(posX, posY, itemName) {
 		this.missile = new Missile(this, posX, posY, this.input.activePointer.x, this.input.activePointer.y, itemName)
 		this.missiles.push(this.missile);
+		missileGroup.add(this.missile.sprite)
+		zombieGroup.forEach((e) => {
+			e.hasOverlapped = false
+		})
 	}
+
+	handleMissileCollision (zombie, missile) {
+		if (!zombie.hasOverlapped) {
+		  zombie.hasOverlapped = true
+		  zombie.health -= 100
+		}
+	  }
 
 	/* 
 		SOCKET HELPER FUNCTIONS

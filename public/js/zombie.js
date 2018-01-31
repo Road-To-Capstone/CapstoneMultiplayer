@@ -26,6 +26,13 @@ export default class zombie {
   update () {
   }
 
+  damage(dmg){
+    if (!this.sprite.hasOverlapped){
+      this.sprite.health -= dmg;
+      this.sprite.hasOverlapped = true;
+    }
+  }
+
   setZombieX(x){
     this.sprite.x = x;
     return this;
