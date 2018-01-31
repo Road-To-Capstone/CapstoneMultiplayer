@@ -322,9 +322,9 @@ export default class GameState extends Phaser.State{
 	handleCollideZombie (player, zombie) {
 		if (this.time.now > zombiesCoolDown) {
 		  zombiesCoolDown = zombiesAttack + this.time.now
-		  player.playerHealth -= 1;
+		  player.playerHealth -= 50;
 		  if (player.playerHealth === 0) {
-			console.log('GAME OVER') // This should make the game over state
+			this.state.start('GameOver');
 		  }
 		}
 	  }
