@@ -32,7 +32,9 @@ export default class Player{
 	  
 
 		this.sprite.items = ['Melee','Machine Gun','Flame Thrower', 'Rocket Launcher']
-		this.sprite.selectedItem = ''
+		this.sprite.selectedItem = 'Melee'
+		this.sprite.ammo = [Infinity, 100,500,5]
+		this.sprite.ammoIndex = 0;
 		  
 		this.sprite.playerSpeedY = 100
 		this.sprite.playerSpeedX = 200
@@ -73,7 +75,8 @@ export default class Player{
 			}
 			if (this.sprite.controls.selectItem.isDown) {
 				itemCount++;
-			  this.sprite.selectedItem = this.sprite.items[itemCount % this.sprite.items.length]
+				this.sprite.selectedItem = this.sprite.items[itemCount % this.sprite.items.length]
+				this.sprite.ammoIndex = itemCount % this.sprite.items.length
 			}
 	}
 	setX(x){
@@ -94,5 +97,9 @@ export default class Player{
 	}
 	getY(y){
 		return this.sprite.y
+	}
+
+	consumeAmmo(){
+		--this.sprite.ammo[this.sprite.ammoIndex]
 	}
 }
