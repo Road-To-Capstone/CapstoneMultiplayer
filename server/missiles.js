@@ -3,8 +3,8 @@ module.exports = new (class Missiles{
 	constructor(){
 		this.missiles = [];
 	}
-	add(id, posX, posY){
-		const newMissile = {id, posX, posY};
+	add(id, posX, posY, itemName){
+		const newMissile = {id, posX, posY,itemName};
 		this.missiles.push(newMissile);
 		if (this.missiles.length > 10){
 			this.missiles.shift()

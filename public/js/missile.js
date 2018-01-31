@@ -18,7 +18,7 @@ export default class Missile{
         switch (itemName) {
             case 'Melee':
             this.sprite.scale.setTo(0.25, 0.25);
-            this.sprite.lifespan = 250;
+            this.sprite.lifespan = 5000; //was 250, changed  for testing
             break;
             case 'Machine Gun':
             this.sprite.scale.setTo(0.15, 0.15);
@@ -49,4 +49,10 @@ export default class Missile{
 	update(){
     }
     
+    set(x,y,velocityX, velocityY, itemName){
+        this.sprite.x = x;
+        this.sprite.y = y;
+        this.sprite.body.velocity.x = velocity.x;
+        this.sprite.body.velocity.y = velocity.y;
+    }
 }
