@@ -11,14 +11,14 @@ export default class Missile{
         this.sprite = this.game.add.sprite(0, 0, 'missile');
         this.game.physics.arcade.enableBody(this.sprite);
         this.sprite.physicsBodyType = Phaser.Physics.ARCADE
-    
+        this.sprite.anchor.setTo(0.5, 0.5);
 
         this.sprite.checkWorldBounds = true
         this.sprite.outOfBoundsKill = true;
         switch (itemName) {
             case 'Melee':
             this.sprite.scale.setTo(0.25, 0.25);
-            this.sprite.lifespan = 250;
+            this.sprite.lifespan = 5000; //was 250, changed  for testing
             break;
             case 'Machine Gun':
             this.sprite.scale.setTo(0.15, 0.15);
@@ -37,16 +37,21 @@ export default class Missile{
             this.sprite.lifespan = 250;
             break;
         }
-        this.sprite.anchor.setTo(0.5, 0.5);
         this.sprite.x = x;
         this.sprite.y = y;
 
         
-    
+        console.log(this.mouseX)
         this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, 100)
 	}
 	
 	update(){
     }
     
+    set(x,y,velocityX, velocityY, itemName){
+        this.sprite.x = x;
+        this.sprite.y = y;
+        this.sprite.body.velocity.x = velocity.x;
+        this.sprite.body.velocity.y = velocity.y;
+    }
 }
