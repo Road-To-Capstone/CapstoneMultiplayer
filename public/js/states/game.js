@@ -8,7 +8,7 @@ import {
 } from './../HealthBar.standalone'
 import Building from './../building'
 
-var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500, cameraSet = false, building;
+var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500, cameraSet = false, buildingGroup, nextMissileCollision = 0, missileCollisionRate = 1000;
 export default class GameState extends Phaser.State{
 	constructor(){
 		super();
@@ -31,9 +31,11 @@ export default class GameState extends Phaser.State{
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
-		this.spawnBuilding(652, 961)
-		this.spawnBuilding(821, 1480)
-		this.spawnBuilding(1400, 1003)
+		//buildingGroup = this.add.group()
+
+		buildingGroup = this.spawnBuilding(821, 1480)
+		//this.spawnBuilding(1400, 1003)
+		//this.spawnBuilding(652, 961)
 	}
 	update(){
 	
@@ -52,7 +54,10 @@ export default class GameState extends Phaser.State{
 				posY: player.sprite.y
 				//angle: player.sprite.angle
 			});
-			this.physics.arcade.collide(player, building) //
+
+			this.physics.arcade.collide(player,  buildingGroup, ()=> {console.log("hello")}) //
+			
+
 			const missile = this.getMissileByPlayerId(this.io.id)
 
 			//this.io.emit('client:missile-fired', {id: this.io.id, posX: this.missiles.sprite.x, posY: this.missiles.sprite.y, velocityX: this.missiles.sprite.body.velocity.x, velocityY: this.missiles.sprite.body.velocity.y})
@@ -84,6 +89,33 @@ export default class GameState extends Phaser.State{
 				})
 			}
 
+			if (this.time.now > nextMissileCollision){
+				nextMissileCollision = this.time.now + missileCollisionRate;
+				this.zombies.forEach(z=> {
+					z.sprite.hasOverlapped = true;
+				})
+			}
+
+			console.log(this.zombies.length)
+			for (var i = this.missiles.length;  i> 0 && i>this.missiles.length-10;i-=2){
+			//	console.log(this.missiles)
+				for (var j = 0; j<this.zombies.length;j++){
+					if(this.missiles[i]){
+						if(this.missiles[i].sprite.x){
+							var distance = this.math.distance(this.missiles[i].sprite.x, this.missiles[i].sprite.y,
+								this.zombies[j].sprite.x, this.zombies[j].sprite.y);
+								console.log(distance)
+							if (distance < 400){
+								this.zombies[j].sprite.health -= 100;
+								this.zombies[j].sprite.hasOverlapped = true
+							}
+							
+						}
+					//	console.log("missiles" ,this.missiles[i].sprite.x)
+					}
+				//	console.log("zombies" ,this.zombies[j].sprite.x)
+				}
+			}
 			//this.physics.arcade.overlap(this.zombies, this.missiles, this.handleMissileCollision, null, this)
 			
 		}
@@ -110,10 +142,10 @@ export default class GameState extends Phaser.State{
 		this.myHealthBar.setFixedToCamera(true)
 	}
 
-	spawnBuilding(x, y) {
-		building = new Building(this.game, x, y)
-		return building
-	}
+	spawnBuilding (x, y) {
+		var building = new Building(this.game,x,y)
+		return building;
+	  }
 
 	//Testing for single zombie to show up
 	// setUpZombie() {

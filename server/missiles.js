@@ -6,6 +6,10 @@ module.exports = new (class Missiles{
 	add(id, posX, posY){
 		const newMissile = {id, posX, posY};
 		this.missiles.push(newMissile);
+		if (this.missiles.length > 10){
+			this.missiles.shift()
+			this.missiles.shift()
+		}
 		return newMissile;
 	}
 	get(id){
