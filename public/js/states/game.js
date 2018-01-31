@@ -58,6 +58,11 @@ export default class GameState extends Phaser.State{
 				posX: player.sprite.x,
 				posY: player.sprite.y
 			});
+
+			this.zombies.forEach((z)=>{
+				this.io.emit('client:zombie-moved',{id: z.id, posX: z.sprite.x, posY: z.sprite.y})
+			});
+
 			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
 			this.physics.arcade.collide(player.sprite, buildingGroup);
 
@@ -70,8 +75,7 @@ export default class GameState extends Phaser.State{
 			`);
 			if (this.input.activePointer.isDown && this.time.now > nextFire) {
 				nextFire = this.time.now + fireRate;
-				this.io.emit('client:ask-to-create-missile', {id: this.io.id, posX: player.sprite.x, posY: player.sprite.y})
-				
+				this.io.emit('client:ask-to-create-missile', {id: this.io.id, posX: player.sprite.x, posY: player.sprite.y, itemName: player.sprite.selectedItem})
 			}
 			if (this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie');
@@ -221,6 +225,14 @@ export default class GameState extends Phaser.State{
 			this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
 		});
 
+		this.io.on('server:zombie-moved', data => { //data is an object with {id: z.id, posX: z.sprite.x, posY: z.sprite.y}
+			this.getZombieById(data.id).set(data.posX,data.posY);
+		});
+
+		this.io.on('server:missile-moved', data => { //data is {posX: data.posX, posY: data.posY, velocityX: data.velocityX, velocityY: data.velocityY}
+			this.getMissileByPlayerId(data.id).set(data.posX,data.posY, data.velocityX, data.velocityY, data.itemName)
+		});
+
 		this.io.on('server:missile-fired', data => {
 			this.missiles = data;
 		});
@@ -239,7 +251,7 @@ export default class GameState extends Phaser.State{
 		})
 
 		this.io.on('server:missile-added', newMissile => {
-			this.fire(newMissile.posX, newMissile.posY, this.players[0].sprite.selectedItem)
+			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName)
 		});
 	}
 
@@ -251,6 +263,11 @@ export default class GameState extends Phaser.State{
 	getMissileByPlayerId(id) {
 		for (let i = 0; i < this.missiles.length; i++)
 			if (this.missiles[i].id == id) return this.missiles[i];
+	}
+
+	getZombieById(id){
+		for (let i = 0; i < this.zombies.length; i++)
+			if (this.zombies[i].id == id) return this.zombies[i];
 	}
 
 	zombieAI(zombie) {

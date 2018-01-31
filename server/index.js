@@ -27,6 +27,12 @@ io.on('connection', socket => {
 		players.set(data.id, {posX: data.posX, posY: data.posY});
 	});
 
+	// data is id: z.id, posX: z.sprite.x, posY: z.sprite.y
+	socket.on('client:zombie-moved',data=>{
+		socket.broadcast.emit('server:zombie-moved', zombies.get(data.id));
+		zombies.set(data.id, {posX: data.posX, posY: data.posY});
+	});
+
 	socket.on('disconnect', ()=>{
 		players.delete(socket.id);
 		io.emit('server:player-disconnected',socket.id); console.log(`${socket.id} disconnected`);
@@ -36,8 +42,8 @@ io.on('connection', socket => {
 		console.log("missiles data is ", data)
 		//missiles.set()
 	
-		socket.broadcast.emit('server:player-moved', missiles.get(socket.id));
-		missiles.set(data.id, {posX: data.posX, posY: data.posY, velocityX: data.velocityX, velocityY: data.velocityY})
+		socket.broadcast.emit('server:missile-moved', missiles.get(socket.id));
+		missiles.set(data.id, {posX: data.posX, posY: data.posY, velocityX: data.velocityX, velocityY: data.velocityY, itemName: data.itemName})
 		//io.emit('server:missiles-fired',missileGroup)
 	});
 	socket.on('client:give-me-zombies', () => {
@@ -55,7 +61,7 @@ io.on('connection', socket => {
 	})
 
 	socket.on('client:ask-to-create-missile', (data) => {
-		let newMissile = missiles.add(data.id, data.posX, data.posY);
+		let newMissile = missiles.add(data.id, data.posX, data.posY, data.itemName);
 		io.emit('server:missile-added', newMissile);
 	});
 

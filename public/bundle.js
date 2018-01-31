@@ -84581,6 +84581,11 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				posX: player.sprite.x,
 				posY: player.sprite.y
 			});
+
+			this.zombies.forEach((z)=>{
+				this.io.emit('client:zombie-moved',{id: z.id, posX: z.sprite.x, posY: z.sprite.y})
+			});
+
 			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
 			this.physics.arcade.collide(player.sprite, buildingGroup);
 
@@ -84593,8 +84598,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 			`);
 			if (this.input.activePointer.isDown && this.time.now > nextFire) {
 				nextFire = this.time.now + fireRate;
-				this.io.emit('client:ask-to-create-missile', {id: this.io.id, posX: player.sprite.x, posY: player.sprite.y})
-				
+				this.io.emit('client:ask-to-create-missile', {id: this.io.id, posX: player.sprite.x, posY: player.sprite.y, itemName: player.sprite.selectedItem})
 			}
 			if (this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie');
@@ -84744,6 +84748,14 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 			this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
 		});
 
+		this.io.on('server:zombie-moved', data => { //data is an object with {id: z.id, posX: z.sprite.x, posY: z.sprite.y}
+			this.getZombieById(data.id).set(data.posX,data.posY);
+		});
+
+		this.io.on('server:missile-moved', data => { //data is {posX: data.posX, posY: data.posY, velocityX: data.velocityX, velocityY: data.velocityY}
+			this.getMissileByPlayerId(data.id).set(data.posX,data.posY, data.velocityX, data.velocityY, data.itemName)
+		});
+
 		this.io.on('server:missile-fired', data => {
 			this.missiles = data;
 		});
@@ -84762,7 +84774,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		})
 
 		this.io.on('server:missile-added', newMissile => {
-			this.fire(newMissile.posX, newMissile.posY, this.players[0].sprite.selectedItem)
+			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName)
 		});
 	}
 
@@ -84774,6 +84786,11 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	getMissileByPlayerId(id) {
 		for (let i = 0; i < this.missiles.length; i++)
 			if (this.missiles[i].id == id) return this.missiles[i];
+	}
+
+	getZombieById(id){
+		for (let i = 0; i < this.zombies.length; i++)
+			if (this.zombies[i].id == id) return this.zombies[i];
 	}
 
 	zombieAI(zombie) {
@@ -90021,7 +90038,7 @@ class Missile{
         switch (itemName) {
             case 'Melee':
             this.sprite.scale.setTo(0.25, 0.25);
-            this.sprite.lifespan = 250;
+            this.sprite.lifespan = 5000; //was 250, changed  for testing
             break;
             case 'Machine Gun':
             this.sprite.scale.setTo(0.15, 0.15);
@@ -90052,6 +90069,12 @@ class Missile{
 	update(){
     }
     
+    set(x,y,velocityX, velocityY, itemName){
+        this.sprite.x = x;
+        this.sprite.y = y;
+        this.sprite.body.velocity.x = velocity.x;
+        this.sprite.body.velocity.y = velocity.y;
+    }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Missile;
 
@@ -90207,6 +90230,11 @@ class zombie {
       this.sprite.health -= dmg;
       this.sprite.hasOverlapped = true;
     }
+  }
+
+  set(x,y){
+    this.sprite.x = x;
+    this.sprite.y = y;
   }
 
   setZombieX(x){

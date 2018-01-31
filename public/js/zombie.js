@@ -33,6 +33,11 @@ export default class zombie {
     }
   }
 
+  set(x,y){
+    this.sprite.x = x;
+    this.sprite.y = y;
+  }
+
   setZombieX(x){
     this.sprite.x = x;
     return this;
