@@ -84540,8 +84540,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	}
 	preload() {
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
-		// this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
-		// this.load.image('tiles', './assets/tiles.png')
+		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Tilemap.TILED_JSON)
+		this.load.image('tiles', './assets/tiles.png')
 		this.load.image('player', './assets/playerplaceholder.jpg')
 		this.load.image('building', './assets/buildingplaceholder.png')
 		this.load.image('missile', '/assets/missileplaceholder.png')
@@ -84549,7 +84549,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	}
 
 	create() {
-		//this.setUpMap()
+		this.setUpMap()
 		//this.setupMissilesGroup()
 
 		this.world.setBounds(0, 0, 1920, 1920)
@@ -84630,8 +84630,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		map = this.add.tilemap('BaseMap')
 		map.addTilesetImage('Map tiles.tsx', 'tiles')
 		layer = map.createLayer('Tile Layer 1')
-		layer = map.createLayer('Tile Layer 2')
-		layer = map.createLayer('Tile Layer 3')
 		layer.resizeWorld()
 	}
 
