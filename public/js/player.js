@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { HealthBar } from './HealthBar.standalone'
 
+var itemCount = 0;
+
 export default class Player{
 	constructor(id, game, x, y, angle){
 		this.id = id;
@@ -24,11 +26,13 @@ export default class Player{
 			right: this.game.input.keyboard.addKey(Phaser.Keyboard.D),
 			left: this.game.input.keyboard.addKey(Phaser.Keyboard.A),
 			up: this.game.input.keyboard.addKey(Phaser.Keyboard.W),
-			down: this.game.input.keyboard.addKey(Phaser.Keyboard.S)
+			down: this.game.input.keyboard.addKey(Phaser.Keyboard.S),
+			selectItem: this.game.input.keyboard.addKey(Phaser.Keyboard.B)
 		  }
 	  
 
-		this.sprite.item = []
+		this.sprite.items = ['Melee','Machine Gun','Flame Thrower', 'Rocket Launcher']
+		this.sprite.selectedItem = ''
 		  
 		this.sprite.playerSpeedY = 100
 		this.sprite.playerSpeedX = 200
@@ -66,7 +70,11 @@ export default class Player{
 		  }
 		  if (this.sprite.controls.down.isDown && this.sprite.controls.up.isDown) {
 			this.sprite.body.velocity.y = 0
-		  }
+			}
+			if (this.sprite.controls.selectItem.isDown) {
+				itemCount++;
+			  this.sprite.selectedItem = this.sprite.items[itemCount % this.sprite.items.length]
+			}
 	}
 	setX(x){
 		this.sprite.x = x;
