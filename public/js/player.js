@@ -4,6 +4,8 @@ import {
 } from './HealthBar.standalone'
 
 var itemCount = 0;
+var itemSwitchCooldown = 500;
+var lastSwitch = 0;
 
 export default class Player {
 	constructor(id, game, x, y, angle) {
@@ -34,10 +36,13 @@ export default class Player {
 		}
 
 
-		this.sprite.items = ['Melee', 'Machine Gun', 'Flame Thrower', 'Rocket Launcher']
+		this.sprite.items = ['Melee', 'Machine Gun', 'Flame Thrower', 'Rocket Launcher', 'Chainsaw', 'Lazer']
 		this.sprite.selectedItem = 'Melee'
-		this.sprite.ammo = [Infinity, 100, 500, 5]
-		this.sprite.ammoIndex = 0;
+		this.sprite.ammo = [Infinity, 100, 500, 5, 50, 5]
+		this.sprite.ammoIndex = 0
+		this.sprite.fireRates = [500, 100, 250, 1000, 200, 1250]
+		this.sprite.selectedFireRate = 500
+		this.sprite.fireRateIndex = 0
 
 		this.sprite.playerSpeedY = 100
 		this.sprite.playerSpeedX = 200
@@ -77,9 +82,15 @@ export default class Player {
 			this.sprite.body.velocity.y = 0
 		}
 		if (this.sprite.controls.selectItem.isDown) {
-			itemCount++;
-			this.sprite.selectedItem = this.sprite.items[itemCount % this.sprite.items.length]
-			this.sprite.ammoIndex = itemCount % this.sprite.items.length
+			if(lastSwitch < this.game.time.now){
+				itemCount++;
+				this.sprite.selectedItem = this.sprite.items[itemCount % this.sprite.items.length]
+				this.sprite.ammoIndex = itemCount % this.sprite.items.length
+				this.sprite.fireRateIndex = itemCount % this.sprite.fireRates.length
+				this.sprite.selectedFireRate = this.sprite.fireRates[this.sprite.fireRateIndex]
+				lastSwitch = this.game.time.now + itemSwitchCooldown;
+			}
+			
 		}
 	}
 	setX(x) {

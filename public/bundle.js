@@ -84620,9 +84620,9 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 
 var map, layer, missileGroup, zombieGroup, nextFire = 0,
-	fireRate = 500,
 	cameraSet = false,
-	buildingGroup, nextMissileCollision = 0,
+	buildingGroup,
+	nextMissileCollision = 0,
 	missileCollisionRate = 1000,
 	zombiesCoolDown = 1000,
 	zombiesAttack = 1000,
@@ -84647,21 +84647,20 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			fill: '#ffffff'
 		})
 		text.fixedToCamera = true;
-
+	
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default.a.connect();
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
-
+	
 		zombieGroup = this.add.group();
 		missileGroup = this.add.group();
 		buildingGroup = this.add.group();
-
+	
 		this.spawnBuilding(652, 961)
 		this.spawnBuilding(821, 1480)
-		this.spawnBuilding(1400, 1003)
-
+		this.spawnBuilding(1400, 1003)	
 	}
 
 	update() {
@@ -84695,8 +84694,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
-			if (this.input.activePointer.isDown && this.time.now > nextFire) {
-				nextFire = this.time.now + fireRate;
+			if (this.input.activePointer.isDown && this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex]>0) {
+				nextFire = this.time.now + player.sprite.selectedFireRate;
 				this.io.emit('client:ask-to-create-missile', {
 					id: this.io.id,
 					posX: player.sprite.x,
@@ -84775,7 +84774,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 	}
 
 	fire(posX, posY, itemName, id) {
-		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this, posX, posY, this.input.activePointer.x, this.input.activePointer.y, itemName, id)
+		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this, posX, posY, this.input.activePointer.worldX, this.input.activePointer.worldY, itemName, id)
 		this.missiles.push(this.missile);
 		missileGroup.add(this.missile.sprite)
 		zombieGroup.forEach((e) => {
@@ -84974,15 +84973,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		if (this.time.now > zombiesCoolDown) {
 		  zombiesCoolDown = zombiesAttack + this.time.now
 		  player.playerHealth -= 10;
-		//   if (player.playerHealth === 0) {
-		// 	this.io.emit('client:game-over', player.id);
-		// 	for (let i = 0; i < this.players.length; i++) 
-		// 		if (this.players[i].id === player.id) { 
-		// 			this.players[i].sprite.destroy(); 
-		// 			this.players.splice(i, 1); 
-		// 	};
-		// 	this.state.start('GameOver');
-		//   }
 		}
 	}
 }
@@ -90224,8 +90214,6 @@ const newgame = new game();
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
-var nextFire = 300,
-    fireRate = 500;
 class Missile {
     constructor(game, x, y, mouseX, mouseY, itemName, id) {
         this.game = game;
@@ -90233,6 +90221,7 @@ class Missile {
         this.mouseY = mouseY
         this.itemName = itemName
         this.id = id;
+        this.missleSpeed = 100;
 
         this.sprite = this.game.add.sprite(0, 0, 'missile');
         this.game.physics.arcade.enableBody(this.sprite);
@@ -90244,29 +90233,44 @@ class Missile {
         switch (itemName) {
             case 'Melee':
                 this.sprite.scale.setTo(0.25, 0.25);
-                this.sprite.lifespan = 5000; //was 250, changed  for testing
+                this.sprite.lifespan = 250;
+                this.missleSpeed = 100;
                 break;
             case 'Machine Gun':
                 this.sprite.scale.setTo(0.15, 0.15);
-                this.sprite.lifespan = 1000;
+                this.sprite.lifespan = 2000;
+                this.missleSpeed = 200;
                 break;
             case 'Flame Thrower':
                 this.sprite.scale.setTo(0.5, 0.5);
-                this.sprite.lifespan = 250
+                this.sprite.lifespan = 1000
+                this.missleSpeed = 150;
                 break;
             case 'Rocket Launcher':
                 this.sprite.scale.setTo(0.7, 0.7);
                 this.sprite.lifespan = 1000;
+                this.missleSpeed = 500;
+                break;
+            case 'Chainsaw':
+                this.sprite.scale.setTo(0.25, 0.25);
+                this.sprite.lifespan = 650;
+                this.missleSpeed = 100;
+                break;
+            case 'Lazer':
+                this.sprite.scale.setTo(0.1, 0.1);
+                this.sprite.lifespan = 10000;
+                this.missleSpeed = 500;
                 break;
             default:
                 this.sprite.scale.setTo(0.25, 0.25);
                 this.sprite.lifespan = 250;
+                this.missleSpeed = 100;
                 break;
         }
         this.sprite.x = x;
         this.sprite.y = y;
 
-        this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, 100)
+        this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, this.missleSpeed)
     }
 
     update() {}
@@ -90293,6 +90297,8 @@ class Missile {
 
 
 var itemCount = 0;
+var itemSwitchCooldown = 500;
+var lastSwitch = 0;
 
 class Player {
 	constructor(id, game, x, y, angle) {
@@ -90323,10 +90329,13 @@ class Player {
 		}
 
 
-		this.sprite.items = ['Melee', 'Machine Gun', 'Flame Thrower', 'Rocket Launcher']
+		this.sprite.items = ['Melee', 'Machine Gun', 'Flame Thrower', 'Rocket Launcher', 'Chainsaw', 'Lazer']
 		this.sprite.selectedItem = 'Melee'
-		this.sprite.ammo = [Infinity, 100, 500, 5]
-		this.sprite.ammoIndex = 0;
+		this.sprite.ammo = [Infinity, 100, 500, 5, 50, 5]
+		this.sprite.ammoIndex = 0
+		this.sprite.fireRates = [500, 100, 250, 1000, 200, 1250]
+		this.sprite.selectedFireRate = 500
+		this.sprite.fireRateIndex = 0
 
 		this.sprite.playerSpeedY = 100
 		this.sprite.playerSpeedX = 200
@@ -90366,9 +90375,15 @@ class Player {
 			this.sprite.body.velocity.y = 0
 		}
 		if (this.sprite.controls.selectItem.isDown) {
-			itemCount++;
-			this.sprite.selectedItem = this.sprite.items[itemCount % this.sprite.items.length]
-			this.sprite.ammoIndex = itemCount % this.sprite.items.length
+			if(lastSwitch < this.game.time.now){
+				itemCount++;
+				this.sprite.selectedItem = this.sprite.items[itemCount % this.sprite.items.length]
+				this.sprite.ammoIndex = itemCount % this.sprite.items.length
+				this.sprite.fireRateIndex = itemCount % this.sprite.fireRates.length
+				this.sprite.selectedFireRate = this.sprite.fireRates[this.sprite.fireRateIndex]
+				lastSwitch = this.game.time.now + itemSwitchCooldown;
+			}
+			
 		}
 	}
 	setX(x) {
