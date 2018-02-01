@@ -9,9 +9,9 @@ import {
 import Building from './../building'
 
 var map, layer, missileGroup, zombieGroup, nextFire = 0,
-	fireRate = 500,
 	cameraSet = false,
-	buildingGroup, nextMissileCollision = 0,
+	buildingGroup,
+	nextMissileCollision = 0,
 	missileCollisionRate = 1000,
 	zombiesCoolDown = 1000,
 	zombiesAttack = 1000,
@@ -36,21 +36,20 @@ export default class GameState extends Phaser.State {
 			fill: '#ffffff'
 		})
 		text.fixedToCamera = true;
-
+	
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = socketio.connect();
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
-
+	
 		zombieGroup = this.add.group();
 		missileGroup = this.add.group();
 		buildingGroup = this.add.group();
-
+	
 		this.spawnBuilding(652, 961)
 		this.spawnBuilding(821, 1480)
-		this.spawnBuilding(1400, 1003)
-
+		this.spawnBuilding(1400, 1003)	
 	}
 
 	update() {
@@ -84,8 +83,8 @@ export default class GameState extends Phaser.State {
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
-			if (this.input.activePointer.isDown && this.time.now > nextFire) {
-				nextFire = this.time.now + fireRate;
+			if (this.input.activePointer.isDown && this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex]>0) {
+				nextFire = this.time.now + player.sprite.selectedFireRate;
 				this.io.emit('client:ask-to-create-missile', {
 					id: this.io.id,
 					posX: player.sprite.x,
@@ -155,7 +154,7 @@ export default class GameState extends Phaser.State {
 	}
 
 	fire(posX, posY, itemName, id) {
-		this.missile = new Missile(this, posX, posY, this.input.activePointer.x, this.input.activePointer.y, itemName, id)
+		this.missile = new Missile(this, posX, posY, this.input.activePointer.worldX, this.input.activePointer.worldY, itemName, id)
 		this.missiles.push(this.missile);
 		missileGroup.add(this.missile.sprite)
 		zombieGroup.forEach((e) => {
