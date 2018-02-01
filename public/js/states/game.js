@@ -363,15 +363,6 @@ export default class GameState extends Phaser.State {
 		if (this.time.now > zombiesCoolDown) {
 		  zombiesCoolDown = zombiesAttack + this.time.now
 		  player.playerHealth -= 10;
-		//   if (player.playerHealth === 0) {
-		// 	this.io.emit('client:game-over', player.id);
-		// 	for (let i = 0; i < this.players.length; i++) 
-		// 		if (this.players[i].id === player.id) { 
-		// 			this.players[i].sprite.destroy(); 
-		// 			this.players.splice(i, 1); 
-		// 	};
-		// 	this.state.start('GameOver');
-		//   }
 		}
 	}
 }
