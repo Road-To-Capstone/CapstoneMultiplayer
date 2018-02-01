@@ -8,9 +8,9 @@ import {
 } from './../HealthBar.standalone'
 import Building from './../building'
 
-var map,layer, missileGroup, zombieGroup, singleMissile, nextFire = 0, fireRate = 500
-, cameraSet = false, buildingGroup, nextMissileCollision = 0, missileCollisionRate = 1000
-, missileGroup, zombiesCoolDown = 1000, zombiesAttack = 1000, text;
+var map,layer, missileGroup, zombieGroup, nextFire = 0, fireRate = 500,
+cameraSet = false, buildingGroup, nextMissileCollision = 0, missileCollisionRate = 1000,
+zombiesCoolDown = 1000, zombiesAttack = 1000, text;
 export default class GameState extends Phaser.State{
 	constructor(){
 		super();
@@ -28,7 +28,6 @@ export default class GameState extends Phaser.State{
 	create() {
 		//this.setUpMap()
 		
-		//this.setupMissilesGroup()
 		text = this.add.text(300, this.game.height-55, "Melee | X ", {fill:'#ffffff'})
 		text.fixedToCamera = true;
 		
@@ -71,7 +70,6 @@ export default class GameState extends Phaser.State{
 			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
 			this.physics.arcade.collide(player.sprite, buildingGroup);
 
-			//const missile = this.getMissileByPlayerId(this.io.id)
 			this.getPlayerById(this.io.id).update();
 			this.topText.setText(`Your ID: ${this.io.id}
 				${this.players.length} players
@@ -87,8 +85,7 @@ export default class GameState extends Phaser.State{
 			}
 
 			if(!!this.zombies.length) {
-			//	console.log('this.zombies', this.zombies);
-				this.zombies.forEach(e => {
+					this.zombies.forEach(e => {
 					this.zombieAI(e);
 					if(e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
 					this.physics.arcade.collide(e.sprite, zombieGroup);
@@ -107,7 +104,6 @@ export default class GameState extends Phaser.State{
 
 			this.physics.arcade.overlap(zombieGroup, missileGroup, this.handleMissileCollision, null, this)
 			this.setHealthBarPercent();
-			//console.log(this.getMissileByPlayerId(this.io.id))
 			text.setText(player.sprite.selectedItem + " | " + player.sprite.ammo[player.sprite.ammoIndex])
 			
 		}
@@ -147,7 +143,6 @@ export default class GameState extends Phaser.State{
 	}
 
 	fire(posX, posY, itemName,id) {
-		console.log("id in fire is", id)
 		this.missile = new Missile(this, posX, posY, this.input.activePointer.x, this.input.activePointer.y, itemName,id)
 		this.missiles.push(this.missile);		
 		missileGroup.add(this.missile.sprite)
