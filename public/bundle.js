@@ -84360,7 +84360,7 @@ HealthBar.prototype.mergeWithDefaultConfiguration = function (newConfig) {
   return mergeObjetcs(defaultConfig, newConfig)
 }
 
-function mergeObjetcs (targetObj, newObj) {
+function mergeObjetcs(targetObj, newObj) {
   for (var p in newObj) {
     try {
       targetObj[p] = newObj[p].constructor === Object ? mergeObjetcs(targetObj[p], newObj[p]) : newObj[p]
@@ -84445,7 +84445,9 @@ HealthBar.prototype.setBarColor = function (newColor) {
 }
 
 HealthBar.prototype.setWidth = function (newWidth) {
-  this.game.add.tween(this.barSprite).to({ width: newWidth }, this.config.animationDuration, null, true)
+  this.game.add.tween(this.barSprite).to({
+    width: newWidth
+  }, this.config.animationDuration, null, true)
 }
 
 HealthBar.prototype.setFixedToCamera = function (fixedToCamera) {
@@ -84472,7 +84474,7 @@ HealthBar.prototype.kill = function () {
  Utils
  */
 
-function hexToRgb (hex) {
+function hexToRgb(hex) {
   // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
   var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i
   hex = hex.replace(shorthandRegex, function (m, r, g, b) {
@@ -84486,7 +84488,6 @@ function hexToRgb (hex) {
     b: parseInt(result[3], 16)
   } : null
 }
-
 
 /***/ }),
 /* 28 */
@@ -84531,11 +84532,16 @@ module.exports = {
 
 
 
-var map,layer, missileGroup, zombieGroup, nextFire = 0, fireRate = 500,
-cameraSet = false, buildingGroup, nextMissileCollision = 0, missileCollisionRate = 1000,
-zombiesCoolDown = 1000, zombiesAttack = 1000, text;
-class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
-	constructor(){
+var map, layer, missileGroup, zombieGroup, nextFire = 0,
+	fireRate = 500,
+	cameraSet = false,
+	buildingGroup, nextMissileCollision = 0,
+	missileCollisionRate = 1000,
+	zombiesCoolDown = 1000,
+	zombiesAttack = 1000,
+	text;
+class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
+	constructor() {
 		super();
 	}
 	preload() {
@@ -84550,10 +84556,11 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 
 	create() {
 		//this.setUpMap()
-		
-		text = this.add.text(300, this.game.height-55, "Melee | X ", {fill:'#ffffff'})
+		text = this.add.text(300, this.game.height - 55, "Melee | X ", {
+			fill: '#ffffff'
+		})
 		text.fixedToCamera = true;
-		
+
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default.a.connect();
 		this.io.on('connect', data => {
@@ -84568,16 +84575,14 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		this.spawnBuilding(821, 1480)
 		this.spawnBuilding(1400, 1003)
 
-		
-
 	}
 
-	update(){
-		if(this.doneLoading){
-			if(!cameraSet){
+	update() {
+		if (this.doneLoading) {
+			if (!cameraSet) {
 				this.camera.follow(this.getPlayerById(this.io.id).sprite)
 				this.setUpHealthBar()
-				cameraSet = true;			
+				cameraSet = true;
 			}
 			const player = this.getPlayerById(this.io.id);
 			this.io.emit('client:player-moved', {
@@ -84586,8 +84591,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 				posY: player.sprite.y
 			});
 
-			this.zombies.forEach((z)=>{
-				this.io.emit('client:zombie-moved',{id: z.id, posX: z.sprite.x, posY: z.sprite.y})
+			this.zombies.forEach((z) => {
+				this.io.emit('client:zombie-moved', {
+					id: z.id,
+					posX: z.sprite.x,
+					posY: z.sprite.y
+				})
 			});
 
 			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
@@ -84601,34 +84610,38 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 			`);
 			if (this.input.activePointer.isDown && this.time.now > nextFire) {
 				nextFire = this.time.now + fireRate;
-				this.io.emit('client:ask-to-create-missile', {id: this.io.id, posX: player.sprite.x, posY: player.sprite.y, itemName: player.sprite.selectedItem})
+				this.io.emit('client:ask-to-create-missile', {
+					id: this.io.id,
+					posX: player.sprite.x,
+					posY: player.sprite.y,
+					itemName: player.sprite.selectedItem
+				})
 			}
 			if (this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie');
 			}
 
-			if(!!this.zombies.length) {
-					this.zombies.forEach(e => {
+			if (!!this.zombies.length) {
+				this.zombies.forEach(e => {
 					this.zombieAI(e);
-					if(e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
+					if (e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
 					this.physics.arcade.collide(e.sprite, zombieGroup);
 					this.physics.arcade.collide(e.sprite, buildingGroup);
 				});
 
 			}
 
-			if (this.time.now > nextMissileCollision){
+			if (this.time.now > nextMissileCollision) {
 				nextMissileCollision = this.time.now + missileCollisionRate;
-				this.zombies.forEach(z=> {
+				this.zombies.forEach(z => {
 					z.sprite.hasOverlapped = true;
 				})
 			}
-	
 
 			this.physics.arcade.overlap(zombieGroup, missileGroup, this.handleMissileCollision, null, this)
 			this.setHealthBarPercent();
 			text.setText(player.sprite.selectedItem + " | " + player.sprite.ammo[player.sprite.ammoIndex])
-			
+
 		}
 	}
 
@@ -84642,7 +84655,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		layer.resizeWorld()
 	}
 
-	setHealthBarPercent () {
+	setHealthBarPercent() {
 		this.myHealthBar.setPercent(this.players[0].sprite.playerHealth)
 	}
 
@@ -84665,23 +84678,23 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-	fire(posX, posY, itemName,id) {
-		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this, posX, posY, this.input.activePointer.x, this.input.activePointer.y, itemName,id)
-		this.missiles.push(this.missile);		
+	fire(posX, posY, itemName, id) {
+		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this, posX, posY, this.input.activePointer.x, this.input.activePointer.y, itemName, id)
+		this.missiles.push(this.missile);
 		missileGroup.add(this.missile.sprite)
 		zombieGroup.forEach((e) => {
 			e.hasOverlapped = false
 		})
 		this.getPlayerById(this.io.id).consumeAmmo()
-		
+
 	}
 
-	handleMissileCollision (zombie, missile) {
+	handleMissileCollision(zombie, missile) {
 		if (!zombie.hasOverlapped) {
-		  zombie.hasOverlapped = true
-		  zombie.health -= 100
+			zombie.hasOverlapped = true
+			zombie.health -= 100
 		}
-	  }
+	}
 
 	/* 
 		SOCKET HELPER FUNCTIONS
@@ -84704,15 +84717,17 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		this.stage.backgroundColor = '#aaa';
 		this.physics.startSystem(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Physics.ARCADE);
 
-	
-		this.topText= this.add.text(
-	   		10, 
-	   		10, 
-	   		'', 
-			   { font: "12px Arial", fill: "rgba(0, 0, 0, 0.64)" });
-			   
-	   	
-	    this.doneLoading = 1;
+
+		this.topText = this.add.text(
+			10,
+			10,
+			'', {
+				font: "12px Arial",
+				fill: "rgba(0, 0, 0, 0.64)"
+			});
+
+
+		this.doneLoading = 1;
 	}
 
 	socketCreateListeners() {
@@ -84741,7 +84756,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		});
 
 		this.io.on('server:player-disconnected', id => { //if a player has disconnected
-			console.log(`Player ${id} disconnected`);
 			for (let i = 0; i < this.players.length; i++) //loop through all players
 				if (this.players[i].id == id) { // found the player
 					this.players[i].sprite.destroy(); //phaser sprite destroy function
@@ -84754,11 +84768,11 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		});
 
 		this.io.on('server:zombie-moved', data => { //data is an object with {id: z.id, posX: z.sprite.x, posY: z.sprite.y}
-			this.getZombieById(data.id).set(data.posX,data.posY);
+			this.getZombieById(data.id).set(data.posX, data.posY);
 		});
 
 		this.io.on('server:missile-moved', data => { //data is {posX: data.posX, posY: data.posY, velocityX: data.velocityX, velocityY: data.velocityY}
-			this.getMissileByPlayerId(data.id).set(data.posX,data.posY, data.velocityX, data.velocityY, data.itemName)
+			this.getMissileByPlayerId(data.id).set(data.posX, data.posY, data.velocityX, data.velocityY, data.itemName)
 		});
 
 		this.io.on('server:missile-fired', data => {
@@ -84770,8 +84784,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		});
 
 		this.io.on('server:kill-this-zombie', id => {
-			for(let i = 0; i < this.zombies.length; i++) {
-				if(this.zombies[i].id === id) {
+			for (let i = 0; i < this.zombies.length; i++) {
+				if (this.zombies[i].id === id) {
 					this.zombies[i].sprite.destroy();
 					this.zombies.splice(i, 1);
 				}
@@ -84793,7 +84807,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 			if (this.missiles[i].id == id) return this.missiles[i];
 	}
 
-	getZombieById(id){
+	getZombieById(id) {
 		for (let i = 0; i < this.zombies.length; i++)
 			if (this.zombies[i].id == id) return this.zombies[i];
 	}
@@ -84803,11 +84817,11 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 		var targetAngle = this.math.angleBetween(
 			zombie.sprite.position.x, zombie.sprite.position.y,
 			this.players[mindex].sprite.position.x, this.players[mindex].sprite.position.y // this needs to be player x and y that updates dynamically
-		  )
-	  
-		  // Gradually (this.TURN_RATE) aim the Invader towards the target angle
-		  if (zombie.sprite.rotation !== targetAngle) {
-		  // Calculate difference between the current angle and targetAngle
+		)
+
+		// Gradually (this.TURN_RATE) aim the Invader towards the target angle
+		if (zombie.sprite.rotation !== targetAngle) {
+			// Calculate difference between the current angle and targetAngle
 			var delta = targetAngle - zombie.sprite.rotation
 
 			// Keep it in range from -180 to 180 to make the most efficient turns.
@@ -84832,32 +84846,35 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	updateVelocity(xVelocity, yVelocity, zombie) {
 		zombie.sprite.body.velocity.x = xVelocity
 		zombie.sprite.body.velocity.y = yVelocity
-	  }
+	}
 
 	findClosestPlayer(zombie) {
-		let minSet = {dist: 1920}, distance, playerPosX, playerPoxY;
-		for(let i = 0; i < this.players.length; i++) {
+		let minSet = {
+				dist: 1920
+			},
+			distance, playerPosX, playerPoxY;
+		for (let i = 0; i < this.players.length; i++) {
 			playerPosX = players[i].sprite.position.x;
 			playerPoxY = players[i].sprite.position.y;
-			distance = Math.sqrt(Math.pow(playerPosX - zombie.sprite.position.x, 2)
-				+ Math.pow(playerPoxY - zombie.sprite.position.y, 2));
-			if(distance < minSet.dist) {
+			distance = Math.sqrt(Math.pow(playerPosX - zombie.sprite.position.x, 2) +
+				Math.pow(playerPoxY - zombie.sprite.position.y, 2));
+			if (distance < minSet.dist) {
 				minSet['index'] = i;
 				minSet['dist'] = distance;
 			}
 		}
-		return minSet.index? minSet.index: 0;
+		return minSet.index ? minSet.index : 0;
 	}
 
-	handleCollideZombie (player, zombie) {
+	handleCollideZombie(player, zombie) {
 		if (this.time.now > zombiesCoolDown) {
-		  zombiesCoolDown = zombiesAttack + this.time.now
-		  player.playerHealth -= 1;
-		  if (player.playerHealth === 0) {
-			console.log('GAME OVER') // This should make the game over state
-		  }
+			zombiesCoolDown = zombiesAttack + this.time.now
+			player.playerHealth -= 1;
+			if (player.playerHealth === 0) {
+				console.log('GAME OVER') // This should make the game over state
+			}
 		}
-	  }
+	}
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = GameState;
 
@@ -84871,57 +84888,60 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
-var text, textToUpdate="", shouldHandleKeyDown = true, deleteButton; 
-class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
-    constructor(){
-		super();
-	}
-	preload() {
+var text, textToUpdate = "",
+    shouldHandleKeyDown = true,
+    deleteButton;
+class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
+    constructor() {
+        super();
+    }
+    preload() {
         this.load.image('inputfield', './assets/inputField.png')
         this.load.image('playbutton', './assets/playnowbutton.png')
     }
 
     create() {
         this.stage.backgroundColor = "#4488AA"
-        this.add.text(this.game.width/2,this.game.height/2+100, "Enter Player Name").anchor.set(0.5)
-        var inputField = this.add.sprite(this.game.width/2,this.game.height/2+150, 'inputfield')
-        inputField.anchor.setTo(0.5,0.5)
-        inputField.scale.setTo(1,0.5)
+        this.add.text(this.game.width / 2, this.game.height / 2 + 100, "Enter Player Name").anchor.set(0.5)
+        var inputField = this.add.sprite(this.game.width / 2, this.game.height / 2 + 150, 'inputfield')
+        inputField.anchor.setTo(0.5, 0.5)
+        inputField.scale.setTo(1, 0.5)
 
-        var playNowButton = this.add.sprite(this.game.width/2,this.game.height-50, 'playbutton')
-        playNowButton.anchor.setTo(0.5,0.5);
-        playNowButton.scale.setTo(0.5,0.5);
+        var playNowButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'playbutton')
+        playNowButton.anchor.setTo(0.5, 0.5);
+        playNowButton.scale.setTo(0.5, 0.5);
         playNowButton.inputEnabled = true;
         playNowButton.events.onInputDown.add(this.listener, this)
 
-        text = this.add.text(this.game.width/2-inputField.width/2, this.game.height/2+170 - inputField.height/2, textToUpdate, {boundsAlignH: "center"})
-        text.setTextBounds(0,0, inputField.width , inputField.height)
-        window.addEventListener('keypress', function(event) {
+        text = this.add.text(this.game.width / 2 - inputField.width / 2, this.game.height / 2 + 170 - inputField.height / 2, textToUpdate, {
+            boundsAlignH: "center"
+        })
+        text.setTextBounds(0, 0, inputField.width, inputField.height)
+        window.addEventListener('keypress', function (event) {
             shouldHandleKeyDown = false;
             var key = event.keyCode || event.which;
-            console.log("keypress = " + String.fromCharCode(key))
             textToUpdate = textToUpdate + String.fromCharCode(key).toUpperCase();
         });
         deleteButton = this.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.BACKSPACE)
     }
 
     update() {
-        if (shouldHandleKeyDown){
-           shouldHandleKeyDown = false;
-            text.setText(textToUpdate)
-        }
-        if (deleteButton.isDown){
+        if (shouldHandleKeyDown) {
             shouldHandleKeyDown = false;
-            textToUpdate = textToUpdate.slice(0,-1);
             text.setText(textToUpdate)
         }
-        document.onkeyup = function() {
+        if (deleteButton.isDown) {
+            shouldHandleKeyDown = false;
+            textToUpdate = textToUpdate.slice(0, -1);
+            text.setText(textToUpdate)
+        }
+        document.onkeyup = function () {
             shouldHandleKeyDown = true;
         }
-        
+
     }
 
-    listener(){
+    listener() {
         this.state.start('GameState');
     }
 }
@@ -90025,12 +90045,12 @@ module.exports = __webpack_amd_options__;
 
 
 
-class Building{
-  constructor (game, x, y) {
+class Building {
+  constructor(game, x, y) {
 
     this.game = game
 
-    this.sprite = this.game.add.sprite(0, 0, 'building',100);
+    this.sprite = this.game.add.sprite(0, 0, 'building', 100);
     this.sprite.game.physics.arcade.enableBody(this.sprite);
     this.sprite.body.immovable = true;
     this.sprite.anchor.setTo(0.5, 0.5)
@@ -90041,7 +90061,6 @@ class Building{
   }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Building;
-
 
 
 /***/ }),
@@ -90069,15 +90088,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-class game extends __WEBPACK_IMPORTED_MODULE_2_phaser___default.a.Game{
-	constructor(){
+class game extends __WEBPACK_IMPORTED_MODULE_2_phaser___default.a.Game {
+	constructor() {
 		const docElement = document.documentElement
 		const width = docElement.clientWidth
 		const height = docElement.clientHeight
-	
-		super(width,height,__WEBPACK_IMPORTED_MODULE_2_phaser___default.a.AUTO);
-		this.state.add('GameState',__WEBPACK_IMPORTED_MODULE_4__states_game__["a" /* default */]);
-		this.state.add('MenuState',__WEBPACK_IMPORTED_MODULE_5__states_menu__["a" /* default */]);
+
+		super(width, height, __WEBPACK_IMPORTED_MODULE_2_phaser___default.a.AUTO);
+		this.state.add('GameState', __WEBPACK_IMPORTED_MODULE_4__states_game__["a" /* default */]);
+		this.state.add('MenuState', __WEBPACK_IMPORTED_MODULE_5__states_menu__["a" /* default */]);
 		this.state.start('MenuState');
 	}
 }
@@ -90094,9 +90113,10 @@ const newgame = new game();
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
-var nextFire = 300, fireRate = 500;
-class Missile{
-	constructor(game, x, y, mouseX, mouseY, itemName,id){
+var nextFire = 300,
+    fireRate = 500;
+class Missile {
+    constructor(game, x, y, mouseX, mouseY, itemName, id) {
         this.game = game;
         this.mouseX = mouseX
         this.mouseY = mouseY
@@ -90112,38 +90132,35 @@ class Missile{
         this.sprite.outOfBoundsKill = true;
         switch (itemName) {
             case 'Melee':
-            this.sprite.scale.setTo(0.25, 0.25);
-            this.sprite.lifespan = 5000; //was 250, changed  for testing
-            break;
+                this.sprite.scale.setTo(0.25, 0.25);
+                this.sprite.lifespan = 5000; //was 250, changed  for testing
+                break;
             case 'Machine Gun':
-            this.sprite.scale.setTo(0.15, 0.15);
-            this.sprite.lifespan = 1000;
-            break;
+                this.sprite.scale.setTo(0.15, 0.15);
+                this.sprite.lifespan = 1000;
+                break;
             case 'Flame Thrower':
-            this.sprite.scale.setTo(0.5, 0.5);
-            this.sprite.lifespan = 250
-            break;
+                this.sprite.scale.setTo(0.5, 0.5);
+                this.sprite.lifespan = 250
+                break;
             case 'Rocket Launcher':
-            this.sprite.scale.setTo(0.7, 0.7);
-            this.sprite.lifespan = 1000;
-            break;
+                this.sprite.scale.setTo(0.7, 0.7);
+                this.sprite.lifespan = 1000;
+                break;
             default:
-            this.sprite.scale.setTo(0.25, 0.25);
-            this.sprite.lifespan = 250;
-            break;
+                this.sprite.scale.setTo(0.25, 0.25);
+                this.sprite.lifespan = 250;
+                break;
         }
         this.sprite.x = x;
         this.sprite.y = y;
 
-        
-       // console.log(this.mouseX)
         this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, 100)
-	}
-	
-	update(){
     }
-    
-    set(x,y,velocityX, velocityY, itemName){
+
+    update() {}
+
+    set(x, y, velocityX, velocityY, itemName) {
         this.sprite.x = x;
         this.sprite.y = y;
         this.sprite.body.velocity.x = velocity.x;
@@ -90151,7 +90168,6 @@ class Missile{
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Missile;
-
 
 
 /***/ }),
@@ -90167,108 +90183,107 @@ class Missile{
 
 var itemCount = 0;
 
-class Player{
-	constructor(id, game, x, y, angle){
+class Player {
+	constructor(id, game, x, y, angle) {
 		this.id = id;
 		this.game = game;
 
-		this.sprite = this.game.add.sprite(0, 0, 'player',100);
+		this.sprite = this.game.add.sprite(0, 0, 'player', 100);
 		this.game.physics.arcade.enable(this.sprite);
-		
-	
+
+
 		this.sprite.anchor.setTo(0.5, 0.5)
 		this.sprite.scale.setTo(0.15, 0.15)
 		this.sprite.checkWorldBounds = true
-	    this.sprite.body.collideWorldBounds = true;
-	    this.sprite.inputEnabled = true;
-	    this.sprite.x = x;
-	    this.sprite.y = y;
-	    this.sprite.angle = angle;
+		this.sprite.body.collideWorldBounds = true;
+		this.sprite.inputEnabled = true;
+		this.sprite.x = x;
+		this.sprite.y = y;
+		this.sprite.angle = angle;
 		this.sprite.body.allowRotation = false;
-		
+
 		this.sprite.controls = {
 			right: this.game.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.D),
 			left: this.game.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.A),
 			up: this.game.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.W),
 			down: this.game.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.S),
 			selectItem: this.game.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.B)
-		  }
-	  
+		}
 
-		this.sprite.items = ['Melee','Machine Gun','Flame Thrower', 'Rocket Launcher']
+
+		this.sprite.items = ['Melee', 'Machine Gun', 'Flame Thrower', 'Rocket Launcher']
 		this.sprite.selectedItem = 'Melee'
-		this.sprite.ammo = [Infinity, 100,500,5]
+		this.sprite.ammo = [Infinity, 100, 500, 5]
 		this.sprite.ammoIndex = 0;
-		  
+
 		this.sprite.playerSpeedY = 100
 		this.sprite.playerSpeedX = 200
-		  
+
 		this.sprite.playerHealth = 100
 		this.sprite.playerMaxHealth = 100
 	}
-	
-	update(){
+
+	update() {
 		// Handle Player controls
 		if (this.sprite.controls.up.isDown) {
 			this.sprite.body.velocity.y = -this.sprite.playerSpeedY
-		  // this.sprite.y -= this.sprite.playerSpeedY
-		  }
-		  if (this.sprite.controls.down.isDown) {
+			// this.sprite.y -= this.sprite.playerSpeedY
+		}
+		if (this.sprite.controls.down.isDown) {
 			this.sprite.body.velocity.y = this.sprite.playerSpeedY
-		  // this.sprite.y += this.sprite.playerSpeedY
-		  }
-		  if (this.sprite.controls.left.isDown) {
+			// this.sprite.y += this.sprite.playerSpeedY
+		}
+		if (this.sprite.controls.left.isDown) {
 			this.sprite.body.velocity.x = -this.sprite.playerSpeedX
-		  // this.sprite.x -= this.sprite.playerSpeedX
-		  }
-		  if (this.sprite.controls.right.isDown) {
+			// this.sprite.x -= this.sprite.playerSpeedX
+		}
+		if (this.sprite.controls.right.isDown) {
 			this.sprite.body.velocity.x = this.sprite.playerSpeedX
-		  // this.sprite.x += this.sprite.playerSpeedX
-		  }
-		  if (!this.sprite.controls.right.isDown && !this.sprite.controls.left.isDown) {
+			// this.sprite.x += this.sprite.playerSpeedX
+		}
+		if (!this.sprite.controls.right.isDown && !this.sprite.controls.left.isDown) {
 			this.sprite.body.velocity.x = 0
-		  }
-		  if (this.sprite.controls.right.isDown && this.sprite.controls.left.isDown) {
+		}
+		if (this.sprite.controls.right.isDown && this.sprite.controls.left.isDown) {
 			this.sprite.body.velocity.x = 0
-		  }
-		  if (!this.sprite.controls.down.isDown && !this.sprite.controls.up.isDown) {
+		}
+		if (!this.sprite.controls.down.isDown && !this.sprite.controls.up.isDown) {
 			this.sprite.body.velocity.y = 0
-		  }
-		  if (this.sprite.controls.down.isDown && this.sprite.controls.up.isDown) {
+		}
+		if (this.sprite.controls.down.isDown && this.sprite.controls.up.isDown) {
 			this.sprite.body.velocity.y = 0
-			}
-			if (this.sprite.controls.selectItem.isDown) {
-				itemCount++;
-				this.sprite.selectedItem = this.sprite.items[itemCount % this.sprite.items.length]
-				this.sprite.ammoIndex = itemCount % this.sprite.items.length
-			}
+		}
+		if (this.sprite.controls.selectItem.isDown) {
+			itemCount++;
+			this.sprite.selectedItem = this.sprite.items[itemCount % this.sprite.items.length]
+			this.sprite.ammoIndex = itemCount % this.sprite.items.length
+		}
 	}
-	setX(x){
+	setX(x) {
 		this.sprite.x = x;
 		return this;
 	}
-	setY(y){
+	setY(y) {
 		this.sprite.y = y;
 		return this;
 	}
-	setAngle(deg){
+	setAngle(deg) {
 		this.sprite.angle = deg;
 		return this;
 	}
 
-	getX(x){
+	getX(x) {
 		return this.sprite.x
 	}
-	getY(y){
+	getY(y) {
 		return this.sprite.y
 	}
 
-	consumeAmmo(){
+	consumeAmmo() {
 		--this.sprite.ammo[this.sprite.ammoIndex]
 	}
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Player;
-
 
 
 /***/ }),
@@ -90281,7 +90296,7 @@ class Player{
 
 
 class zombie {
-  constructor (id, game, x, y) {
+  constructor(id, game, x, y) {
     this.id = id;
     this.game = game;
 
@@ -90303,32 +90318,30 @@ class zombie {
     this.sprite.health = 100;
   }
 
-  update () {
-  }
+  update() {}
 
-  damage(dmg){
-    if (!this.sprite.hasOverlapped){
+  damage(dmg) {
+    if (!this.sprite.hasOverlapped) {
       this.sprite.health -= dmg;
       this.sprite.hasOverlapped = true;
     }
   }
 
-  set(x,y){
+  set(x, y) {
     this.sprite.x = x;
     this.sprite.y = y;
   }
 
-  setZombieX(x){
+  setZombieX(x) {
     this.sprite.x = x;
     return this;
   }
-  setZombieY(y){
+  setZombieY(y) {
     this.sprite.y = y;
     return this;
   }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = zombie;
-
 
 
 /***/ }),

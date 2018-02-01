@@ -56,7 +56,7 @@ HealthBar.prototype.mergeWithDefaultConfiguration = function (newConfig) {
   return mergeObjetcs(defaultConfig, newConfig)
 }
 
-function mergeObjetcs (targetObj, newObj) {
+function mergeObjetcs(targetObj, newObj) {
   for (var p in newObj) {
     try {
       targetObj[p] = newObj[p].constructor === Object ? mergeObjetcs(targetObj[p], newObj[p]) : newObj[p]
@@ -141,7 +141,9 @@ HealthBar.prototype.setBarColor = function (newColor) {
 }
 
 HealthBar.prototype.setWidth = function (newWidth) {
-  this.game.add.tween(this.barSprite).to({ width: newWidth }, this.config.animationDuration, null, true)
+  this.game.add.tween(this.barSprite).to({
+    width: newWidth
+  }, this.config.animationDuration, null, true)
 }
 
 HealthBar.prototype.setFixedToCamera = function (fixedToCamera) {
@@ -168,7 +170,7 @@ HealthBar.prototype.kill = function () {
  Utils
  */
 
-function hexToRgb (hex) {
+function hexToRgb(hex) {
   // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
   var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i
   hex = hex.replace(shorthandRegex, function (m, r, g, b) {
