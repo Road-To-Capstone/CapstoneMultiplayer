@@ -84944,8 +84944,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State{
 	handleCollideZombie (player, zombie) {
 		if (this.time.now > zombiesCoolDown) {
 		  zombiesCoolDown = zombiesAttack + this.time.now
-		  player.playerHealth -= 50;
+		  player.playerHealth -= 10;
 		  if (player.playerHealth === 0) {
+			this.io.emit('disconnect');
 			this.state.start('GameOver');
 		  }
 		}
