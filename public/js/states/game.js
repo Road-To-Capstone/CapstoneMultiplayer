@@ -361,7 +361,7 @@ export default class GameState extends Phaser.State {
 	handleCollideZombie(player, zombie) {
 		if (this.time.now > zombiesCoolDown) {
 		  zombiesCoolDown = zombiesAttack + this.time.now
-		  player.playerHealth -= 10;
+		  player.playerHealth -= 50;
 		}
 	}
 }

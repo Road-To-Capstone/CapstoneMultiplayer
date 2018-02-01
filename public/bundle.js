@@ -84972,7 +84972,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 	handleCollideZombie(player, zombie) {
 		if (this.time.now > zombiesCoolDown) {
 		  zombiesCoolDown = zombiesAttack + this.time.now
-		  player.playerHealth -= 10;
+		  player.playerHealth -= 50;
 		}
 	}
 }
