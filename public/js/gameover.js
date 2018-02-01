@@ -65,7 +65,7 @@ export default class GameOver extends Phaser.State {
         if (this.enter.isDown){
             let selection = this.selectArray[this.selected];
             if (selection === 'PLAY AGAIN'){
-                this.state.start('GameState');
+                location.reload();
             } else if (selection === 'SCORE BOARD'){
                 // game.add.text(465, 530, 'CANNOT SEE HIGH SCORES YET', {font: '14pt Megrim', fill: '#5C804B'})
                 // this.state.start('HighScore')

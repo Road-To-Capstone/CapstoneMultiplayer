@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 
 export default class zombie {
-  constructor (id, game, x, y) {
+  constructor(id, game, x, y) {
     this.id = id;
     this.game = game;
 
@@ -23,26 +23,25 @@ export default class zombie {
     this.sprite.health = 100;
   }
 
-  update () {
-  }
+  update() {}
 
-  damage(dmg){
-    if (!this.sprite.hasOverlapped){
+  damage(dmg) {
+    if (!this.sprite.hasOverlapped) {
       this.sprite.health -= dmg;
       this.sprite.hasOverlapped = true;
     }
   }
 
-  set(x,y){
+  set(x, y) {
     this.sprite.x = x;
     this.sprite.y = y;
   }
 
-  setZombieX(x){
+  setZombieX(x) {
     this.sprite.x = x;
     return this;
   }
-  setZombieY(y){
+  setZombieY(y) {
     this.sprite.y = y;
     return this;
   }
