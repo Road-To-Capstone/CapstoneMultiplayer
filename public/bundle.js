@@ -85226,11 +85226,8 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	zombiesCoolDown = 1000,
 	zombiesAttack = 1000,
 	text,
-<<<<<<< Updated upstream
-	song;
-=======
+	song,
 	weaponDamage = [20, 10, 20, 100, 20, 100];
->>>>>>> Stashed changes
 class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 	constructor() {
 		super();
