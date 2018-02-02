@@ -85256,6 +85256,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.load.image('building', './assets/buildingplaceholder.png')
 		this.load.image('missile', '/assets/missileplaceholder.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
+		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
+		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
+		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
 	}
 
 	create() {
@@ -85359,6 +85362,14 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 						this.io.emit('client:kill-this-zombie', e.id);
 						player.sprite.score += 1000;
 						player.giveAmmo();
+						var zombieDeath = this.add.sprite(e.sprite.x,e.sprite.y,'zombiedeath');
+						zombieDeath.anchor.setTo(0.5, 0.5);
+						zombieDeath.scale.setTo(0.12,0.12);
+				
+						var animatedDeath = zombieDeath.animations.add('zombiedeath',[4,5,6,3,8,9,10,7,0,1,2,11,11,11,11,11,11,11,11,11]  ,6, false);
+						animatedDeath.killOnComplete = true;
+						
+						zombieDeath.animations.play('zombiedeath');
 				}
 					this.physics.arcade.collide(e.sprite, zombieGroup);
 					this.physics.arcade.collide(e.sprite, buildingGroup);
@@ -85583,11 +85594,22 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 	zombieAI(zombie) {
 		let mindex = this.findClosestPlayer(zombie);
-		var targetAngle = this.math.angleBetween(
+		this.physics.arcade.moveToXY(zombie.sprite,this.players[mindex].sprite.position.x ,this.players[mindex].sprite.position.y, zombie.sprite.SPEED)
+		/*var targetAngle = this.math.angleBetween(
 			zombie.sprite.position.x, zombie.sprite.position.y,
 			this.players[mindex].sprite.position.x, this.players[mindex].sprite.position.y // this needs to be player x and y that updates dynamically
-		)
-
+		)*/
+		 
+		if(zombie.sprite.body.velocity.x <=0 && zombie.sprite.isRightFacing) {
+			zombie.sprite.scale.x *= -1;
+			zombie.sprite.isRightFacing = false;
+		 }
+		 else if (zombie.sprite.body.velocity.x > 0 && !zombie.sprite.isRightFacing) {
+			zombie.sprite.scale.x *= -1;
+		  	zombie.sprite.isRightFacing = true;
+		 }
+	 
+/*
 		// Gradually (this.TURN_RATE) aim the Invader towards the target angle
 		if (zombie.sprite.rotation !== targetAngle) {
 			// Calculate difference between the current angle and targetAngle
@@ -85609,13 +85631,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			if (Math.abs(delta) < this.math.degToRad(zombie.sprite.TURN_RATE)) {
 				zombie.sprite.rotation = targetAngle
 			}
-		}
-		this.updateVelocity(Math.cos(zombie.sprite.rotation) * zombie.sprite.SPEED, Math.sin(zombie.sprite.rotation) * zombie.sprite.SPEED, zombie)
+		}*/
+		//this.updateVelocity(zombie.sprite.SPEED, zombie.sprite.SPEED, zombie)
 	}
-	updateVelocity(xVelocity, yVelocity, zombie) {
+	/*updateVelocity(xVelocity, yVelocity, zombie) {
 		zombie.sprite.body.velocity.x = xVelocity
 		zombie.sprite.body.velocity.y = yVelocity
-	}
+	}*/
 
 	findClosestPlayer(zombie) {
 		let minSet = {
@@ -85639,6 +85661,10 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		if (this.time.now > zombiesCoolDown) {
 			zombiesCoolDown = zombiesAttack + this.time.now
 			player.playerHealth -= 10;
+		
+			//console.log(zombie.sprite);
+			/*zombie.animations.add('zombieattack')
+			zombie.animations.play('zombieattack',2)*/
 		}
 	}
 }
@@ -92139,25 +92165,33 @@ class zombie {
     this.id = id;
     this.game = game;
 
-    this.sprite = this.game.add.sprite(50, 0, 'zombie');
+    this.sprite = this.game.add.sprite(50, 0, 'zombiewalk');
     this.game.physics.arcade.enableBody(this.sprite);
+    this.sprite.body.fixedRotation = true;
 
     this.sprite.anchor.setTo(0.5, 0.5);
-    this.sprite.scale.setTo(0.06, 0.06);
+    this.sprite.scale.setTo(0.12, 0.12);
     this.sprite.checkWorldBounds = true
     this.sprite.body.collideWorldBounds = true;
 
     this.sprite.x = x;
     this.sprite.y = y;
 
-    this.sprite.SPEED = 200; // Invader speed pixels/second
+    this.sprite.SPEED = 110; // Invader speed pixels/second
     this.sprite.TURN_RATE = 10; // turn rate in degrees/frame
     this.sprite.health = 100;
     this.sprite.hasOverlapped = false;
     this.sprite.health = 100;
+    this.sprite.rotations = 0;
+    this.sprite.isRightFacing = true;
+
+
+    this.sprite.animations.add('zombiewalk');
+    this.sprite.animations.play('zombiewalk',10, true)
   }
 
-  update() {}
+  update() {
+  }
 
   damage(dmg) {
     if (!this.sprite.hasOverlapped) {
