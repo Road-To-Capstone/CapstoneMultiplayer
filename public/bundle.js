@@ -85390,11 +85390,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 			if (player.sprite.playerHealth <= 0) {
 				this.io.emit('client:game-over', player.id);
-				for (let i = 0; i < this.players.length; i++)
-					if (this.players[i].id === player.id) {
-						this.players[i].sprite.destroy();
+				this.players.forEach((e, i) => {
+					if(e.id === player.id) {
+						e.sprite.destroy();
 						this.players.splice(i, 1);
-					};
+					}
+				});
 				this.state.start('GameOver', true, false, player.sprite.score, this.name);
 			}
 		}
@@ -85528,11 +85529,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:player-disconnected', id => { //if a player has disconnected
-			for (let i = 0; i < this.players.length; i++) //loop through all players
-				if (this.players[i].id == id) { // found the player
-					this.players[i].sprite.destroy(); //phaser sprite destroy function
-					this.players.splice(i, 1); //unset from the players array
+			this.players.forEach((e, i) => {
+				if(e.id === id) {
+					e.sprite.destroy();
+					this.players.splice(i, 1);
 				}
+			});
 		});
 
 		this.io.on('server:player-moved', data => {
@@ -85540,11 +85542,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:game-over', id => {
-			for (let i = 0; i < this.players.length; i++)
-				if (this.players[i].id === id) {
-					// this.players[i].sprite.destroy(); 
+			this.players.forEach((e, i) => {
+				if(e.id === id) {
+					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}
+			});
 		})
 
 		this.io.on('server:zombie-moved', data => { //data is an object with {id: z.id, posX: z.sprite.x, posY: z.sprite.y}
@@ -85564,12 +85567,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:kill-this-zombie', id => {
-			for (let i = 0; i < this.zombies.length; i++) {
-				if (this.zombies[i].id === id) {
-					this.zombies[i].sprite.destroy();
+			this.zombies.forEach((z, i) => {
+				if(z.id === id) {
+					z.sprite.destroy();
 					this.zombies.splice(i, 1);
 				}
-			}
+			});
 		})
 
 		this.io.on('server:missile-added', newMissile => {
@@ -85578,18 +85581,15 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 	}
 
 	getPlayerById(id) {
-		for (let i = 0; i < this.players.length; i++)
-			if (this.players[i].id == id) return this.players[i];
+		return this.players.find(p => p.id === id);
 	}
 
 	getMissileByPlayerId(id) {
-		for (let i = 0; i < this.missiles.length; i++)
-			if (this.missiles[i].id == id) return this.missiles[i];
+		return this.missiles.find(m => m.id === id);
 	}
 
 	getZombieById(id) {
-		for (let i = 0; i < this.zombies.length; i++)
-			if (this.zombies[i].id == id) return this.zombies[i];
+		return this.zombies.find(z => z.id === id);
 	}
 
 	zombieAI(zombie) {
@@ -85644,16 +85644,16 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				dist: 1920
 			},
 			distance, playerPosX, playerPoxY;
-		for (let i = 0; i < this.players.length; i++) {
-			playerPosX = players[i].sprite.position.x;
-			playerPoxY = players[i].sprite.position.y;
+		this.players.forEach((p, i) => {
+			playerPosX = p.sprite.position.x;
+			playerPoxY = p.sprite.position.y;
 			distance = Math.sqrt(Math.pow(playerPosX - zombie.sprite.position.x, 2) +
 				Math.pow(playerPoxY - zombie.sprite.position.y, 2));
 			if (distance < minSet.dist) {
 				minSet['index'] = i;
 				minSet['dist'] = distance;
 			}
-		}
+		})
 		return minSet.index ? minSet.index : 0;
 	}
 
@@ -91879,7 +91879,7 @@ class Building {
     this.sprite.game.physics.arcade.enableBody(this.sprite);
     this.sprite.body.immovable = true;
     this.sprite.anchor.setTo(0.5, 0.5)
-    this.sprite.scale.setTo(0.5, 0.5)
+    this.sprite.scale.setTo(0.75, 0.75)
     this.sprite.x = x
     this.sprite.y = y
 
