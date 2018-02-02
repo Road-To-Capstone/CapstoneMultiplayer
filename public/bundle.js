@@ -85253,23 +85253,23 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			fill: '#ffffff'
 		})
 		text.fixedToCamera = true;
-	
+
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default.a.connect();
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
-	
+
 		zombieGroup = this.add.group();
 		missileGroup = this.add.group();
 		buildingGroup = this.add.group();
-		
-		song = this.add.audio('bensound-happyrock')
+
+		song = this.add.audio('bensound-happyrock');
 		this.sound.setDecodedCallback(song, this.startMusic, this);
 
 		this.spawnBuilding(652, 961)
 		this.spawnBuilding(821, 1480)
-		this.spawnBuilding(1400, 1003)	
+		this.spawnBuilding(1400, 1003)
 	}
 
 	update() {
@@ -85303,7 +85303,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
-			if (this.input.activePointer.isDown && this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex]>0) {
+			if (this.input.activePointer.isDown && this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
 				this.io.emit('client:ask-to-create-missile', {
 					id: this.io.id,
@@ -85337,13 +85337,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			this.setHealthBarPercent();
 			text.setText(player.sprite.selectedItem + " | " + player.sprite.ammo[player.sprite.ammoIndex])
 
-			if(player.sprite.playerHealth <= 0) {
+			if (player.sprite.playerHealth <= 0) {
 				this.io.emit('client:game-over', player.id);
-				for (let i = 0; i < this.players.length; i++) 
-					if (this.players[i].id === player.id) { 
-						this.players[i].sprite.destroy(); 
-						this.players.splice(i, 1); 
-				};
+				for (let i = 0; i < this.players.length; i++)
+					if (this.players[i].id === player.id) {
+						this.players[i].sprite.destroy();
+						this.players.splice(i, 1);
+					};
 				this.state.start('GameOver', true, false, player.sprite.score, this.name);
 			}
 		}
@@ -85359,9 +85359,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		layer.resizeWorld()
 	}
 
-	startMusic () {
-		console.log('Started');
-		song.loopFull(0.3);
+	startMusic() {
+		song.loopFull(0.2);
 	}
 
 	setHealthBarPercent() {
@@ -85480,10 +85479,10 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:game-over', id => {
-			for (let i = 0; i < this.players.length; i++) 
-				if (this.players[i].id === id) { 
+			for (let i = 0; i < this.players.length; i++)
+				if (this.players[i].id === id) {
 					// this.players[i].sprite.destroy(); 
-					this.players.splice(i, 1); 
+					this.players.splice(i, 1);
 				}
 		})
 
@@ -85588,8 +85587,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 	handleCollideZombie(player, zombie) {
 		if (this.time.now > zombiesCoolDown) {
-		  zombiesCoolDown = zombiesAttack + this.time.now
-		  player.playerHealth -= 10;
+			zombiesCoolDown = zombiesAttack + this.time.now
+			player.playerHealth -= 10;
 		}
 	}
 }
@@ -85685,7 +85684,7 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
             } else if (selection === 'SCORE BOARD'){
                 // game.add.text(465, 530, 'CANNOT SEE HIGH SCORES YET', {font: '14pt Megrim', fill: '#5C804B'})
                 // this.state.start('HighScore')
-                console.log('SCORE BOARD REACHED');
+                this.state.start('ScoreBoard');
             }
         }
     }
@@ -85780,12 +85779,35 @@ class ScoreBoard extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
 
     preload() {
+       
     }
 
     create() {
+        this.colorArray = ['#ff33ff', '#66FC20', '#60FA19', '#59F810', '#51F207', '#4BDE06', '#46CE07', '#41BE07', '#3CB007', '#37A106']
+        this.add.text(315, 30, 'SCORE BOARD', {font: '60pt Megrim', fill: 'white'})
+
+        __WEBPACK_IMPORTED_MODULE_1_axios___default.a.get('/api/score')
+        .then(res => res.data)
+        .then(data => {
+            data = data.sort((a,b) => {
+                return b.score - a.score;
+            });
+            data = data.slice(0, 10);
+            data.forEach((e,i) => {
+                this.add.text(345, 150 + i * 50, e.name, {font: '24pt Megrim', fill: this.colorArray[i]})
+                this.add.text(800, 150 + i * 50, e.score, {font: '24pt Megrim', fill: this.colorArray[i]})
+                if(i === 9) {
+                    this.add.text(20, 150 + i * 50, 'Back', {font: '42pt Megrim', fill: '#5C804B'});
+                }
+            });
+        });
+        this.enter = this.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.ENTER);
     }
     
     update() {
+        if (this.enter.isDown){
+           location.reload();
+        }
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = ScoreBoard;
