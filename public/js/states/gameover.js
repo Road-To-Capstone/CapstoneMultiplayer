@@ -78,7 +78,7 @@ export default class GameOver extends Phaser.State {
             } else if (selection === 'SCORE BOARD'){
                 // game.add.text(465, 530, 'CANNOT SEE HIGH SCORES YET', {font: '14pt Megrim', fill: '#5C804B'})
                 // this.state.start('HighScore')
-                console.log('SCORE BOARD REACHED');
+                this.state.start('ScoreBoard');
             }
         }
     }
