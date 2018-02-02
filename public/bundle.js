@@ -85226,7 +85226,11 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	zombiesCoolDown = 1000,
 	zombiesAttack = 1000,
 	text,
+<<<<<<< Updated upstream
 	song;
+=======
+	weaponDamage = [20, 10, 20, 100, 20, 100];
+>>>>>>> Stashed changes
 class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 	constructor() {
 		super();
@@ -85319,7 +85323,11 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			if (!!this.zombies.length) {
 				this.zombies.forEach(e => {
 					this.zombieAI(e);
-					if (e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
+					if (e.sprite.health === 0) {
+						this.io.emit('client:kill-this-zombie', e.id);
+						player.sprite.score += 1000;
+						player.giveAmmo();
+				}
 					this.physics.arcade.collide(e.sprite, zombieGroup);
 					this.physics.arcade.collide(e.sprite, buildingGroup);
 				});
@@ -85400,8 +85408,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 	handleMissileCollision(zombie, missile) {
 		if (!zombie.hasOverlapped) {
 			zombie.hasOverlapped = true
-			zombie.health -= 10;
 			let currentPlayer = this.getPlayerById(this.io.id);
+			zombie.health -= weaponDamage[currentPlayer.sprite.ammoIndex];
 			currentPlayer.sprite.score += 100;
 			console.log('current Player====', currentPlayer.sprite.score);
 		}
@@ -91871,12 +91879,12 @@ class Missile {
                 this.missleSpeed = 200;
                 break;
             case 'Flame Thrower':
-                this.sprite.scale.setTo(0.5, 0.5);
-                this.sprite.lifespan = 1000
+                this.sprite.scale.setTo(0.25, 0.25);
+                this.sprite.lifespan = 1500;
                 this.missleSpeed = 150;
                 break;
             case 'Rocket Launcher':
-                this.sprite.scale.setTo(0.7, 0.7);
+                this.sprite.scale.setTo(0.5, 0.5);
                 this.sprite.lifespan = 1000;
                 this.missleSpeed = 500;
                 break;
@@ -91886,9 +91894,9 @@ class Missile {
                 this.missleSpeed = 100;
                 break;
             case 'Lazer':
-                this.sprite.scale.setTo(0.1, 0.1);
+                this.sprite.scale.setTo(0.15, 0.15);
                 this.sprite.lifespan = 10000;
-                this.missleSpeed = 500;
+                this.missleSpeed = 1000;
                 break;
             default:
                 this.sprite.scale.setTo(0.25, 0.25);
@@ -91928,6 +91936,8 @@ class Missile {
 var itemCount = 0;
 var itemSwitchCooldown = 500;
 var lastSwitch = 0;
+var maxAmmo = [Infinity, 200, 100, 5, 100, 10]
+var ammoToAdd = [Infinity, 10, 5, 1, 5, 1]
 
 class Player {
 	constructor(id, game, x, y, angle) {
@@ -91961,7 +91971,7 @@ class Player {
 
 		this.sprite.items = ['Melee', 'Machine Gun', 'Flame Thrower', 'Rocket Launcher', 'Chainsaw', 'Lazer']
 		this.sprite.selectedItem = 'Melee'
-		this.sprite.ammo = [Infinity, 100, 500, 5, 50, 5]
+		this.sprite.ammo = [Infinity, 200, 100, 5, 100, 10]
 		this.sprite.ammoIndex = 0
 		this.sprite.fireRates = [500, 100, 250, 1000, 200, 1250]
 		this.sprite.selectedFireRate = 500
@@ -92038,6 +92048,13 @@ class Player {
 
 	consumeAmmo() {
 		--this.sprite.ammo[this.sprite.ammoIndex]
+	}
+
+	giveAmmo() {
+		var randomNumber = Math.floor(Math.random() * 5)+1
+		if (this.sprite.ammo[randomNumber]+ammoToAdd[randomNumber]< maxAmmo[randomNumber])
+			this.sprite.ammo[randomNumber] += ammoToAdd[randomNumber]
+		console.log(randomNumber)
 	}
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Player;
