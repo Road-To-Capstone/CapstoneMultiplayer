@@ -124,6 +124,6 @@ export default class Player {
 		var randomNumber = Math.floor(Math.random() * 5)+1
 		if (this.sprite.ammo[randomNumber]+ammoToAdd[randomNumber]< maxAmmo[randomNumber])
 			this.sprite.ammo[randomNumber] += ammoToAdd[randomNumber]
-		console.log(randomNumber)
+	//	console.log(randomNumber)
 	}
 }
