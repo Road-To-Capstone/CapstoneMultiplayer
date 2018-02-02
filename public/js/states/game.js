@@ -16,7 +16,8 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	zombiesCoolDown = 1000,
 	zombiesAttack = 1000,
 	text,
-	song;
+	song,
+	weaponDamage = [20, 10, 20, 100, 20, 100];
 export default class GameState extends Phaser.State {
 	constructor() {
 		super();
@@ -109,7 +110,11 @@ export default class GameState extends Phaser.State {
 			if (!!this.zombies.length) {
 				this.zombies.forEach(e => {
 					this.zombieAI(e);
-					if (e.sprite.health === 0) this.io.emit('client:kill-this-zombie', e.id);
+					if (e.sprite.health === 0) {
+						this.io.emit('client:kill-this-zombie', e.id);
+						player.sprite.score += 1000;
+						player.giveAmmo();
+				}
 					this.physics.arcade.collide(e.sprite, zombieGroup);
 					this.physics.arcade.collide(e.sprite, buildingGroup);
 				});
@@ -190,8 +195,8 @@ export default class GameState extends Phaser.State {
 	handleMissileCollision(zombie, missile) {
 		if (!zombie.hasOverlapped) {
 			zombie.hasOverlapped = true
-			zombie.health -= 10;
 			let currentPlayer = this.getPlayerById(this.io.id);
+			zombie.health -= weaponDamage[currentPlayer.sprite.ammoIndex];
 			currentPlayer.sprite.score += 100;
 			console.log('current Player====', currentPlayer.sprite.score);
 		}

@@ -28,12 +28,12 @@ export default class Missile {
                 this.missleSpeed = 200;
                 break;
             case 'Flame Thrower':
-                this.sprite.scale.setTo(0.5, 0.5);
-                this.sprite.lifespan = 1000
+                this.sprite.scale.setTo(0.25, 0.25);
+                this.sprite.lifespan = 1500;
                 this.missleSpeed = 150;
                 break;
             case 'Rocket Launcher':
-                this.sprite.scale.setTo(0.7, 0.7);
+                this.sprite.scale.setTo(0.5, 0.5);
                 this.sprite.lifespan = 1000;
                 this.missleSpeed = 500;
                 break;
@@ -43,9 +43,9 @@ export default class Missile {
                 this.missleSpeed = 100;
                 break;
             case 'Lazer':
-                this.sprite.scale.setTo(0.1, 0.1);
+                this.sprite.scale.setTo(0.15, 0.15);
                 this.sprite.lifespan = 10000;
-                this.missleSpeed = 500;
+                this.missleSpeed = 1000;
                 break;
             default:
                 this.sprite.scale.setTo(0.25, 0.25);
