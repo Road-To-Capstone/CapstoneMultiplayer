@@ -15,7 +15,8 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	missileCollisionRate = 1000,
 	zombiesCoolDown = 1000,
 	zombiesAttack = 1000,
-	text;
+	text,
+	song;
 export default class GameState extends Phaser.State {
 	constructor() {
 		super();
@@ -27,6 +28,7 @@ export default class GameState extends Phaser.State {
 
 	preload() {
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
+		this.load.audio('bensound-happyrock', './assets/bensound-happyrock.mp3')
 		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
 		this.load.image('tiles', './assets/tiles.png')
 		this.load.image('player', './assets/playerplaceholder.jpg')
@@ -41,20 +43,23 @@ export default class GameState extends Phaser.State {
 			fill: '#ffffff'
 		})
 		text.fixedToCamera = true;
-	
+
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = socketio.connect();
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
-	
+
 		zombieGroup = this.add.group();
 		missileGroup = this.add.group();
 		buildingGroup = this.add.group();
-	
+
+		song = this.add.audio('bensound-happyrock');
+		this.sound.setDecodedCallback(song, this.startMusic, this);
+
 		this.spawnBuilding(652, 961)
 		this.spawnBuilding(821, 1480)
-		this.spawnBuilding(1400, 1003)	
+		this.spawnBuilding(1400, 1003)
 	}
 
 	update() {
@@ -88,7 +93,7 @@ export default class GameState extends Phaser.State {
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
-			if (this.input.activePointer.isDown && this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex]>0) {
+			if (this.input.activePointer.isDown && this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
 				this.io.emit('client:ask-to-create-missile', {
 					id: this.io.id,
@@ -122,13 +127,13 @@ export default class GameState extends Phaser.State {
 			this.setHealthBarPercent();
 			text.setText(player.sprite.selectedItem + " | " + player.sprite.ammo[player.sprite.ammoIndex])
 
-			if(player.sprite.playerHealth <= 0) {
+			if (player.sprite.playerHealth <= 0) {
 				this.io.emit('client:game-over', player.id);
-				for (let i = 0; i < this.players.length; i++) 
-					if (this.players[i].id === player.id) { 
-						this.players[i].sprite.destroy(); 
-						this.players.splice(i, 1); 
-				};
+				for (let i = 0; i < this.players.length; i++)
+					if (this.players[i].id === player.id) {
+						this.players[i].sprite.destroy();
+						this.players.splice(i, 1);
+					};
 				this.state.start('GameOver', true, false, player.sprite.score, this.name);
 			}
 		}
@@ -142,6 +147,10 @@ export default class GameState extends Phaser.State {
 		map.addTilesetImage('Map tiles.tsx', 'tiles')
 		layer = map.createLayer('Tile Layer 1')
 		layer.resizeWorld()
+	}
+
+	startMusic() {
+		song.loopFull(0.2);
 	}
 
 	setHealthBarPercent() {
@@ -260,10 +269,10 @@ export default class GameState extends Phaser.State {
 		});
 
 		this.io.on('server:game-over', id => {
-			for (let i = 0; i < this.players.length; i++) 
-				if (this.players[i].id === id) { 
+			for (let i = 0; i < this.players.length; i++)
+				if (this.players[i].id === id) {
 					// this.players[i].sprite.destroy(); 
-					this.players.splice(i, 1); 
+					this.players.splice(i, 1);
 				}
 		})
 
@@ -368,8 +377,8 @@ export default class GameState extends Phaser.State {
 
 	handleCollideZombie(player, zombie) {
 		if (this.time.now > zombiesCoolDown) {
-		  zombiesCoolDown = zombiesAttack + this.time.now
-		  player.playerHealth -= 10;
+			zombiesCoolDown = zombiesAttack + this.time.now
+			player.playerHealth -= 10;
 		}
 	}
 }
