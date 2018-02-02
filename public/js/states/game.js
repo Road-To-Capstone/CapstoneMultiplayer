@@ -17,7 +17,17 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	zombiesAttack = 1000,
 	text,
 	song,
-	weaponDamage = [20, 10, 20, 100, 20, 100];
+	weaponDamage = [20, 10, 20, 100, 20, 100],
+	finalTranscript = "",
+	transcriptArray = [],
+	startShooting = false,
+	startShootingTimer = 0,
+	startShootingDuration = 5000;
+
+//const SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)
+
+
 export default class GameState extends Phaser.State {
 	constructor() {
 		super();
@@ -61,10 +71,34 @@ export default class GameState extends Phaser.State {
 		this.spawnBuilding(652, 961)
 		this.spawnBuilding(821, 1480)
 		this.spawnBuilding(1400, 1003)
+
+		recognition.continuous = true;
+		recognition.lang = 'en-US'
+		recognition.start();
+		
 	}
 
 	update() {
 		if (this.doneLoading) {
+			recognition.onresult = event => {
+				for (let i = event.resultIndex; i<event.results.length;i++){
+					const transcript = event.results[i][0].transcript
+					if (event.results[i].isFinal) finalTranscript += transcript + " "
+				}
+				transcriptArray = finalTranscript.split(" ")
+				finalTranscript = '';
+			}
+		
+			let voiceRecCommand = transcriptArray.shift()
+			startShooting = this.pewCommand(voiceRecCommand) 
+			if (startShootingTimer < this.time.now){
+				console.log("start shooting is false")
+				startShooting = false;
+			}
+
+			
+			console.log("voiceRecCommand is", voiceRecCommand)
+			
 			if (!cameraSet) {
 				this.camera.follow(this.getPlayerById(this.io.id).sprite)
 				this.setUpHealthBar()
@@ -94,7 +128,7 @@ export default class GameState extends Phaser.State {
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
-			if (this.input.activePointer.isDown && this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0) {
+			if ((startShooting|| this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
 				this.io.emit('client:ask-to-create-missile', {
 					id: this.io.id,
@@ -158,6 +192,13 @@ export default class GameState extends Phaser.State {
 		song.loopFull(0.2);
 	}
 
+	pewCommand(speech){
+		startShootingTimer = this.time.now + startShootingDuration;
+		if (speech === 'pew' || speech === 'q' || speech === 'Q' || speech === 'cute' || speech === 'shoot')
+			return true
+		return startShooting || false;
+	}
+
 	setHealthBarPercent() {
 		this.myHealthBar.setPercent(this.players[0].sprite.playerHealth)
 	}
@@ -198,7 +239,7 @@ export default class GameState extends Phaser.State {
 			let currentPlayer = this.getPlayerById(this.io.id);
 			zombie.health -= weaponDamage[currentPlayer.sprite.ammoIndex];
 			currentPlayer.sprite.score += 100;
-			console.log('current Player====', currentPlayer.sprite.score);
+			//console.log('current Player====', currentPlayer.sprite.score);
 		}
 	}
 
