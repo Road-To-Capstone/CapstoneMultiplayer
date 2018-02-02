@@ -85285,24 +85285,25 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		recognition.continuous = true;
 		recognition.lang = 'en-US'
 		recognition.start();
+
+		recognition.onresult = event => {
+			for (let i = event.resultIndex; i<event.results.length;i++){
+				const transcript = event.results[i][0].transcript
+				if (event.results[i].isFinal) finalTranscript += transcript + " "
+			}
+			transcriptArray = finalTranscript.split(" ")
+			finalTranscript = '';
+		}
 		
 	}
 
 	update() {
 		if (this.doneLoading) {
-			recognition.onresult = event => {
-				for (let i = event.resultIndex; i<event.results.length;i++){
-					const transcript = event.results[i][0].transcript
-					if (event.results[i].isFinal) finalTranscript += transcript + " "
-				}
-				transcriptArray = finalTranscript.split(" ")
-				finalTranscript = '';
-			}
+			
 		
 			let voiceRecCommand = transcriptArray.shift()
 			startShooting = this.pewCommand(voiceRecCommand) 
 			if (startShootingTimer < this.time.now){
-				console.log("start shooting is false")
 				startShooting = false;
 			}
 
@@ -85403,9 +85404,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 	}
 
 	pewCommand(speech){
-		startShootingTimer = this.time.now + startShootingDuration;
+		
 		if (speech === 'pew' || speech === 'q' || speech === 'Q' || speech === 'cute' || speech === 'shoot')
+		{	
+			startShootingTimer = this.time.now + startShootingDuration;
 			return true
+		}
 		return startShooting || false;
 	}
 
