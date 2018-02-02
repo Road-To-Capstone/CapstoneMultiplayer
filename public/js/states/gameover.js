@@ -1,9 +1,15 @@
 import Phaser from 'phaser';
+import axios from 'axios';
 
 let shadowText, map;
 export default class GameOver extends Phaser.State {
     constructor() {
         super();
+    }
+
+    init(score, name) {
+        this.score = score;
+        this.name = name;
     }
 
     preload() {
@@ -20,7 +26,7 @@ export default class GameOver extends Phaser.State {
     create() {
         this.setUpMap();
         this.add.text(254, 50, 'GAME OVER', {font: '72pt Megrim', fill: 'white'});
-        this.add.text(254, 126, `YOUR SCORE: ${500}`, {font: '84pt Megrim', fill: '#cc00cc'});
+        this.add.text(100, 126, `${this.name} SCORE: ${this.score}`, {font: '84pt Megrim', fill: '#cc00cc'});
         this.add.text(430, 400, this.selectArray[this.selected], {font: '42pt Megrim', fill: '#5C804B'});
         shadowText = this.add.text(this.shadowX, this.shadowY, 'PLAY AGAIN', {font: '42pt Megrim', fill: '#66FB21'});
         this.add.text(430, 475, 'SCORE BOARD', {font: '42pt Megrim', fill: '#5C804B'});
@@ -30,6 +36,9 @@ export default class GameOver extends Phaser.State {
         // this.dright = this.input.keyboard.addKey(Phaser.Keyboard.D);
         this.sdown = this.input.keyboard.addKey(Phaser.Keyboard.S);
         // this.aleft = this.input.keyboard.addKey(Phaser.Keyboard.A);
+        axios.post('/api/score-post', {name: this.name, score: this.score})
+        .then(res => res.data)
+        .then(result => console.log('axios =========',result));
     }
 
     setUpMap() {

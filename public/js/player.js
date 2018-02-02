@@ -26,6 +26,7 @@ export default class Player {
 		this.sprite.y = y;
 		this.sprite.angle = angle;
 		this.sprite.body.allowRotation = false;
+		this.sprite.score = 0;
 
 		this.sprite.controls = {
 			right: this.game.input.keyboard.addKey(Phaser.Keyboard.D),

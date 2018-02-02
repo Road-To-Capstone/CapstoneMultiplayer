@@ -14,7 +14,7 @@ router.get('/score', (req, res, next) => {
 
 // });
 
-router.post('/', (req, res, next) => {
+router.post('/score-post', (req, res, next) => {
     Score.create(req.body)
     .then(newScore => res.json(newScore))
     .catch(next)

@@ -20,6 +20,11 @@ export default class GameState extends Phaser.State {
 	constructor() {
 		super();
 	}
+
+	init(playerName) {
+		this.name = playerName;
+	}
+
 	preload() {
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
 		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
@@ -124,7 +129,7 @@ export default class GameState extends Phaser.State {
 						this.players[i].sprite.destroy(); 
 						this.players.splice(i, 1); 
 				};
-				this.state.start('GameOver');
+				this.state.start('GameOver', true, false, player.sprite.score, this.name);
 			}
 		}
 	}
@@ -176,7 +181,10 @@ export default class GameState extends Phaser.State {
 	handleMissileCollision(zombie, missile) {
 		if (!zombie.hasOverlapped) {
 			zombie.hasOverlapped = true
-			zombie.health -= 100
+			zombie.health -= 10;
+			let currentPlayer = this.getPlayerById(this.io.id);
+			currentPlayer.sprite.score += 100;
+			console.log('current Player====', currentPlayer.sprite.score);
 		}
 	}
 
@@ -361,7 +369,7 @@ export default class GameState extends Phaser.State {
 	handleCollideZombie(player, zombie) {
 		if (this.time.now > zombiesCoolDown) {
 		  zombiesCoolDown = zombiesAttack + this.time.now
-		  player.playerHealth -= 50;
+		  player.playerHealth -= 10;
 		}
 	}
 }
