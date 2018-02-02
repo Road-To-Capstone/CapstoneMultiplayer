@@ -21,10 +21,12 @@ export default class Player {
 		this.sprite.checkWorldBounds = true
 		this.sprite.body.collideWorldBounds = true;
 		this.sprite.inputEnabled = true;
+		this.sprite.id = id;
 		this.sprite.x = x;
 		this.sprite.y = y;
 		this.sprite.angle = angle;
 		this.sprite.body.allowRotation = false;
+		this.sprite.score = 0;
 
 		this.sprite.controls = {
 			right: this.game.input.keyboard.addKey(Phaser.Keyboard.D),

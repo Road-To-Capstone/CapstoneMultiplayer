@@ -20,6 +20,11 @@ export default class GameState extends Phaser.State {
 	constructor() {
 		super();
 	}
+
+	init(playerName) {
+		this.name = playerName;
+	}
+
 	preload() {
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
 		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
@@ -117,6 +122,15 @@ export default class GameState extends Phaser.State {
 			this.setHealthBarPercent();
 			text.setText(player.sprite.selectedItem + " | " + player.sprite.ammo[player.sprite.ammoIndex])
 
+			if(player.sprite.playerHealth <= 0) {
+				this.io.emit('client:game-over', player.id);
+				for (let i = 0; i < this.players.length; i++) 
+					if (this.players[i].id === player.id) { 
+						this.players[i].sprite.destroy(); 
+						this.players.splice(i, 1); 
+				};
+				this.state.start('GameOver', true, false, player.sprite.score, this.name);
+			}
 		}
 	}
 
@@ -167,7 +181,10 @@ export default class GameState extends Phaser.State {
 	handleMissileCollision(zombie, missile) {
 		if (!zombie.hasOverlapped) {
 			zombie.hasOverlapped = true
-			zombie.health -= 100
+			zombie.health -= 10;
+			let currentPlayer = this.getPlayerById(this.io.id);
+			currentPlayer.sprite.score += 100;
+			console.log('current Player====', currentPlayer.sprite.score);
 		}
 	}
 
@@ -241,6 +258,14 @@ export default class GameState extends Phaser.State {
 		this.io.on('server:player-moved', data => {
 			this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
 		});
+
+		this.io.on('server:game-over', id => {
+			for (let i = 0; i < this.players.length; i++) 
+				if (this.players[i].id === id) { 
+					// this.players[i].sprite.destroy(); 
+					this.players.splice(i, 1); 
+				}
+		})
 
 		this.io.on('server:zombie-moved', data => { //data is an object with {id: z.id, posX: z.sprite.x, posY: z.sprite.y}
 			this.getZombieById(data.id).set(data.posX, data.posY);
@@ -343,11 +368,8 @@ export default class GameState extends Phaser.State {
 
 	handleCollideZombie(player, zombie) {
 		if (this.time.now > zombiesCoolDown) {
-			zombiesCoolDown = zombiesAttack + this.time.now
-			player.playerHealth -= 1;
-			if (player.playerHealth === 0) {
-				console.log('GAME OVER') // This should make the game over state
-			}
+		  zombiesCoolDown = zombiesAttack + this.time.now
+		  player.playerHealth -= 10;
 		}
 	}
 }
