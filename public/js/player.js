@@ -20,7 +20,7 @@ export default class Player {
 
 
 		this.sprite.anchor.setTo(0.5, 0.5)
-		this.sprite.scale.setTo(1, 1)
+		this.sprite.scale.setTo(1.25, 1.25)
 		this.sprite.checkWorldBounds = true
 		this.sprite.body.collideWorldBounds = true;
 		this.sprite.inputEnabled = true;
@@ -48,7 +48,7 @@ export default class Player {
 		this.sprite.selectedFireRate = 500
 		this.sprite.fireRateIndex = 0
 
-		this.sprite.playerSpeedY = 100
+		this.sprite.playerSpeedY = 200
 		this.sprite.playerSpeedX = 200
 
 		this.sprite.playerHealth = 100

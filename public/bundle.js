@@ -85318,7 +85318,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			transcriptArray = finalTranscript.split(" ")
 			finalTranscript = '';
 		}
-		
+		this.addRain();
 	}
 
 	update() {
@@ -85458,6 +85458,34 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		// This just tells the engine it should update the texture cache
 		this.shadowTexture.dirty = true;
 	}
+
+	addRain(){
+		
+		   let rainParticle = this.game.add.bitmapData(15, 50);
+		
+		   rainParticle.ctx.rect(0, 0, 15, 50);
+		   rainParticle.ctx.fillStyle = '#9cc9de';
+		   rainParticle.ctx.fill();
+		
+		   this.emitter = this.add.emitter(this.world.centerX, -300, 400);
+		
+		   this.emitter.width = this.game.world.width;
+		   this.emitter.angle = 10;
+		
+		   this.emitter.makeParticles(rainParticle);
+		
+		   this.emitter.minParticleScale = 0.1;
+		   this.emitter.maxParticleScale = 0.3;
+		
+		   this.emitter.setYSpeed(600, 1000);
+		   this.emitter.setXSpeed(-5, 5);
+		
+		   this.emitter.minRotation = 0;
+		   this.emitter.maxRotation = 0;
+		
+		   this.emitter.start(false, 1600, 5, 0);
+		
+	   }
 
 	pewCommand(speech){
 		
@@ -92211,7 +92239,7 @@ class Player {
 
 
 		this.sprite.anchor.setTo(0.5, 0.5)
-		this.sprite.scale.setTo(1, 1)
+		this.sprite.scale.setTo(1.25, 1.25)
 		this.sprite.checkWorldBounds = true
 		this.sprite.body.collideWorldBounds = true;
 		this.sprite.inputEnabled = true;
@@ -92239,7 +92267,7 @@ class Player {
 		this.sprite.selectedFireRate = 500
 		this.sprite.fireRateIndex = 0
 
-		this.sprite.playerSpeedY = 100
+		this.sprite.playerSpeedY = 200
 		this.sprite.playerSpeedX = 200
 
 		this.sprite.playerHealth = 100

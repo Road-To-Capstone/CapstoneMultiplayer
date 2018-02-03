@@ -108,7 +108,7 @@ export default class GameState extends Phaser.State {
 			transcriptArray = finalTranscript.split(" ")
 			finalTranscript = '';
 		}
-		
+		this.addRain();
 	}
 
 	update() {
@@ -248,6 +248,38 @@ export default class GameState extends Phaser.State {
 		// This just tells the engine it should update the texture cache
 		this.shadowTexture.dirty = true;
 	}
+
+	lightningStrike(){
+		
+	}
+
+	addRain(){
+		
+		   let rainParticle = this.game.add.bitmapData(15, 50);
+		
+		   rainParticle.ctx.rect(0, 0, 15, 50);
+		   rainParticle.ctx.fillStyle = '#9cc9de';
+		   rainParticle.ctx.fill();
+		
+		   this.emitter = this.add.emitter(this.world.centerX, -300, 400);
+		
+		   this.emitter.width = this.game.world.width;
+		   this.emitter.angle = 10;
+		
+		   this.emitter.makeParticles(rainParticle);
+		
+		   this.emitter.minParticleScale = 0.1;
+		   this.emitter.maxParticleScale = 0.3;
+		
+		   this.emitter.setYSpeed(600, 1000);
+		   this.emitter.setXSpeed(-5, 5);
+		
+		   this.emitter.minRotation = 0;
+		   this.emitter.maxRotation = 0;
+		
+		   this.emitter.start(false, 1600, 5, 0);
+		
+	   }
 
 	pewCommand(speech){
 		
