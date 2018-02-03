@@ -85262,6 +85262,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.load.image('Chainsaw', '/assets/Chainsaw.png')
 		this.load.image('Flame Thrower', '/assets/Flame Thrower.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
+		this.load.image('building1', '../../assets/building1.png')
+		this.load.image('building2', '../../assets/building2.png')
+		this.load.image('building3', '../../assets/building3.png')
 		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
 		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
 		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
@@ -85296,9 +85299,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		song = this.add.audio('bensound-ofeliasdream');
 		this.sound.setDecodedCallback(song, this.startMusic, this);
 
-		this.spawnBuilding(652, 961)
-		this.spawnBuilding(821, 1480)
-		this.spawnBuilding(1400, 1003)
+		this.spawnBuilding(652, 961, 'building1');
+		this.spawnBuilding(821, 1480, 'building2');
+		this.spawnBuilding(1400, 1003, 'building3');
 
 		this.shadowTexture = this.add.bitmapData(1920, 1920)
 
@@ -85481,8 +85484,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.myHealthBar.setFixedToCamera(true)
 	}
 
-	spawnBuilding(x, y) {
-		this.building = new __WEBPACK_IMPORTED_MODULE_6__building__["a" /* default */](this.game, x, y)
+	spawnBuilding(x, y, option) {
+		this.building = new __WEBPACK_IMPORTED_MODULE_6__building__["a" /* default */](this.game, x, y, option)
 		buildingGroup.add(this.building.sprite);
 	}
 
@@ -92033,15 +92036,17 @@ module.exports = __webpack_amd_options__;
 
 
 class Building {
-  constructor(game, x, y) {
+  constructor(game, x, y, option) {
 
     this.game = game
 
-    this.sprite = this.game.add.sprite(0, 0, 'building', 100);
+    // this.sprite = this.game.add.sprite(0, 0, 'building', 100);
+    this.sprite = this.game.add.sprite(0, 0, option, 100);
     this.sprite.game.physics.arcade.enableBody(this.sprite);
     this.sprite.body.immovable = true;
     this.sprite.anchor.setTo(0.5, 0.5)
-    this.sprite.scale.setTo(0.75, 0.75)
+    // this.sprite.scale.setTo(0.75, 0.75)
+    this.sprite.scale.setTo(0.3)
     this.sprite.x = x
     this.sprite.y = y
 
@@ -92095,8 +92100,8 @@ class game extends __WEBPACK_IMPORTED_MODULE_2_phaser___default.a.Game {
 		this.state.add('Preload', __WEBPACK_IMPORTED_MODULE_8__states_preload__["a" /* default */]);
 		this.state.add('HowToPlay', __WEBPACK_IMPORTED_MODULE_9__states_howtoplay__["a" /* default */]);
 		// this.state.start('HowToPlay');
-		this.state.start('Preload');
-		// this.state.start('MenuState');
+		// this.state.start('Preload');
+		this.state.start('MenuState');
 	}
 }
 
