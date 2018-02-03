@@ -17,6 +17,7 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	zombiesAttack = 1000,
 	text,
 	song,
+	healthPercent,
 	weaponDamage = [20, 10, 20, 100, 20, 100],
 	finalTranscript = "",
 	transcriptArray = [],
@@ -63,6 +64,11 @@ export default class GameState extends Phaser.State {
 			fill: '#ffffff'
 		})
 		text.fixedToCamera = true;
+
+		healthPercent = this.add.text(20, this.game.height - 100, '100%', {
+			fill: '#ffffff'
+		});
+		healthPercent.fixedToCamera = true;
 
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = socketio.connect();
