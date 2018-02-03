@@ -25,7 +25,7 @@ export default class Preload extends Phaser.State {
     update() {
         this.counter++
         if (this.counter > 350){
-          this.state.start('MenuState')
+          this.state.start('HowToPlay')
         }
         //This is to load the Megrin font before it actually needs to be used
         if (this.counter%100 === 0){
