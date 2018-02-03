@@ -42,7 +42,7 @@ export default class GameState extends Phaser.State {
 		this.load.audio('bensound-happyrock', './assets/bensound-happyrock.mp3')
 		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
 		this.load.image('tiles', './assets/tiles.png')
-		this.load.image('player', './assets/playerplaceholder.jpg')
+		
 		this.load.image('building', './assets/buildingplaceholder.png')
 		this.load.image('Melee', '/assets/missileplaceholder.png')
 		this.load.image('Lazer', '/assets/Lazer.png')
@@ -52,6 +52,7 @@ export default class GameState extends Phaser.State {
 		this.load.image('Flame Thrower', '/assets/Flame Thrower.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
 		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
+		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
 		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
 		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
 	}
