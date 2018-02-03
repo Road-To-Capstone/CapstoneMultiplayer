@@ -43,7 +43,7 @@ export default class GameState extends Phaser.State {
 		this.load.audio('bensound-ofeliasdream', './assets/bensound-ofeliasdream.mp3')
 		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
 		this.load.image('tiles', './assets/tiles.png')
-		
+		this.load.image('background', '/assets/background.png')
 		this.load.image('building', './assets/buildingplaceholder.png')
 		this.load.image('Melee', '/assets/missileplaceholder.png')
 		this.load.image('Lazer', '/assets/Lazer.png')
@@ -65,6 +65,7 @@ export default class GameState extends Phaser.State {
 		})
 		text.fixedToCamera = true;
 
+		this.background = this.add.tileSprite(0,0,1920,1920, 'background')
 		healthPercent = this.add.text(20, this.game.height - 100, '100%', {
 			fill: '#ffffff'
 		});
