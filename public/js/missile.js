@@ -9,7 +9,7 @@ export default class Missile {
         this.id = id;
         this.missleSpeed = 100;
 
-        this.sprite = this.game.add.sprite(0, 0, 'Melee');
+        this.sprite = this.game.add.sprite(0, 0, itemName);
         this.game.physics.arcade.enableBody(this.sprite);
         this.sprite.physicsBodyType = Phaser.Physics.ARCADE
         this.sprite.anchor.setTo(0.5, 0.5);
@@ -23,12 +23,12 @@ export default class Missile {
                 this.missleSpeed = 100;
                 break;
             case 'Machine Gun':
-                this.sprite.scale.setTo(0.15, 0.15);
+                this.sprite.scale.setTo(0.5, 0.5);
                 this.sprite.lifespan = 2000;
                 this.missleSpeed = 200;
                 break;
             case 'Flame Thrower':
-                this.sprite.scale.setTo(0.25, 0.25);
+                this.sprite.scale.setTo(1.5, 1.5);
                 this.sprite.lifespan = 1500;
                 this.missleSpeed = 150;
                 break;
@@ -38,12 +38,12 @@ export default class Missile {
                 this.missleSpeed = 500;
                 break;
             case 'Chainsaw':
-                this.sprite.scale.setTo(0.25, 0.25);
+                this.sprite.scale.setTo(1, 1);
                 this.sprite.lifespan = 650;
                 this.missleSpeed = 100;
                 break;
             case 'Lazer':
-                this.sprite.scale.setTo(0.15, 0.15);
+                this.sprite.scale.setTo(0.4, 0.4);
                 this.sprite.lifespan = 10000;
                 this.missleSpeed = 1000;
                 break;
