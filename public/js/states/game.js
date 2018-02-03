@@ -70,6 +70,8 @@ export default class GameState extends Phaser.State {
 			this.createOnConnection(data);
 		});
 
+		this.LIGHT_RADIUS = 300;
+
 		zombieGroup = this.add.group();
 		missileGroup = this.add.group();
 		buildingGroup = this.add.group();
@@ -80,6 +82,12 @@ export default class GameState extends Phaser.State {
 		this.spawnBuilding(652, 961)
 		this.spawnBuilding(821, 1480)
 		this.spawnBuilding(1400, 1003)
+
+		this.shadowTexture = this.add.bitmapData(1920, 1920)
+
+		var lightSprite = this.game.add.image(0,0, this.shadowTexture)
+
+		lightSprite.blendMode = Phaser.blendModes.MULTIPLY
 
 		recognition.continuous = true;
 		recognition.lang = 'en-US'
@@ -99,7 +107,7 @@ export default class GameState extends Phaser.State {
 	update() {
 		if (this.doneLoading) {
 			
-		
+			
 			let voiceRecCommand = transcriptArray.shift()
 			startShooting = this.pewCommand(voiceRecCommand) 
 			if (startShootingTimer < this.time.now){
@@ -120,6 +128,8 @@ export default class GameState extends Phaser.State {
 				posX: player.sprite.x,
 				posY: player.sprite.y
 			});
+
+			this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
 				this.io.emit('client:zombie-moved', {
@@ -182,7 +192,7 @@ export default class GameState extends Phaser.State {
 
 			this.physics.arcade.overlap(zombieGroup, missileGroup, this.handleMissileCollision, null, this)
 			this.setHealthBarPercent();
-			text.setText(player.sprite.selectedItem + " | " + player.sprite.ammo[player.sprite.ammoIndex])
+			this.world.bringToTop(text.setText(player.sprite.selectedItem + " | " + player.sprite.ammo[player.sprite.ammoIndex]))
 
 			if (player.sprite.playerHealth <= 0) {
 				this.io.emit('client:game-over', player.id);
@@ -209,6 +219,27 @@ export default class GameState extends Phaser.State {
 
 	startMusic() {
 		song.loopFull(0.2);
+	}
+
+	updateShadowTexture(player) {
+		this.shadowTexture.context.fillStyle = 'rgb(0, 0, 0)'; //this number controls the outside darkness
+		this.shadowTexture.context.fillRect(0, 0, 1920, 1920);
+	
+		// Draw circle of light with a soft edge
+		var gradient = this.shadowTexture.context.createRadialGradient(
+			player.sprite.x, player.sprite.y, this.LIGHT_RADIUS * 0.01,
+			player.sprite.x, player.sprite.y, this.LIGHT_RADIUS);
+		gradient.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
+		gradient.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
+	
+		this.shadowTexture.context.beginPath();
+		this.shadowTexture.context.fillStyle = gradient;
+		this.shadowTexture.context.arc(player.sprite.x, player.sprite.y,
+			this.LIGHT_RADIUS, 0, Math.PI*2);
+		this.shadowTexture.context.fill();
+	
+		// This just tells the engine it should update the texture cache
+		this.shadowTexture.dirty = true;
 	}
 
 	pewCommand(speech){
