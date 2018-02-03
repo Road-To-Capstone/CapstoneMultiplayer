@@ -40,7 +40,7 @@ export default class GameState extends Phaser.State {
 
 	preload() {
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
-		this.load.audio('bensound-happyrock', './assets/bensound-happyrock.mp3')
+		this.load.audio('bensound-ofeliasdream', './assets/bensound-ofeliasdream.mp3')
 		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
 		this.load.image('tiles', './assets/tiles.png')
 		
@@ -82,7 +82,7 @@ export default class GameState extends Phaser.State {
 		missileGroup = this.add.group();
 		buildingGroup = this.add.group();
 
-		song = this.add.audio('bensound-happyrock');
+		song = this.add.audio('bensound-ofeliasdream');
 		this.sound.setDecodedCallback(song, this.startMusic, this);
 
 		this.spawnBuilding(652, 961)
