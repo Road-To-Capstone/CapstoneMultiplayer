@@ -23,7 +23,7 @@ export default class HowToPlay extends Phaser.State {
         this.add.text(450, 450, 'Click b to switch weapons', {font: '25pt Megrim', fill: 'white'});
         let keys = this.add.sprite(50, 200, 'wasdkey');
         keys.scale.setTo(0.75);
-        this.add.text(900, 450, 'Right click to shoot!', {font: '25pt Megrim', fill: 'white'});
+        this.add.text(900, 450, 'Left click to shoot!', {font: '25pt Megrim', fill: 'white'});
         this.add.text(25, 600, 'Press Enter', {font: '35pt Megrim', fill: '#5C804B'});
         this.enter = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
     }
