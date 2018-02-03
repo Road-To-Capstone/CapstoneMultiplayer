@@ -9,7 +9,7 @@ export default class Missile {
         this.id = id;
         this.missleSpeed = 100;
 
-        this.sprite = this.game.add.sprite(0, 0, 'missile');
+        this.sprite = this.game.add.sprite(0, 0, 'Melee');
         this.game.physics.arcade.enableBody(this.sprite);
         this.sprite.physicsBodyType = Phaser.Physics.ARCADE
         this.sprite.anchor.setTo(0.5, 0.5);
