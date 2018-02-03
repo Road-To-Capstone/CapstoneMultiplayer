@@ -85254,7 +85254,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.load.image('tiles', './assets/tiles.png')
 		this.load.image('player', './assets/playerplaceholder.jpg')
 		this.load.image('building', './assets/buildingplaceholder.png')
-		this.load.image('missile', '/assets/missileplaceholder.png')
+		this.load.image('Melee', '/assets/missileplaceholder.png')
+		this.load.image('Lazer', '/assets/Lazer.png')
+		this.load.image('Machine Gun', '/assets/Machine Gun.png')
+		this.load.image('Rocket Launcher', '/assets/Rocket Launcher.png')
+		this.load.image('Chainsaw', '/assets/Chainsaw.png')
+		this.load.image('Flame Thrower', '/assets/Flame Thrower.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
 		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
 		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
@@ -91951,7 +91956,7 @@ class Missile {
         this.id = id;
         this.missleSpeed = 100;
 
-        this.sprite = this.game.add.sprite(0, 0, 'missile');
+        this.sprite = this.game.add.sprite(0, 0, itemName);
         this.game.physics.arcade.enableBody(this.sprite);
         this.sprite.physicsBodyType = __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Physics.ARCADE
         this.sprite.anchor.setTo(0.5, 0.5);
@@ -91965,12 +91970,12 @@ class Missile {
                 this.missleSpeed = 100;
                 break;
             case 'Machine Gun':
-                this.sprite.scale.setTo(0.15, 0.15);
+                this.sprite.scale.setTo(0.5, 0.5);
                 this.sprite.lifespan = 2000;
                 this.missleSpeed = 200;
                 break;
             case 'Flame Thrower':
-                this.sprite.scale.setTo(0.25, 0.25);
+                this.sprite.scale.setTo(1.5, 1.5);
                 this.sprite.lifespan = 1500;
                 this.missleSpeed = 150;
                 break;
@@ -91980,12 +91985,12 @@ class Missile {
                 this.missleSpeed = 500;
                 break;
             case 'Chainsaw':
-                this.sprite.scale.setTo(0.25, 0.25);
+                this.sprite.scale.setTo(1, 1);
                 this.sprite.lifespan = 650;
                 this.missleSpeed = 100;
                 break;
             case 'Lazer':
-                this.sprite.scale.setTo(0.15, 0.15);
+                this.sprite.scale.setTo(0.4, 0.4);
                 this.sprite.lifespan = 10000;
                 this.missleSpeed = 1000;
                 break;
