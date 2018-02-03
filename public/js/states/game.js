@@ -42,7 +42,7 @@ export default class GameState extends Phaser.State {
 		this.load.audio('bensound-happyrock', './assets/bensound-happyrock.mp3')
 		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
 		this.load.image('tiles', './assets/tiles.png')
-		
+		this.load.image('background', '/assets/background.png')
 		this.load.image('building', './assets/buildingplaceholder.png')
 		this.load.image('Melee', '/assets/missileplaceholder.png')
 		this.load.image('Lazer', '/assets/Lazer.png')
@@ -63,6 +63,8 @@ export default class GameState extends Phaser.State {
 			fill: '#ffffff'
 		})
 		text.fixedToCamera = true;
+
+		this.background = this.add.tileSprite(0,0,1920,1920, 'background')
 
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = socketio.connect();
