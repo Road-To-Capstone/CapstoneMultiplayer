@@ -85250,7 +85250,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 	preload() {
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
-		this.load.audio('bensound-happyrock', './assets/bensound-happyrock.mp3')
+		this.load.audio('bensound-ofeliasdream', './assets/bensound-ofeliasdream.mp3')
 		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Tilemap.TILED_JSON)
 		this.load.image('tiles', './assets/tiles.png')
 		this.load.image('background', '/assets/background.png')
@@ -85293,7 +85293,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		missileGroup = this.add.group();
 		buildingGroup = this.add.group();
 
-		song = this.add.audio('bensound-happyrock');
+		song = this.add.audio('bensound-ofeliasdream');
 		this.sound.setDecodedCallback(song, this.startMusic, this);
 
 		this.spawnBuilding(652, 961)
