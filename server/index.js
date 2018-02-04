@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketio(server).listen(server);
+const io = socketio.listen(server);
 
 app.use('/',express.static(config.publicDir));
 
@@ -30,7 +30,7 @@ const players = require('./players.js');
 const missiles = require('./missiles.js');
 const zombies = require('./zombies.js');
 
-io.on('connection', socket => {
+io.sockets.on('connection', socket => {
 	players.add(socket.id);
 	console.log(`player ${socket.id} added`)
 	io.emit('server:player-added', players.get(socket.id));
