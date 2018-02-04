@@ -85276,7 +85276,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		healthPercent.fixedToCamera = true;
 
 		this.world.setBounds(0, 0, 1920, 1920)
-		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default.a.connect();
+		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default()()
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
