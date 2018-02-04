@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketio(server);
+const io = socketio(server).listen(server);
 
 app.use('/',express.static(config.publicDir));
 
@@ -21,6 +21,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 //app.use('/api', require('./api'));
 
+server.listen(process.env.PORT || config.port, () => {
+	console.log(`Listening on ${process.env.PORT || config.port}`);
+});
 
 //-socket
 const players = require('./players.js');
@@ -100,9 +103,6 @@ io.on('connection', socket => {
 
 });
 //=socket
-server.listen(process.env.PORT || config.port, () => {
-	console.log(`Listening on ${process.env.PORT || config.port}`);
-});
 
 //creating new zombie id
 function newZombieId() {
