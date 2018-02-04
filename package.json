@@ -6,6 +6,7 @@
   "scripts": {
     "svdev": "./node_modules/.bin/nodemon --exec \"node server/index.js\" --watch server",
     "sv": "node server/index.js",
+    "start": "node server/index.js",
     "wbp": "./node_modules/.bin/webpack"
   },
   "keywords": [],

@@ -12,14 +12,14 @@ const io = socketio(server);
 
 app.use('/',express.static(config.publicDir));
 
-db.sync({force: false}).then(() => {
+/*db.sync({force: false}).then(() => {
 	//console.log('Database is synced')
 });
-
+*/
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use('/api', require('./api'));
+//app.use('/api', require('./api'));
 
 
 //-socket
