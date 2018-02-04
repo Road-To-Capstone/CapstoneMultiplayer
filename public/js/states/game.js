@@ -72,7 +72,7 @@ export default class GameState extends Phaser.State {
 		healthPercent.fixedToCamera = true;
 
 		this.world.setBounds(0, 0, 1920, 1920)
-		this.io = socketio()
+		this.io = socketio().connect('https://<url>', {reconnect: true, transports: ['websocket'], path:'/node_modules/socket.io/lib/socket.js'})
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
