@@ -100,7 +100,7 @@ io.on('connection', socket => {
 
 });
 //=socket
-server.listen(config.port, () => {
+server.listen(process.env.PORT || config.port, () => {
 	console.log(`Listening on ${config.port}`);
 });
 
