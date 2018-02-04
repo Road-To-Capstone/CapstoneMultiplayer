@@ -69,7 +69,7 @@ export default class Player {
 
 	update() {
 		/* ANIMATIONS */
-		console.log("this.pointerx", this.game.input.activePointer.worldX ,"this.sprite.x", this.sprite.x)
+		//console.log("this.pointerx", this.game.input.activePointer.worldX ,"this.sprite.x", this.sprite.x)
 		var xDiff = Math.abs(this.game.input.activePointer.worldX - this.sprite.x)
 		var yDiff = Math.abs(this.game.input.activePointer.worldY - this.sprite.y)
 		if (xDiff > yDiff){
@@ -160,6 +160,5 @@ export default class Player {
 		var randomNumber = Math.floor(Math.random() * 5)+1
 		if (this.sprite.ammo[randomNumber]+ammoToAdd[randomNumber]< maxAmmo[randomNumber])
 			this.sprite.ammo[randomNumber] += ammoToAdd[randomNumber]
-	//	console.log(randomNumber)
 	}
 }

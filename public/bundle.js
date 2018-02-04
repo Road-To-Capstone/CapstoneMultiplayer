@@ -85459,9 +85459,18 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.shadowTexture.dirty = true;
 	}
 
+	/*lightningStrike(){
+		let lightningStrike = this.add.bitmapData(1920,1920)
+
+		lightningStrike.context.fillStyle = 'rgb(255,255,255)'
+		lightningStrike.context.fillRect(0, 0, 1920, 1920);
+
+		lightningStrike.destroy()
+	}*/
+
 	addRain(){
 		
-		   let rainParticle = this.game.add.bitmapData(15, 50);
+		   let rainParticle = this.add.bitmapData(15, 50);
 		
 		   rainParticle.ctx.rect(0, 0, 15, 50);
 		   rainParticle.ctx.fillStyle = '#9cc9de';
@@ -92168,7 +92177,7 @@ class Missile {
                 this.missleSpeed = 200;
                 break;
             case 'Flame Thrower':
-                this.sprite.scale.setTo(1.5, 1.5);
+                this.sprite.scale.setTo(0.5, 0.5);
                 this.sprite.lifespan = 1500;
                 this.missleSpeed = 150;
                 break;
@@ -92288,7 +92297,7 @@ class Player {
 
 	update() {
 		/* ANIMATIONS */
-		console.log("this.pointerx", this.game.input.activePointer.worldX ,"this.sprite.x", this.sprite.x)
+		//console.log("this.pointerx", this.game.input.activePointer.worldX ,"this.sprite.x", this.sprite.x)
 		var xDiff = Math.abs(this.game.input.activePointer.worldX - this.sprite.x)
 		var yDiff = Math.abs(this.game.input.activePointer.worldY - this.sprite.y)
 		if (xDiff > yDiff){
@@ -92379,7 +92388,6 @@ class Player {
 		var randomNumber = Math.floor(Math.random() * 5)+1
 		if (this.sprite.ammo[randomNumber]+ammoToAdd[randomNumber]< maxAmmo[randomNumber])
 			this.sprite.ammo[randomNumber] += ammoToAdd[randomNumber]
-	//	console.log(randomNumber)
 	}
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Player;
