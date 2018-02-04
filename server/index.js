@@ -101,7 +101,7 @@ io.on('connection', socket => {
 });
 //=socket
 server.listen(process.env.PORT || config.port, () => {
-	console.log(`Listening on ${config.port}`);
+	console.log(`Listening on ${process.env.PORT || config.port}`);
 });
 
 //creating new zombie id
