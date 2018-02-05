@@ -34,6 +34,7 @@ io.sockets.on('connection', socket => {
 	players.add(socket.id);
 	console.log(`player ${socket.id} added`)
 	io.emit('server:player-added', players.get(socket.id));
+	socket.broadcast.emit('server:players-added', players.get())
 
 	socket.on('client:give-me-players', () => {
 		socket.emit('server:all-players', players.get());

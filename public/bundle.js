@@ -85592,6 +85592,10 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			});
 		});
 
+		this.io.on('server:players-added', data => {
+			players = data;
+		});
+
 		this.io.on('server:all-zombies', data => {
 			data.forEach(newZombie => {
 				this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
