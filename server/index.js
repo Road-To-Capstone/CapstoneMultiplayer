@@ -66,7 +66,7 @@ io.sockets.on('connection', socket => {
 
 	// data is id: z.id, posX: z.sprite.x, posY: z.sprite.y
 	socket.on('client:zombie-moved', data => {
-		socket.broadcast.emit('server:zombie-moved', zombies.get(data.id));
+		io.emit('server:zombie-moved', zombies.get(data.id));
 		zombies.set(data.id, {
 			posX: data.posX,
 			posY: data.posY
