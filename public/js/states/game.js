@@ -146,11 +146,11 @@ export default class GameState extends Phaser.State {
 			if(voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
 
 	
-					this.io.emit('client:player-moved', {
-						id: this.io.id,
-						posX: player.sprite.x,
-						posY: player.sprite.y
-					});
+			this.io.emit('client:player-moved', {
+				id: this.io.id,
+				posX: player.sprite.x,
+				posY: player.sprite.y
+			});
 	
 
 			this.updateShadowTexture(player);
@@ -172,7 +172,7 @@ export default class GameState extends Phaser.State {
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
-	/*		if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
+			if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
 				this.io.emit('client:ask-to-create-missile', {
 					id: this.io.id,
@@ -183,7 +183,7 @@ export default class GameState extends Phaser.State {
 					toY: this.input.activePointer.worldY
 				})
 			}
-			if (this.zombies.length < 2) {
+/*		if (this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie');
 			}
 
@@ -207,7 +207,7 @@ export default class GameState extends Phaser.State {
 					this.physics.arcade.collide(e.sprite, buildingGroup);
 				});
 
-			}
+			}*/
 
 			if (this.time.now > nextMissileCollision) {
 				nextMissileCollision = this.time.now + missileCollisionRate;
@@ -215,7 +215,7 @@ export default class GameState extends Phaser.State {
 					z.sprite.hasOverlapped = true;
 				})
 			}
-*/
+
 			this.physics.arcade.overlap(zombieGroup, missileGroup, this.handleMissileCollision, null, this)
 			this.setHealthBarPercent();
 			this.world.bringToTop(text.setText(player.sprite.selectedItem + " | " + player.sprite.ammo[player.sprite.ammoIndex]))
