@@ -3,7 +3,7 @@ module.exports = new(class Missiles {
 	constructor() {
 		this.missiles = [];
 	}
-	add(id, posX, posY, itemName,toX,toY) {
+	add(id, posX, posY, itemName, toX, toY) {
 		const newMissile = {
 			id,
 			posX,
