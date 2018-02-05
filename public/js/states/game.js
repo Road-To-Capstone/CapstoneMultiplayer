@@ -161,7 +161,9 @@ export default class GameState extends Phaser.State {
 					id: this.io.id,
 					posX: player.sprite.x,
 					posY: player.sprite.y,
-					itemName: player.sprite.selectedItem
+					itemName: player.sprite.selectedItem,
+					toX: this.input.activePointer.worldX,
+					toY:  this.input.activePointer.worldY
 				})
 			}
 			if (this.zombies.length < 2) {
@@ -319,8 +321,8 @@ export default class GameState extends Phaser.State {
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-	fire(posX, posY, itemName, id) {
-		this.missile = new Missile(this, posX, posY, this.input.activePointer.worldX, this.input.activePointer.worldY, itemName, id)
+	fire(posX, posY, itemName, id, toX, toY) {
+		this.missile = new Missile(this, posX, posY, toX, toY, itemName, id)
 		this.missiles.push(this.missile);
 		missileGroup.add(this.missile.sprite)
 		zombieGroup.forEach((e) => {
@@ -387,7 +389,7 @@ export default class GameState extends Phaser.State {
 					players.push(new Player(e.id, this, e.posX, e.posY, e.angle));
 			});
 		});
-		
+
 		this.io.on('server:all-zombies', data => {
 			data.forEach(newZombie => {
 				this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
@@ -447,7 +449,7 @@ export default class GameState extends Phaser.State {
 		})
 
 		this.io.on('server:missile-added', newMissile => {
-			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName, newMissile.id)
+			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName, newMissile.id, newMissile.toX, newMissile.toY)
 		});
 	}
 
