@@ -12,7 +12,7 @@ const io = socketio(server);
 
 app.use('/',express.static(config.publicDir));
 
-db.sync({force: false}).then(() => {
+db.sync({force: true}).then(() => {
 	//console.log('Database is synced')
 });
 

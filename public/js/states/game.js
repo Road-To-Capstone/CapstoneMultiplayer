@@ -122,7 +122,7 @@ export default class GameState extends Phaser.State {
 			
 			
 			let voiceRecCommand = transcriptArray.shift()
-			startShooting = this.pewCommand(voiceRecCommand) 
+			startShooting = this.pewCommand(voiceRecCommand);
 			if (startShootingTimer < this.time.now){
 				startShooting = false;
 			}
@@ -136,6 +136,7 @@ export default class GameState extends Phaser.State {
 				cameraSet = true;
 			}
 			const player = this.getPlayerById(this.io.id);
+			if(voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
 			this.io.emit('client:player-moved', {
 				id: this.io.id,
 				posX: player.sprite.x,
@@ -161,6 +162,8 @@ export default class GameState extends Phaser.State {
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
+
+			// console.log('===== switchWeapon', player.sprite);
 			if ((startShooting|| this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
 				this.io.emit('client:ask-to-create-missile', {
@@ -323,6 +326,32 @@ export default class GameState extends Phaser.State {
 		this.zombie = new Zombie(id, this, x, y);
 		this.zombies.push(this.zombie);
 		zombieGroup.add(this.zombie.sprite)
+	}
+
+	switchWeapon(voice, player) {
+		let voiceTemp = voice.toLowerCase();
+		if(voiceTemp === 'melee') {
+			this.switchWeaponHelper(0, player);
+		} else if(voiceTemp === 'machine') {
+			this.switchWeaponHelper(1, player);
+		} else if(voiceTemp === 'flame') {
+			this.switchWeaponHelper(2, player);
+		} else if(voiceTemp === 'rocket') {
+			this.switchWeaponHelper(3, player);
+		} else if(voiceTemp === 'chain') {
+			this.switchWeaponHelper(4, player);
+		} else if(voiceTemp === 'lazer') {
+			this.switchWeaponHelper(5, player);
+		} else {
+			return;
+		}
+	}
+
+	switchWeaponHelper(index, player) {
+		player.sprite.selectedItem = player.sprite.items[index];
+		player.sprite.ammoIndex = index;
+		player.sprite.fireRateIndex = index;
+		player.sprite.selectedFireRate = player.sprite.fireRates[index];
 	}
 
 	fire(posX, posY, itemName, id) {
