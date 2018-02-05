@@ -85184,7 +85184,6 @@ __webpack_require__(26)(__webpack_require__(82))
 /* 37 */
 /***/ (function(module, exports) {
 
-
 module.exports = {
 	gameWidth: 1920,
 	gameHeight: 1920
@@ -85230,7 +85229,7 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	startShootingDuration = 5000;
 
 //const SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
-const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)
+const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)
 
 
 class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
@@ -85249,17 +85248,16 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.load.image('tiles', './assets/tiles.png')
 		this.load.image('background', '/assets/background.png')
 		this.load.image('building', './assets/buildingplaceholder.png')
-		this.load.image('Melee', '/assets/missileplaceholder.png')
+		this.load.image('Melee', '/assets/Melee.png')
 		this.load.image('Lazer', '/assets/Lazer.png')
 		this.load.image('Machine Gun', '/assets/Machine Gun.png')
 		this.load.image('Rocket Launcher', '/assets/Rocket Launcher.png')
 		this.load.image('Chainsaw', '/assets/Chainsaw.png')
 		this.load.image('Flame Thrower', '/assets/Flame Thrower.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
-		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
-		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
-		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
-		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
+		this.load.spritesheet('player', '/assets/playerspritesheet.png', 24, 32)
+		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png', 430, 519, 10)
+		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png', 629, 526, 12)
 	}
 
 	create() {
@@ -85269,14 +85267,18 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		})
 		text.fixedToCamera = true;
 
-		this.background = this.add.tileSprite(0,0,1920,1920, 'background')
+		this.background = this.add.tileSprite(0, 0, 1920, 1920, 'background')
 		healthPercent = this.add.text(20, this.game.height - 100, '100%', {
 			fill: '#ffffff'
 		});
 		healthPercent.fixedToCamera = true;
 
 		this.world.setBounds(0, 0, 1920, 1920)
-		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default()().connect('https://<url>', {reconnect: true, transports: ['websocket'], path:'/socket.io'})
+		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default()().connect('https://<url>', {
+			reconnect: true,
+			transports: ['websocket'],
+			path: '/socket.io'
+		})
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
@@ -85296,7 +85298,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 		this.shadowTexture = this.add.bitmapData(1920, 1920)
 
-		var lightSprite = this.game.add.image(0,0, this.shadowTexture)
+		var lightSprite = this.game.add.image(0, 0, this.shadowTexture)
 
 		lightSprite.blendMode = __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.blendModes.MULTIPLY
 
@@ -85305,7 +85307,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		recognition.start();
 
 		recognition.onresult = event => {
-			for (let i = event.resultIndex; i<event.results.length;i++){
+			for (let i = event.resultIndex; i < event.results.length; i++) {
 				const transcript = event.results[i][0].transcript
 				if (event.results[i].isFinal) finalTranscript += transcript + " "
 			}
@@ -85317,17 +85319,17 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 	update() {
 		if (this.doneLoading) {
-			
-			
+
+
 			let voiceRecCommand = transcriptArray.shift()
-			startShooting = this.pewCommand(voiceRecCommand) 
-			if (startShootingTimer < this.time.now){
+			startShooting = this.pewCommand(voiceRecCommand)
+			if (startShootingTimer < this.time.now) {
 				startShooting = false;
 			}
 
-			
+
 			console.log("voiceRecCommand is", voiceRecCommand)
-			
+
 			if (!cameraSet) {
 				this.camera.follow(this.getPlayerById(this.io.id).sprite)
 				this.setUpHealthBar()
@@ -85359,7 +85361,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
-			if ((startShooting|| this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
+			if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
 				this.io.emit('client:ask-to-create-missile', {
 					id: this.io.id,
@@ -85367,7 +85369,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 					posY: player.sprite.y,
 					itemName: player.sprite.selectedItem,
 					toX: this.input.activePointer.worldX,
-					toY:  this.input.activePointer.worldY
+					toY: this.input.activePointer.worldY
 				})
 			}
 			if (this.zombies.length < 2) {
@@ -85381,15 +85383,15 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 						this.io.emit('client:kill-this-zombie', e.id);
 						player.sprite.score += 1000;
 						player.giveAmmo();
-						var zombieDeath = this.add.sprite(e.sprite.x,e.sprite.y,'zombiedeath');
+						var zombieDeath = this.add.sprite(e.sprite.x, e.sprite.y, 'zombiedeath');
 						zombieDeath.anchor.setTo(0.5, 0.5);
-						zombieDeath.scale.setTo(0.12,0.12);
-				
-						var animatedDeath = zombieDeath.animations.add('zombiedeath',[4,5,6,3,8,9,10,7,0,1,2,11,11,11,11,11,11,11,11,11]  ,6, false);
+						zombieDeath.scale.setTo(0.12, 0.12);
+
+						var animatedDeath = zombieDeath.animations.add('zombiedeath', [4, 5, 6, 3, 8, 9, 10, 7, 0, 1, 2, 11, 11, 11, 11, 11, 11, 11, 11, 11], 6, false);
 						animatedDeath.killOnComplete = true;
-						
+
 						zombieDeath.animations.play('zombiedeath');
-				}
+					}
 					this.physics.arcade.collide(e.sprite, zombieGroup);
 					this.physics.arcade.collide(e.sprite, buildingGroup);
 				});
@@ -85410,7 +85412,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			if (player.sprite.playerHealth <= 0) {
 				this.io.emit('client:game-over', player.id);
 				this.players.forEach((e, i) => {
-					if(e.id === player.id) {
+					if (e.id === player.id) {
 						e.sprite.destroy();
 						this.players.splice(i, 1);
 					}
@@ -85437,65 +85439,55 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 	updateShadowTexture(player) {
 		this.shadowTexture.context.fillStyle = 'rgb(0, 0, 0)'; //this number controls the outside darkness
 		this.shadowTexture.context.fillRect(0, 0, 1920, 1920);
-	
+
 		// Draw circle of light with a soft edge
 		var gradient = this.shadowTexture.context.createRadialGradient(
 			player.sprite.x, player.sprite.y, this.LIGHT_RADIUS * 0.01,
 			player.sprite.x, player.sprite.y, this.LIGHT_RADIUS);
 		gradient.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
 		gradient.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
-	
+
 		this.shadowTexture.context.beginPath();
 		this.shadowTexture.context.fillStyle = gradient;
 		this.shadowTexture.context.arc(player.sprite.x, player.sprite.y,
-			this.LIGHT_RADIUS, 0, Math.PI*2);
+			this.LIGHT_RADIUS, 0, Math.PI * 2);
 		this.shadowTexture.context.fill();
-	
+
 		// This just tells the engine it should update the texture cache
 		this.shadowTexture.dirty = true;
 	}
 
-	/*lightningStrike(){
-		let lightningStrike = this.add.bitmapData(1920,1920)
+	addRain() {
 
-		lightningStrike.context.fillStyle = 'rgb(255,255,255)'
-		lightningStrike.context.fillRect(0, 0, 1920, 1920);
+		let rainParticle = this.add.bitmapData(15, 50);
 
-		lightningStrike.destroy()
-	}*/
+		rainParticle.ctx.rect(0, 0, 15, 50);
+		rainParticle.ctx.fillStyle = '#9cc9de';
+		rainParticle.ctx.fill();
 
-	addRain(){
-		
-		   let rainParticle = this.add.bitmapData(15, 50);
-		
-		   rainParticle.ctx.rect(0, 0, 15, 50);
-		   rainParticle.ctx.fillStyle = '#9cc9de';
-		   rainParticle.ctx.fill();
-		
-		   this.emitter = this.add.emitter(this.world.centerX, -300, 400);
-		
-		   this.emitter.width = this.game.world.width;
-		   this.emitter.angle = 10;
-		
-		   this.emitter.makeParticles(rainParticle);
-		
-		   this.emitter.minParticleScale = 0.1;
-		   this.emitter.maxParticleScale = 0.3;
-		
-		   this.emitter.setYSpeed(600, 1000);
-		   this.emitter.setXSpeed(-5, 5);
-		
-		   this.emitter.minRotation = 0;
-		   this.emitter.maxRotation = 0;
-		
-		   this.emitter.start(false, 1600, 5, 0);
-		
-	   }
+		this.emitter = this.add.emitter(this.world.centerX, -300, 400);
 
-	pewCommand(speech){
-		
-		if (speech === 'pew' || speech === 'q' || speech === 'Q' || speech === 'cute' || speech === 'shoot')
-		{	
+		this.emitter.width = this.game.world.width;
+		this.emitter.angle = 10;
+
+		this.emitter.makeParticles(rainParticle);
+
+		this.emitter.minParticleScale = 0.1;
+		this.emitter.maxParticleScale = 0.3;
+
+		this.emitter.setYSpeed(600, 1000);
+		this.emitter.setXSpeed(-5, 5);
+
+		this.emitter.minRotation = 0;
+		this.emitter.maxRotation = 0;
+
+		this.emitter.start(false, 1600, 5, 0);
+
+	}
+
+	pewCommand(speech) {
+
+		if (speech === 'pew' || speech === 'q' || speech === 'Q' || speech === 'cute' || speech === 'shoot') {
 			startShootingTimer = this.time.now + startShootingDuration;
 			return true
 		}
@@ -85542,7 +85534,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			let currentPlayer = this.getPlayerById(this.io.id);
 			zombie.health -= weaponDamage[currentPlayer.sprite.ammoIndex];
 			currentPlayer.sprite.score += 100;
-			//console.log('current Player====', currentPlayer.sprite.score);
 		}
 	}
 
@@ -85607,7 +85598,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 		this.io.on('server:player-disconnected', id => { //if a player has disconnected
 			this.players.forEach((e, i) => {
-				if(e.id === id) {
+				if (e.id === id) {
 					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}
@@ -85620,7 +85611,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 		this.io.on('server:game-over', id => {
 			this.players.forEach((e, i) => {
-				if(e.id === id) {
+				if (e.id === id) {
 					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}
@@ -85645,7 +85636,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 		this.io.on('server:kill-this-zombie', id => {
 			this.zombies.forEach((z, i) => {
-				if(z.id === id) {
+				if (z.id === id) {
 					z.sprite.destroy();
 					this.zombies.splice(i, 1);
 				}
@@ -85671,50 +85662,21 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 	zombieAI(zombie) {
 		let mindex = this.findClosestPlayer(zombie);
-		this.physics.arcade.moveToXY(zombie.sprite,this.players[mindex].sprite.position.x ,this.players[mindex].sprite.position.y, zombie.sprite.SPEED)
-		/*var targetAngle = this.math.angleBetween(
-			zombie.sprite.position.x, zombie.sprite.position.y,
-			this.players[mindex].sprite.position.x, this.players[mindex].sprite.position.y // this needs to be player x and y that updates dynamically
-		)*/
-		 
-		if(zombie.sprite.body.velocity.x <=0 && zombie.sprite.isRightFacing) {
+		this.physics.arcade.moveToXY(
+			zombie.sprite,
+			this.players[mindex].sprite.position.x,
+			this.players[mindex].sprite.position.y,
+			zombie.sprite.SPEED
+		)
+
+		if (zombie.sprite.body.velocity.x <= 0 && zombie.sprite.isRightFacing) {
 			zombie.sprite.scale.x *= -1;
 			zombie.sprite.isRightFacing = false;
-		 }
-		 else if (zombie.sprite.body.velocity.x > 0 && !zombie.sprite.isRightFacing) {
+		} else if (zombie.sprite.body.velocity.x > 0 && !zombie.sprite.isRightFacing) {
 			zombie.sprite.scale.x *= -1;
-		  	zombie.sprite.isRightFacing = true;
-		 }
-	 
-/*
-		// Gradually (this.TURN_RATE) aim the Invader towards the target angle
-		if (zombie.sprite.rotation !== targetAngle) {
-			// Calculate difference between the current angle and targetAngle
-			var delta = targetAngle - zombie.sprite.rotation
-
-			// Keep it in range from -180 to 180 to make the most efficient turns.
-			if (delta > Math.PI) delta -= Math.PI * 2
-			if (delta < -Math.PI) delta += Math.PI * 2
-
-			if (delta > 0) {
-				// Turn clockwise
-				zombie.sprite.angle += zombie.sprite.TURN_RATE
-			} else {
-				// Turn counter-clockwise
-				zombie.sprite.angle -= zombie.sprite.TURN_RATE
-			}
-
-			// Just set angle to target angle if they are close
-			if (Math.abs(delta) < this.math.degToRad(zombie.sprite.TURN_RATE)) {
-				zombie.sprite.rotation = targetAngle
-			}
-		}*/
-		//this.updateVelocity(zombie.sprite.SPEED, zombie.sprite.SPEED, zombie)
+			zombie.sprite.isRightFacing = true;
+		}
 	}
-	/*updateVelocity(xVelocity, yVelocity, zombie) {
-		zombie.sprite.body.velocity.x = xVelocity
-		zombie.sprite.body.velocity.y = yVelocity
-	}*/
 
 	findClosestPlayer(zombie) {
 		let minSet = {
@@ -85738,10 +85700,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		if (this.time.now > zombiesCoolDown) {
 			zombiesCoolDown = zombiesAttack + this.time.now
 			player.playerHealth -= 10;
-		
-			//console.log(zombie.sprite);
-			/*zombie.animations.add('zombieattack')
-			zombie.animations.play('zombieattack',2)*/
 		}
 	}
 }
@@ -85775,68 +85733,85 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
         this.load.tilemap('BaseMap', './assets/BaseMap.json', null, __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Tilemap.TILED_JSON);
         this.selected = 0;
         this.selectArray = ['PLAY AGAIN', 'SCORE BOARD'];
-        // this.moveCounter = 0;
-	    this.isGlowing = false;
-	    // this.glowCounter = 0;
-	    this.shadowX = 430;
+        this.isGlowing = false;
+        this.shadowX = 430;
         this.shadowY = 400;
     }
 
     create() {
         this.setUpMap();
-        this.add.text(254, 50, 'GAME OVER', {font: '72pt Megrim', fill: 'white'});
-        this.add.text(100, 126, `${this.name} SCORE: ${this.score}`, {font: '84pt Megrim', fill: '#cc00cc'});
-        this.add.text(430, 400, this.selectArray[this.selected], {font: '42pt Megrim', fill: '#5C804B'});
-        shadowText = this.add.text(this.shadowX, this.shadowY, 'PLAY AGAIN', {font: '42pt Megrim', fill: '#66FB21'});
-        this.add.text(430, 475, 'SCORE BOARD', {font: '42pt Megrim', fill: '#5C804B'});
+        this.add.text(254, 50, 'GAME OVER', {
+            font: '72pt Megrim',
+            fill: 'white'
+        });
+        this.add.text(100, 126, `${this.name} SCORE: ${this.score}`, {
+            font: '84pt Megrim',
+            fill: '#cc00cc'
+        });
+        this.add.text(430, 400, this.selectArray[this.selected], {
+            font: '42pt Megrim',
+            fill: '#5C804B'
+        });
+        shadowText = this.add.text(this.shadowX, this.shadowY, 'PLAY AGAIN', {
+            font: '42pt Megrim',
+            fill: '#66FB21'
+        });
+        this.add.text(430, 475, 'SCORE BOARD', {
+            font: '42pt Megrim',
+            fill: '#5C804B'
+        });
 
         this.enter = this.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.ENTER);
         this.kup = this.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.W);
-        // this.dright = this.input.keyboard.addKey(Phaser.Keyboard.D);
         this.sdown = this.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.S);
-        // this.aleft = this.input.keyboard.addKey(Phaser.Keyboard.A);
-        __WEBPACK_IMPORTED_MODULE_1_axios___default.a.post('/api/score-post', {name: this.name, score: this.score})
-        .then(res => res.data)
-        .then(result => console.log('axios =========',result));
+        __WEBPACK_IMPORTED_MODULE_1_axios___default.a.post('/api/score-post', {
+                name: this.name,
+                score: this.score
+            })
+            .then(res => res.data)
+            .then(result => console.log('axios =========', result));
     }
 
     setUpMap() {
-		map = this.add.tilemap('BaseMap');
+        map = this.add.tilemap('BaseMap');
     }
-    
+
     update() {
         //Selecting options
-        if (this.kup.isDown){
-            if (this.selectArray[this.selected] !== 'PLAY AGAIN'){
+        if (this.kup.isDown) {
+            if (this.selectArray[this.selected] !== 'PLAY AGAIN') {
                 this.selected--;
                 shadowText.destroy();
                 this.shadowY -= 75;
-                shadowText = this.add.text(this.shadowX, this.shadowY, this.selectArray[this.selected], {font: '42pt Megrim', fill: '#66FB21'});
+                shadowText = this.add.text(this.shadowX, this.shadowY, this.selectArray[this.selected], {
+                    font: '42pt Megrim',
+                    fill: '#66FB21'
+                });
             } else {
                 return;
             }
         }
 
-        if (this.sdown.isDown){
-            if (this.selectArray[this.selected] !== 'SCORE BOARD'){
+        if (this.sdown.isDown) {
+            if (this.selectArray[this.selected] !== 'SCORE BOARD') {
                 this.selected++;
                 shadowText.destroy();
                 this.shadowY += 75;
-                shadowText = this.add.text(this.shadowX, this.shadowY, this.selectArray[this.selected], {font: '42pt Megrim', fill: '#66FB21'});
-            }
-            else {
+                shadowText = this.add.text(this.shadowX, this.shadowY, this.selectArray[this.selected], {
+                    font: '42pt Megrim',
+                    fill: '#66FB21'
+                });
+            } else {
                 return;
             }
         }
 
         //Start mode
-        if (this.enter.isDown){
+        if (this.enter.isDown) {
             let selection = this.selectArray[this.selected];
-            if (selection === 'PLAY AGAIN'){
+            if (selection === 'PLAY AGAIN') {
                 location.reload();
-            } else if (selection === 'SCORE BOARD'){
-                // game.add.text(465, 530, 'CANNOT SEE HIGH SCORES YET', {font: '14pt Megrim', fill: '#5C804B'})
-                // this.state.start('HighScore')
+            } else if (selection === 'SCORE BOARD') {
                 this.state.start('ScoreBoard');
             }
         }
@@ -85868,24 +85843,36 @@ class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
 
     create() {
-        this.add.text(430, 50, 'How To Play', {font: '50pt Megrim', fill: 'white'});
+        this.add.text(430, 50, 'How To Play', {
+            font: '50pt Megrim',
+            fill: 'white'
+        });
         this.stage.backgroundColor = "black";
         let mouse = this.add.sprite(800, 150, 'mouse');
         mouse.scale.setTo(0.5, 0.5);
         let bkey = this.add.sprite(515, 200, 'bkey');
         bkey.scale.setTo(0.45, 0.45);
-        this.add.text(450, 450, 'Click b to switch weapons', {font: '25pt Megrim', fill: 'white'});
+        this.add.text(450, 450, 'Click b to switch weapons', {
+            font: '25pt Megrim',
+            fill: 'white'
+        });
         let keys = this.add.sprite(50, 200, 'wasdkey');
         keys.scale.setTo(0.75);
-        this.add.text(900, 450, 'Left click to shoot!', {font: '25pt Megrim', fill: 'white'});
-        this.add.text(25, 600, 'Press Enter', {font: '35pt Megrim', fill: '#5C804B'});
+        this.add.text(900, 450, 'Left click to shoot!', {
+            font: '25pt Megrim',
+            fill: 'white'
+        });
+        this.add.text(25, 600, 'Press Enter', {
+            font: '35pt Megrim',
+            fill: '#5C804B'
+        });
         this.enter = this.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.ENTER);
     }
-    
+
     update() {
-        if (this.enter.isDown){
+        if (this.enter.isDown) {
             this.state.start('MenuState');
-         }
+        }
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = HowToPlay;
@@ -85982,50 +85969,83 @@ class Preload extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
 
     create() {
-        // this.stage.backgroundColor = "#4488AA";
         let background = this.add.sprite(8, 0, 'background');
         background.scale.setTo(1.55);
         let logo = this.add.sprite(400, 50, 'logo');
         logo.alpha = 0;
-        this.add.tween(logo).to( { alpha: 1 }, 2000, __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Easing.Linear.None, true, 0, 1000, true);
-        this.add.text(400, 580, 'LOADING ', {font: '50pt Megrim', fill: 'black'});
+        this.add.tween(logo).to({
+            alpha: 1
+        }, 2000, __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Easing.Linear.None, true, 0, 1000, true);
+        this.add.text(400, 580, 'LOADING ', {
+            font: '50pt Megrim',
+            fill: 'black'
+        });
     }
-    
+
     update() {
         this.counter++
-        if (this.counter > 350){
-          this.state.start('HowToPlay')
+            if (this.counter > 350) {
+                this.state.start('HowToPlay')
+            }
+        if (this.counter % 100 === 0) {
+            this.add.text(700, 580, '. ', {
+                font: '50pt Megrim',
+                fill: 'black'
+            });
         }
-        //This is to load the Megrin font before it actually needs to be used
-        if (this.counter%100 === 0){
-          this.add.text(700, 580, '. ', {font: '50pt Megrim', fill: 'black'});
+        if (this.counter % 100 === 10) {
+            this.add.text(700, 580, '. . ', {
+                font: '50pt Megrim',
+                fill: 'black'
+            });
         }
-        if (this.counter%100 === 10){
-          this.add.text(700, 580, '. . ', {font: '50pt Megrim', fill: 'black'});
+        if (this.counter % 100 === 20) {
+            this.add.text(700, 580, '. . .', {
+                font: '50pt Megrim',
+                fill: 'black'
+            });
         }
-        if(this.counter%100 === 20) {
-            this.add.text(700, 580, '. . .', {font: '50pt Megrim', fill: 'black'});
+        if (this.counter % 100 === 30) {
+            this.add.text(700, 580, '. . . .', {
+                font: '50pt Megrim',
+                fill: 'black'
+            });
         }
-        if(this.counter%100 === 30) {
-            this.add.text(700, 580, '. . . .', {font: '50pt Megrim', fill: 'black'});
+        if (this.counter % 100 === 40) {
+            this.add.text(700, 580, '. . . . .', {
+                font: '50pt Megrim',
+                fill: 'black'
+            });
         }
-        if(this.counter%100 === 40) {
-            this.add.text(700, 580, '. . . . .', {font: '50pt Megrim', fill: 'black'});
+        if (this.counter % 100 === 50) {
+            this.add.text(700, 580, '. . . . . .', {
+                font: '50pt Megrim',
+                fill: 'black'
+            });
         }
-        if(this.counter%100 === 50) {
-            this.add.text(700, 580, '. . . . . .', {font: '50pt Megrim', fill: 'black'});
+        if (this.counter % 100 === 60) {
+            this.add.text(700, 580, '. . . . . . .', {
+                font: '50pt Megrim',
+                fill: 'black'
+            });
         }
-        if(this.counter%100 === 60) {
-            this.add.text(700, 580, '. . . . . . .', {font: '50pt Megrim', fill: 'black'});
+        if (this.counter % 100 === 70) {
+            this.add.text(700, 580, '. . . . . . . .', {
+                font: '50pt Megrim',
+                fill: 'black'
+            });
         }
-        if(this.counter%100 === 70) {
-            this.add.text(700, 580, '. . . . . . . .', {font: '50pt Megrim', fill: 'black'});
+        if (this.counter % 100 === 80) {
+            this.add.text(700, 580, '. . . . . . . . .', {
+                font: '50pt Megrim',
+                fill: 'black'
+            });
         }
-        if(this.counter%100 === 80) {
-            this.add.text(700, 580, '. . . . . . . . .', {font: '50pt Megrim', fill: 'black'});
-        }
-        if(this.counter%100 === 90) {
-            this.add.text(700, 580, '. . . . . . . . . .', {font: '50pt Megrim', fill: 'black'});
+        if (this.counter % 100 === 90) {
+            this.add.text(700, 580, '. . . . . . . . . .', {
+                font: '50pt Megrim',
+                fill: 'black'
+            });
         }
     }
 }
@@ -86048,12 +86068,15 @@ class ScoreBoard extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
 
     preload() {
-       
+
     }
 
     create() {
         this.colorArray = ['#ff33ff', '#66FC20', '#60FA19', '#59F810', '#51F207', '#4BDE06', '#46CE07', '#41BE07', '#3CB007', '#37A106']
-        this.add.text(315, 30, 'SCORE BOARD', {font: '60pt Megrim', fill: 'white'})
+        this.add.text(315, 30, 'SCORE BOARD', {
+            font: '60pt Megrim',
+            fill: 'white'
+        })
 
         /*axios.get('/api/score')
         .then(res => res.data)
@@ -86072,10 +86095,10 @@ class ScoreBoard extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
         });*/
         this.enter = this.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.ENTER);
     }
-    
+
     update() {
-        if (this.enter.isDown){
-           location.reload();
+        if (this.enter.isDown) {
+            location.reload();
         }
     }
 }
@@ -92123,17 +92146,15 @@ class game extends __WEBPACK_IMPORTED_MODULE_2_phaser___default.a.Game {
 		const docElement = document.documentElement
 		const width = docElement.clientWidth
 		const height = docElement.clientHeight
-	
-		super(width,height,__WEBPACK_IMPORTED_MODULE_2_phaser___default.a.AUTO);
+
+		super(width, height, __WEBPACK_IMPORTED_MODULE_2_phaser___default.a.AUTO);
 		this.state.add('GameOver', __WEBPACK_IMPORTED_MODULE_5__states_gameOver__["a" /* default */]);
 		this.state.add('GameState', __WEBPACK_IMPORTED_MODULE_4__states_game__["a" /* default */]);
 		this.state.add('MenuState', __WEBPACK_IMPORTED_MODULE_6__states_menu__["a" /* default */]);
 		this.state.add('ScoreBoard', __WEBPACK_IMPORTED_MODULE_7__states_scoreboard__["a" /* default */]);
 		this.state.add('Preload', __WEBPACK_IMPORTED_MODULE_8__states_preload__["a" /* default */]);
 		this.state.add('HowToPlay', __WEBPACK_IMPORTED_MODULE_9__states_howtoplay__["a" /* default */]);
-		// this.state.start('HowToPlay');
 		this.state.start('Preload');
-		// this.state.start('MenuState');
 	}
 }
 
@@ -92167,7 +92188,7 @@ class Missile {
         this.sprite.outOfBoundsKill = true;
         switch (itemName) {
             case 'Melee':
-                this.sprite.scale.setTo(0.25, 0.25);
+                this.sprite.scale.setTo(0.1, 0.1);
                 this.sprite.lifespan = 250;
                 this.missleSpeed = 100;
                 break;
@@ -92192,7 +92213,7 @@ class Missile {
                 this.missleSpeed = 100;
                 break;
             case 'Lazer':
-                this.sprite.scale.setTo(0.4, 0.4);
+                this.sprite.scale.setTo(0.1, 0.1);
                 this.sprite.lifespan = 10000;
                 this.missleSpeed = 1000;
                 break;
@@ -92282,47 +92303,42 @@ class Player {
 		this.sprite.playerHealth = 100
 		this.sprite.playerMaxHealth = 100
 
-		this.sprite.animations.add('walk down', [0,1,2,3,4,5,6,7],4,true)
-		this.sprite.animations.add('walk up', [8,9,10,11,12,13,14,15],4,true)
-		this.sprite.animations.add('walk left', [16,17,18,19,20,21,22,23],4,true)
-		this.sprite.animations.add('walk right', [24,25,26,27,28,29,30,31],4,true)
-		this.sprite.animations.add('idle ', [0],1,false)
-		this.sprite.animations.add('idle down', [0],1,false)
-		this.sprite.animations.add('idle up', [8],1,false)
-		this.sprite.animations.add('idle left', [16],1,false)
-		this.sprite.animations.add('idle right', [24],1,false)
+		this.sprite.animations.add('walk down', [0, 1, 2, 3, 4, 5, 6, 7], 4, true)
+		this.sprite.animations.add('walk up', [8, 9, 10, 11, 12, 13, 14, 15], 4, true)
+		this.sprite.animations.add('walk left', [16, 17, 18, 19, 20, 21, 22, 23], 4, true)
+		this.sprite.animations.add('walk right', [24, 25, 26, 27, 28, 29, 30, 31], 4, true)
+		this.sprite.animations.add('idle ', [0], 1, false)
+		this.sprite.animations.add('idle down', [0], 1, false)
+		this.sprite.animations.add('idle up', [8], 1, false)
+		this.sprite.animations.add('idle left', [16], 1, false)
+		this.sprite.animations.add('idle right', [24], 1, false)
 	}
 
 
 
 	update() {
 		/* ANIMATIONS */
-		//console.log("this.pointerx", this.game.input.activePointer.worldX ,"this.sprite.x", this.sprite.x)
 		var xDiff = Math.abs(this.game.input.activePointer.worldX - this.sprite.x)
 		var yDiff = Math.abs(this.game.input.activePointer.worldY - this.sprite.y)
-		if (xDiff > yDiff){
-			if (this.game.input.activePointer.worldX < this.sprite.x){
+		if (xDiff > yDiff) {
+			if (this.game.input.activePointer.worldX < this.sprite.x) {
 				this.sprite.animations.play('walk left')
 				spriteOrientation = "left"
 			}
-			if (this.game.input.activePointer.worldX > this.sprite.x){
+			if (this.game.input.activePointer.worldX > this.sprite.x) {
 				this.sprite.animations.play('walk right')
 				spriteOrientation = "right"
 			}
-		}
-		else {
-			if (this.game.input.activePointer.worldY < this.sprite.y){
+		} else {
+			if (this.game.input.activePointer.worldY < this.sprite.y) {
 				spriteOrientation = "up"
 				this.sprite.animations.play('walk up')
 			}
-			if (this.game.input.activePointer.worldY > this.sprite.y){
+			if (this.game.input.activePointer.worldY > this.sprite.y) {
 				this.sprite.animations.play('walk down')
 				spriteOrientation = "down"
 			}
 		}
-		/*if (this.sprite.body.velocity.x === 0 && this.sprite.body.velocity.y === 0){
-			this.sprite.animations.play("idle " + spriteOrientation);
-		}*/
 		/* PLAYER CONTROL LOGIC */
 		if (this.sprite.controls.up.isDown) {
 			this.sprite.body.velocity.y = -this.sprite.playerSpeedY
@@ -92331,10 +92347,10 @@ class Player {
 			this.sprite.body.velocity.y = this.sprite.playerSpeedY
 		}
 		if (this.sprite.controls.left.isDown) {
-			this.sprite.body.velocity.x = -this.sprite.playerSpeedX		
+			this.sprite.body.velocity.x = -this.sprite.playerSpeedX
 		}
 		if (this.sprite.controls.right.isDown) {
-			this.sprite.body.velocity.x = this.sprite.playerSpeedX		
+			this.sprite.body.velocity.x = this.sprite.playerSpeedX
 		}
 		if (!this.sprite.controls.right.isDown && !this.sprite.controls.left.isDown) {
 			this.sprite.body.velocity.x = 0
@@ -92349,7 +92365,7 @@ class Player {
 			this.sprite.body.velocity.y = 0
 		}
 		if (this.sprite.controls.selectItem.isDown) {
-			if(lastSwitch < this.game.time.now){
+			if (lastSwitch < this.game.time.now) {
 				itemCount++;
 				this.sprite.selectedItem = this.sprite.items[itemCount % this.sprite.items.length]
 				this.sprite.ammoIndex = itemCount % this.sprite.items.length
@@ -92357,7 +92373,7 @@ class Player {
 				this.sprite.selectedFireRate = this.sprite.fireRates[this.sprite.fireRateIndex]
 				lastSwitch = this.game.time.now + itemSwitchCooldown;
 			}
-			
+
 		}
 	}
 	setX(x) {
@@ -92385,8 +92401,8 @@ class Player {
 	}
 
 	giveAmmo() {
-		var randomNumber = Math.floor(Math.random() * 5)+1
-		if (this.sprite.ammo[randomNumber]+ammoToAdd[randomNumber]< maxAmmo[randomNumber])
+		var randomNumber = Math.floor(Math.random() * 5) + 1
+		if (this.sprite.ammo[randomNumber] + ammoToAdd[randomNumber] < maxAmmo[randomNumber])
 			this.sprite.ammo[randomNumber] += ammoToAdd[randomNumber]
 	}
 }
@@ -92429,11 +92445,10 @@ class zombie {
 
 
     this.sprite.animations.add('zombiewalk');
-    this.sprite.animations.play('zombiewalk',10, true)
+    this.sprite.animations.play('zombiewalk', 10, true)
   }
 
-  update() {
-  }
+  update() {}
 
   damage(dmg) {
     if (!this.sprite.hasOverlapped) {
