@@ -92,7 +92,7 @@ io.sockets.on('connection', socket => {
 	})
 
 	socket.on('client:ask-to-create-missile', (data) => {
-		let newMissile = missiles.add(data.id, data.posX, data.posY, data.itemName);
+		let newMissile = missiles.add(data.id, data.posX, data.posY, data.itemName, data.toX, data.toY);
 		io.emit('server:missile-added', newMissile);
 	});
 
