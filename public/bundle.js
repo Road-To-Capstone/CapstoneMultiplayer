@@ -85249,7 +85249,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.load.image('tiles', './assets/tiles.png')
 		this.load.image('background', '/assets/background.png')
 		this.load.image('building', './assets/buildingplaceholder.png')
-		this.load.image('Melee', '/assets/missileplaceholder.png')
+		this.load.image('Melee', '/assets/Melee.png')
 		this.load.image('Lazer', '/assets/Lazer.png')
 		this.load.image('Machine Gun', '/assets/Machine Gun.png')
 		this.load.image('Rocket Launcher', '/assets/Rocket Launcher.png')
@@ -92167,7 +92167,7 @@ class Missile {
         this.sprite.outOfBoundsKill = true;
         switch (itemName) {
             case 'Melee':
-                this.sprite.scale.setTo(0.25, 0.25);
+                this.sprite.scale.setTo(0.1, 0.1);
                 this.sprite.lifespan = 250;
                 this.missleSpeed = 100;
                 break;
@@ -92192,7 +92192,7 @@ class Missile {
                 this.missleSpeed = 100;
                 break;
             case 'Lazer':
-                this.sprite.scale.setTo(0.4, 0.4);
+                this.sprite.scale.setTo(0.1, 0.1);
                 this.sprite.lifespan = 10000;
                 this.missleSpeed = 1000;
                 break;
