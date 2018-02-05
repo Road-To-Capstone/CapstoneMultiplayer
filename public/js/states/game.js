@@ -462,7 +462,9 @@ export default class GameState extends Phaser.State {
 		});
 
 		this.io.on('server:player-moved', data => {
-			this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
+			if (this.getPlayerById(data.id)){
+				this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
+			}
 		});
 
 		this.io.on('server:game-over', id => {

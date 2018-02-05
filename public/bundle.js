@@ -85665,7 +85665,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:player-moved', data => {
-			this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
+			if (this.getPlayerById(data.id)){
+				this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
+			}
 		});
 
 		this.io.on('server:game-over', id => {
