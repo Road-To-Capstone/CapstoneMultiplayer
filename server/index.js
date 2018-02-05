@@ -70,7 +70,7 @@ io.sockets.on('connection', socket => {
 		zombies.set(data.id, {
 			posX: data.posX,
 			posY: data.posY,
-			playerId: playerId
+			playerId: data.playerId
 		});
 	});
 

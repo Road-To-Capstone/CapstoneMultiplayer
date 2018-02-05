@@ -442,9 +442,11 @@ export default class GameState extends Phaser.State {
 		});
 
 		this.io.on('server:all-zombies', data => {
-			data.forEach(newZombie => {
-				this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
-			})
+			if (data.length>0){
+				data.forEach(newZombie => {
+					this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
+				})
+			}
 		})
 
 		//load your player
