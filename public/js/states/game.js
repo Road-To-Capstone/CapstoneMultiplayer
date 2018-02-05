@@ -419,6 +419,7 @@ export default class GameState extends Phaser.State {
 		/*this.io.emit('client:give-me-players'); //ask for it
 		this.io.emit('client:give-me-zombies'); //ask for zombies  */
 		this.io.emit('client:ask-to-create-player', this.io.id)
+		this.io.emit('client:give-me-players');
 		
 
 		/*this.io.on('server:new-player', data => {
@@ -426,10 +427,12 @@ export default class GameState extends Phaser.State {
 		})*/
 
 		this.io.on('server:all-players', data => { //the data is the players from the server side
-			data.forEach(e => {
-				if (e.id != this.io.id) //this will prevent loading our player two times
-					this.players.push(new Player(e.id, this, e.posX, e.posY, e.angle));
-			});
+			if (data.length>0){
+				data.forEach(e => {
+					if (e.id != this.io.id) //this will prevent loading our player two times
+						this.players.push(new Player(e.id, this, e.posX, e.posY, e.angle));
+				});
+			}
 		});
 
 		this.io.on('server:all-zombies', data => {

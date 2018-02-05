@@ -47,7 +47,7 @@ io.sockets.on('connection', socket => {
 	});*/
 
 	socket.on('client:give-me-players', () => {
-		socket.emit('server:all-players', players.get());
+		socket.emit('server:all-players', players.getAllPlayers());
 	});
 
 	socket.on('client:player-moved', data => {
