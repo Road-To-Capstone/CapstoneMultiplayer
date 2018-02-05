@@ -158,13 +158,13 @@ export default class GameState extends Phaser.State {
 
 			this.updateShadowTexture(player);
 
-			this.zombies.forEach((z) => {
+		/*	this.zombies.forEach((z) => {
 				this.io.emit('client:zombie-moved', {
 					id: z.id,
 					posX: z.sprite.x,
 					posY: z.sprite.y
 				})
-			});
+			});*/
 
 			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
 			this.physics.arcade.collide(player.sprite, buildingGroup);
@@ -175,7 +175,7 @@ export default class GameState extends Phaser.State {
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
-			if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
+	/*		if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
 				this.io.emit('client:ask-to-create-missile', {
 					id: this.io.id,
@@ -218,7 +218,7 @@ export default class GameState extends Phaser.State {
 					z.sprite.hasOverlapped = true;
 				})
 			}
-
+*/
 			this.physics.arcade.overlap(zombieGroup, missileGroup, this.handleMissileCollision, null, this)
 			this.setHealthBarPercent();
 			this.world.bringToTop(text.setText(player.sprite.selectedItem + " | " + player.sprite.ammo[player.sprite.ammoIndex]))
@@ -468,9 +468,9 @@ export default class GameState extends Phaser.State {
 			});
 		})
 
-		this.io.on('server:zombie-moved', data => { //data is an object with {id: z.id, posX: z.sprite.x, posY: z.sprite.y}
+		/*this.io.on('server:zombie-moved', data => { //data is an object with {id: z.id, posX: z.sprite.x, posY: z.sprite.y}
 			this.getZombieById(data.id).set(data.posX, data.posY);
-		});
+		});*/
 
 		this.io.on('server:missile-moved', data => { //data is {posX: data.posX, posY: data.posY, velocityX: data.velocityX, velocityY: data.velocityY}
 			this.getMissileByPlayerId(data.id).set(data.posX, data.posY, data.velocityX, data.velocityY, data.itemName)
