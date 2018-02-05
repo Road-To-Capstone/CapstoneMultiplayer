@@ -3,7 +3,7 @@ module.exports = new(class Zombies {
 	constructor() {
 		this.zombies = [];
 	}
-	add(id) {
+	add(id,playerId) {
 		const {
 			posX,
 			posY
@@ -11,7 +11,8 @@ module.exports = new(class Zombies {
 		const newZombie = {
 			id,
 			posX,
-			posY
+			posY,
+			playerId
 		};
 		this.zombies.push(newZombie);
 		return newZombie;

@@ -23,7 +23,9 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	transcriptArray = [],
 	startShooting = false,
 	startShootingTimer = 0,
-	startShootingDuration = 5000;
+	startShootingDuration = 5000,
+	playerGroup,
+	playerCreated = false;
 
 //const SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
 const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)
@@ -64,6 +66,7 @@ export default class GameState extends Phaser.State {
 
 	create() {
 		//this.setUpMap()
+		this.player = undefined;
 		text = this.add.text(300, this.game.height - 55, "Melee | X ", {
 			fill: '#ffffff'
 		})
@@ -76,20 +79,18 @@ export default class GameState extends Phaser.State {
 		healthPercent.fixedToCamera = true;
 
 		this.world.setBounds(0, 0, 1920, 1920)
-		this.io = socketio().connect('https://<url>', {
-			reconnect: true,
-			transports: ['websocket'],
-			path: '/socket.io'
-		})
+		this.io = socketio().connect();
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
 
 		this.LIGHT_RADIUS = 300;
 
+		playerGroup = this.add.group();
 		zombieGroup = this.add.group();
 		missileGroup = this.add.group();
 		buildingGroup = this.add.group();
+		
 
 		song = this.add.audio('bensound-ofeliasdream');
 		this.sound.setDecodedCallback(song, this.startMusic, this);
@@ -119,10 +120,12 @@ export default class GameState extends Phaser.State {
 			finalTranscript = '';
 		}
 		this.addRain();
+		
 	}
 
 	update() {
-		if (this.doneLoading) {
+		if (this.doneLoading && playerCreated) {
+		
 
 
 			let voiceRecCommand = transcriptArray.shift()
@@ -132,7 +135,7 @@ export default class GameState extends Phaser.State {
 			}
 
 
-			console.log("voiceRecCommand is", voiceRecCommand)
+			//console.log("voiceRecCommand is", voiceRecCommand)
 
 			if (!cameraSet) {
 				this.camera.follow(this.getPlayerById(this.io.id).sprite)
@@ -141,20 +144,27 @@ export default class GameState extends Phaser.State {
 			}
 			const player = this.getPlayerById(this.io.id);
 			if(voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
+
+	
 			this.io.emit('client:player-moved', {
 				id: this.io.id,
 				posX: player.sprite.x,
 				posY: player.sprite.y
 			});
+	
 
-			// this.updateShadowTexture(player);
+			this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
-				this.io.emit('client:zombie-moved', {
-					id: z.id,
-					posX: z.sprite.x,
-					posY: z.sprite.y
-				})
+				if (z.playerId === this.io.id){
+					this.io.emit('client:zombie-moved', {
+						id: z.id,
+						posX: z.sprite.x,
+						posY: z.sprite.y,
+						playerId: z.playerId
+					})
+				}
+			
 			});
 
 			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
@@ -177,8 +187,8 @@ export default class GameState extends Phaser.State {
 					toY: this.input.activePointer.worldY
 				})
 			}
-			if (this.zombies.length < 2) {
-				this.io.emit('client:ask-to-create-zombie');
+		if (this.zombies.length < 2) {
+				this.io.emit('client:ask-to-create-zombie', this.io.id);
 			}
 
 			if (!!this.zombies.length) {
@@ -316,10 +326,18 @@ export default class GameState extends Phaser.State {
 		buildingGroup.add(this.building.sprite);
 	}
 
-	makeZombies(id, x, y) {
-		this.zombie = new Zombie(id, this, x, y);
+	makeZombies(id, x, y, playerId) {
+		this.zombie = new Zombie(id, this, x, y, playerId);
 		this.zombies.push(this.zombie);
 		zombieGroup.add(this.zombie.sprite)
+	}
+
+	makePlayer(id,x,y){
+		this.player = new Player(id, this, x, y)
+		console.log("players is", this.players)
+		this.players.push(this.player)
+		playerGroup.add(this.player.sprite)
+		playerCreated = true;
 	}
 
 	switchWeapon(voice, player) {
@@ -398,7 +416,6 @@ export default class GameState extends Phaser.State {
 				fill: "rgba(0, 0, 0, 0.64)"
 			});
 
-
 		this.doneLoading = 1;
 	}
 
@@ -406,26 +423,38 @@ export default class GameState extends Phaser.State {
 		const me = this.getPlayerById(this.io.id);
 
 		//load all existing players
-		this.io.emit('client:give-me-players'); //ask for it
-		this.io.emit('client:give-me-zombies'); //ask for zombies  
+		/*this.io.emit('client:give-me-players'); //ask for it
+		this.io.emit('client:give-me-zombies'); //ask for zombies  */
+		this.io.emit('client:ask-to-create-player', this.io.id)
+		this.io.emit('client:give-me-players');
+		this.io.emit('client:give-me-zombies');
+		console.log("this.players for real is, ", this.players)
+
+		/*this.io.on('server:new-player', data => {
+
+		})*/
 
 		this.io.on('server:all-players', data => { //the data is the players from the server side
-			data.forEach(e => {
-				if (e.id != this.io.id) //this will prevent loading our player two times
-					players.push(new Player(e.id, this, e.posX, e.posY, e.angle));
-			});
+			if (data.length>0){
+				data.forEach(e => {
+					if (e.id != this.io.id) //this will prevent loading our player two times
+						this.players.push(new Player(e.id, this, e.posX, e.posY, e.angle));
+				});
+			}
 		});
 
 		this.io.on('server:all-zombies', data => {
-			data.forEach(newZombie => {
-				this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
-			})
+			if (data.length>0){
+				data.forEach(newZombie => {
+					this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
+				})
+			}
 		})
 
 		//load your player
-		this.io.on('server:player-added', data => {
+	/*	this.io.on('server:player-added', data => {
 			players.push(new Player(data.id, this, data.posX, data.posY, data.angle));
-		});
+		});*/
 
 		this.io.on('server:player-disconnected', id => { //if a player has disconnected
 			this.players.forEach((e, i) => {
@@ -437,7 +466,9 @@ export default class GameState extends Phaser.State {
 		});
 
 		this.io.on('server:player-moved', data => {
-			this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
+			if (this.getPlayerById(data.id)){
+				this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
+			}
 		});
 
 		this.io.on('server:game-over', id => {
@@ -450,7 +481,9 @@ export default class GameState extends Phaser.State {
 		})
 
 		this.io.on('server:zombie-moved', data => { //data is an object with {id: z.id, posX: z.sprite.x, posY: z.sprite.y}
-			this.getZombieById(data.id).set(data.posX, data.posY);
+			if (this.getZombieById(data.id)){
+				this.getZombieById(data.id).set(data.posX, data.posY);
+			}
 		});
 
 		this.io.on('server:missile-moved', data => { //data is {posX: data.posX, posY: data.posY, velocityX: data.velocityX, velocityY: data.velocityY}
@@ -462,7 +495,7 @@ export default class GameState extends Phaser.State {
 		});
 
 		this.io.on('server:zombie-added', newZombie => {
-			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
+			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId);
 		});
 
 		this.io.on('server:kill-this-zombie', id => {
@@ -477,18 +510,34 @@ export default class GameState extends Phaser.State {
 		this.io.on('server:missile-added', newMissile => {
 			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName, newMissile.id, newMissile.toX, newMissile.toY)
 		});
+
+		this.io.on('server:player-added', newPlayer => {
+			console.log("newPlayer.id is", newPlayer.id)
+			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY)
+		})
+
+		this.io.on('server:update-single-player-players', updatedPlayers => {
+			console.log("updatedPlayers for you is: " , updatedPlayers)
+			this.players = updatedPlayers;
+		})
+
+		this.io.on('server:update-players', updatedPlayers => {
+			console.log("updatedPlayers for others is: " , updatedPlayers)
+			this.players = updatedPlayers;
+		})
 	}
+
 
 	getPlayerById(id) {
 		return this.players.find(p => p.id === id);
 	}
 
 	getMissileByPlayerId(id) {
-		return this.missiles.find(m => m.id === id);
+		return missiles.find(m => m.id === id);
 	}
 
 	getZombieById(id) {
-		return this.zombies.find(z => z.id === id);
+		return zombies.find(z => z.id === id);
 	}
 
 	zombieAI(zombie) {
@@ -514,7 +563,7 @@ export default class GameState extends Phaser.State {
 				dist: 1920
 			},
 			distance, playerPosX, playerPoxY;
-		this.players.forEach((p, i) => {
+			this.players.forEach((p, i) => {
 			playerPosX = p.sprite.position.x;
 			playerPoxY = p.sprite.position.y;
 			distance = Math.sqrt(Math.pow(playerPosX - zombie.sprite.position.x, 2) +

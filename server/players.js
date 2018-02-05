@@ -3,16 +3,21 @@ module.exports = new(class Players {
 	constructor() {
 		this.players = [];
 	}
-	add(id, roomNo) {
-		this.players.push({
-			id,
+	add(id) {
+		const newPlayer = {
+			id: id,
 			posX: config.game.start.x,
 			posY: config.game.start.y
-		});
+		};
+		this.players.push(newPlayer);
+		return newPlayer
 	}
 	get(id) {
 		for (let i = 0; i < this.players.length; i++)
 			if (this.players[i].id == id) return this.players[i];
+		return this.players;
+	}
+	getAllPlayers() {
 		return this.players;
 	}
 	set(id, json) {
