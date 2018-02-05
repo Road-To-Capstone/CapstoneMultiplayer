@@ -85349,11 +85349,11 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			if(voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
 
 	
-					this.io.emit('client:player-moved', {
-						id: this.io.id,
-						posX: player.sprite.x,
-						posY: player.sprite.y
-					});
+			this.io.emit('client:player-moved', {
+				id: this.io.id,
+				posX: player.sprite.x,
+				posY: player.sprite.y
+			});
 	
 
 			this.updateShadowTexture(player);
@@ -85375,7 +85375,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
-	/*		if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
+			if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
 				this.io.emit('client:ask-to-create-missile', {
 					id: this.io.id,
@@ -85386,7 +85386,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 					toY: this.input.activePointer.worldY
 				})
 			}
-			if (this.zombies.length < 2) {
+/*		if (this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie');
 			}
 
@@ -85410,7 +85410,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 					this.physics.arcade.collide(e.sprite, buildingGroup);
 				});
 
-			}
+			}*/
 
 			if (this.time.now > nextMissileCollision) {
 				nextMissileCollision = this.time.now + missileCollisionRate;
@@ -85418,7 +85418,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 					z.sprite.hasOverlapped = true;
 				})
 			}
-*/
+
 			this.physics.arcade.overlap(zombieGroup, missileGroup, this.handleMissileCollision, null, this)
 			this.setHealthBarPercent();
 			this.world.bringToTop(text.setText(player.sprite.selectedItem + " | " + player.sprite.ammo[player.sprite.ammoIndex]))
