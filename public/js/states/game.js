@@ -156,13 +156,15 @@ export default class GameState extends Phaser.State {
 			this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
-				if (z.playerId === this.io.id)
-				this.io.emit('client:zombie-moved', {
-					id: z.id,
-					posX: z.sprite.x,
-					posY: z.sprite.y,
-					playerId: z.playerId
-				})
+				if (z.playerId === this.io.id){
+					this.io.emit('client:zombie-moved', {
+						id: z.id,
+						posX: z.sprite.x,
+						posY: z.sprite.y,
+						playerId: z.playerId
+					})
+				}
+			
 			});
 
 			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
