@@ -12,10 +12,9 @@ const io = socketio.listen(server);
 
 app.use('/', express.static(config.publicDir));
 
-/*db.sync({force: false}).then(() => {
+db.sync({force: true}).then(() => {
 	//console.log('Database is synced')
 });
-*/
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
 	extended: true

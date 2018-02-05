@@ -1,4 +1,4 @@
-/*const Sequelize = require('sequelize');
+const Sequelize = require('sequelize');
 const db = new Sequelize(
     process.env.DATABASE_URL ||
     'postgres://localhost:5432/deathRoad', {
@@ -17,4 +17,4 @@ const Score = db.define('Score', {
     }
 });
 
-module.exports = Score;*/
+module.exports = Score;
