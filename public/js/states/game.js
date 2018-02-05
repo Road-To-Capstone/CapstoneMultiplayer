@@ -45,7 +45,7 @@ export default class GameState extends Phaser.State {
 		this.load.image('tiles', './assets/tiles.png')
 		this.load.image('background', '/assets/background.png')
 		this.load.image('building', './assets/buildingplaceholder.png')
-		this.load.image('Melee', '/assets/missileplaceholder.png')
+		this.load.image('Melee', '/assets/Melee.png')
 		this.load.image('Lazer', '/assets/Lazer.png')
 		this.load.image('Machine Gun', '/assets/Machine Gun.png')
 		this.load.image('Rocket Launcher', '/assets/Rocket Launcher.png')
