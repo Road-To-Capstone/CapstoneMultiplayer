@@ -146,6 +146,7 @@ export default class GameState extends Phaser.State {
 			if(voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
 			if (this.players.length>0)
 			{
+				console.log("player moved and this.players is:" ,this.players)
 				this.players.forEach((p) => {
 					this.io.emit('client:player-moved', {
 						id: this.io.id,
