@@ -147,7 +147,7 @@ export default class GameState extends Phaser.State {
 				posY: player.sprite.y
 			});
 
-			// this.updateShadowTexture(player);
+			this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
 				this.io.emit('client:zombie-moved', {
