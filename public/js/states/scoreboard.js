@@ -7,12 +7,15 @@ export default class ScoreBoard extends Phaser.State {
     }
 
     preload() {
-       
+
     }
 
     create() {
         this.colorArray = ['#ff33ff', '#66FC20', '#60FA19', '#59F810', '#51F207', '#4BDE06', '#46CE07', '#41BE07', '#3CB007', '#37A106']
-        this.add.text(315, 30, 'SCORE BOARD', {font: '60pt Megrim', fill: 'white'})
+        this.add.text(315, 30, 'SCORE BOARD', {
+            font: '60pt Megrim',
+            fill: 'white'
+        })
 
         /*axios.get('/api/score')
         .then(res => res.data)
@@ -31,10 +34,10 @@ export default class ScoreBoard extends Phaser.State {
         });*/
         this.enter = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
     }
-    
+
     update() {
-        if (this.enter.isDown){
-           location.reload();
+        if (this.enter.isDown) {
+            location.reload();
         }
     }
 }

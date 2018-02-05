@@ -54,47 +54,42 @@ export default class Player {
 		this.sprite.playerHealth = 100
 		this.sprite.playerMaxHealth = 100
 
-		this.sprite.animations.add('walk down', [0,1,2,3,4,5,6,7],4,true)
-		this.sprite.animations.add('walk up', [8,9,10,11,12,13,14,15],4,true)
-		this.sprite.animations.add('walk left', [16,17,18,19,20,21,22,23],4,true)
-		this.sprite.animations.add('walk right', [24,25,26,27,28,29,30,31],4,true)
-		this.sprite.animations.add('idle ', [0],1,false)
-		this.sprite.animations.add('idle down', [0],1,false)
-		this.sprite.animations.add('idle up', [8],1,false)
-		this.sprite.animations.add('idle left', [16],1,false)
-		this.sprite.animations.add('idle right', [24],1,false)
+		this.sprite.animations.add('walk down', [0, 1, 2, 3, 4, 5, 6, 7], 4, true)
+		this.sprite.animations.add('walk up', [8, 9, 10, 11, 12, 13, 14, 15], 4, true)
+		this.sprite.animations.add('walk left', [16, 17, 18, 19, 20, 21, 22, 23], 4, true)
+		this.sprite.animations.add('walk right', [24, 25, 26, 27, 28, 29, 30, 31], 4, true)
+		this.sprite.animations.add('idle ', [0], 1, false)
+		this.sprite.animations.add('idle down', [0], 1, false)
+		this.sprite.animations.add('idle up', [8], 1, false)
+		this.sprite.animations.add('idle left', [16], 1, false)
+		this.sprite.animations.add('idle right', [24], 1, false)
 	}
 
 
 
 	update() {
 		/* ANIMATIONS */
-		//console.log("this.pointerx", this.game.input.activePointer.worldX ,"this.sprite.x", this.sprite.x)
 		var xDiff = Math.abs(this.game.input.activePointer.worldX - this.sprite.x)
 		var yDiff = Math.abs(this.game.input.activePointer.worldY - this.sprite.y)
-		if (xDiff > yDiff){
-			if (this.game.input.activePointer.worldX < this.sprite.x){
+		if (xDiff > yDiff) {
+			if (this.game.input.activePointer.worldX < this.sprite.x) {
 				this.sprite.animations.play('walk left')
 				spriteOrientation = "left"
 			}
-			if (this.game.input.activePointer.worldX > this.sprite.x){
+			if (this.game.input.activePointer.worldX > this.sprite.x) {
 				this.sprite.animations.play('walk right')
 				spriteOrientation = "right"
 			}
-		}
-		else {
-			if (this.game.input.activePointer.worldY < this.sprite.y){
+		} else {
+			if (this.game.input.activePointer.worldY < this.sprite.y) {
 				spriteOrientation = "up"
 				this.sprite.animations.play('walk up')
 			}
-			if (this.game.input.activePointer.worldY > this.sprite.y){
+			if (this.game.input.activePointer.worldY > this.sprite.y) {
 				this.sprite.animations.play('walk down')
 				spriteOrientation = "down"
 			}
 		}
-		/*if (this.sprite.body.velocity.x === 0 && this.sprite.body.velocity.y === 0){
-			this.sprite.animations.play("idle " + spriteOrientation);
-		}*/
 		/* PLAYER CONTROL LOGIC */
 		if (this.sprite.controls.up.isDown) {
 			this.sprite.body.velocity.y = -this.sprite.playerSpeedY
@@ -103,10 +98,10 @@ export default class Player {
 			this.sprite.body.velocity.y = this.sprite.playerSpeedY
 		}
 		if (this.sprite.controls.left.isDown) {
-			this.sprite.body.velocity.x = -this.sprite.playerSpeedX		
+			this.sprite.body.velocity.x = -this.sprite.playerSpeedX
 		}
 		if (this.sprite.controls.right.isDown) {
-			this.sprite.body.velocity.x = this.sprite.playerSpeedX		
+			this.sprite.body.velocity.x = this.sprite.playerSpeedX
 		}
 		if (!this.sprite.controls.right.isDown && !this.sprite.controls.left.isDown) {
 			this.sprite.body.velocity.x = 0
@@ -121,7 +116,7 @@ export default class Player {
 			this.sprite.body.velocity.y = 0
 		}
 		if (this.sprite.controls.selectItem.isDown) {
-			if(lastSwitch < this.game.time.now){
+			if (lastSwitch < this.game.time.now) {
 				itemCount++;
 				this.sprite.selectedItem = this.sprite.items[itemCount % this.sprite.items.length]
 				this.sprite.ammoIndex = itemCount % this.sprite.items.length
@@ -129,7 +124,7 @@ export default class Player {
 				this.sprite.selectedFireRate = this.sprite.fireRates[this.sprite.fireRateIndex]
 				lastSwitch = this.game.time.now + itemSwitchCooldown;
 			}
-			
+
 		}
 	}
 	setX(x) {
@@ -157,8 +152,8 @@ export default class Player {
 	}
 
 	giveAmmo() {
-		var randomNumber = Math.floor(Math.random() * 5)+1
-		if (this.sprite.ammo[randomNumber]+ammoToAdd[randomNumber]< maxAmmo[randomNumber])
+		var randomNumber = Math.floor(Math.random() * 5) + 1
+		if (this.sprite.ammo[randomNumber] + ammoToAdd[randomNumber] < maxAmmo[randomNumber])
 			this.sprite.ammo[randomNumber] += ammoToAdd[randomNumber]
 	}
 }
