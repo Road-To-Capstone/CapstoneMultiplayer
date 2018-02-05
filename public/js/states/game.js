@@ -124,12 +124,6 @@ export default class GameState extends Phaser.State {
 	}
 
 	update() {
-		if (this.doneLoading) {
-			if(!this.player) {
-				console.log("hit if")
-				this.io.emit('client:ask-to-create-player', this.io.id)
-			}
-		}
 		if (this.doneLoading && playerCreated) {
 		
 
@@ -336,6 +330,7 @@ export default class GameState extends Phaser.State {
 		console.log("players is", this.players)
 		this.players.push(this.player)
 		playerGroup.add(this.player.sprite)
+		playerCreated = true;
 	}
 
 	switchWeapon(voice, player) {
@@ -423,6 +418,8 @@ export default class GameState extends Phaser.State {
 		//load all existing players
 		/*this.io.emit('client:give-me-players'); //ask for it
 		this.io.emit('client:give-me-zombies'); //ask for zombies  */
+		this.io.emit('client:ask-to-create-player', this.io.id)
+		
 
 		/*this.io.on('server:new-player', data => {
 
@@ -500,13 +497,11 @@ export default class GameState extends Phaser.State {
 		this.io.on('server:player-added', newPlayer => {
 			console.log("newPlayer.id is", newPlayer.id)
 			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY)
-			playerCreated = true;
 		})
 
 		this.io.on('server:update-single-player-players', updatedPlayers => {
 			console.log("updatedPlayers for you is: " , updatedPlayers)
 			this.players = updatedPlayers;
-			playerCreated = true;
 		})
 
 		this.io.on('server:update-players', updatedPlayers => {
