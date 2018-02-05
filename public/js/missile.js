@@ -28,7 +28,7 @@ export default class Missile {
                 this.missleSpeed = 200;
                 break;
             case 'Flame Thrower':
-                this.sprite.scale.setTo(1.5, 1.5);
+                this.sprite.scale.setTo(0.5, 0.5);
                 this.sprite.lifespan = 1500;
                 this.missleSpeed = 150;
                 break;

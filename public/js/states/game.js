@@ -255,13 +255,18 @@ export default class GameState extends Phaser.State {
 		this.shadowTexture.dirty = true;
 	}
 
-	lightningStrike(){
-		
-	}
+	/*lightningStrike(){
+		let lightningStrike = this.add.bitmapData(1920,1920)
+
+		lightningStrike.context.fillStyle = 'rgb(255,255,255)'
+		lightningStrike.context.fillRect(0, 0, 1920, 1920);
+
+		lightningStrike.destroy()
+	}*/
 
 	addRain(){
 		
-		   let rainParticle = this.game.add.bitmapData(15, 50);
+		   let rainParticle = this.add.bitmapData(15, 50);
 		
 		   rainParticle.ctx.rect(0, 0, 15, 50);
 		   rainParticle.ctx.fillStyle = '#9cc9de';
