@@ -72,7 +72,7 @@ export default class GameState extends Phaser.State {
 		healthPercent.fixedToCamera = true;
 
 		this.world.setBounds(0, 0, 1920, 1920)
-		this.io = socketio.connect();
+		this.io = socketio().connect('https://<url>', {reconnect: true, transports: ['websocket'], path:'/socket.io'})
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
@@ -387,7 +387,7 @@ export default class GameState extends Phaser.State {
 					players.push(new Player(e.id, this, e.posX, e.posY, e.angle));
 			});
 		});
-
+		
 		this.io.on('server:all-zombies', data => {
 			data.forEach(newZombie => {
 				this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);

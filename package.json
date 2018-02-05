@@ -6,6 +6,7 @@
   "scripts": {
     "svdev": "./node_modules/.bin/nodemon --exec \"node server/index.js\" --watch server",
     "sv": "node server/index.js",
+    "start": "node server/index.js",
     "wbp": "./node_modules/.bin/webpack"
   },
   "keywords": [],
@@ -18,7 +19,6 @@
     "nodemon": "^1.11.0",
     "phaser": "^2.6.2",
     "script-loader": "^0.7.0",
-    "socket.io-client": "^1.7.3",
     "webpack": "^2.2.1"
   },
   "dependencies": {
@@ -29,6 +29,7 @@
     "pg-hstore": "^2.3.2",
     "sequelize": "^4.32.2",
     "socket.io": "^1.7.3",
+    "socket.io-client": "^1.7.3",
     "volleyball": "^1.4.1"
   }
 }
