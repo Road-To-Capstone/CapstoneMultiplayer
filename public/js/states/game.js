@@ -72,7 +72,7 @@ export default class GameState extends Phaser.State {
 		healthPercent.fixedToCamera = true;
 
 		this.world.setBounds(0, 0, 1920, 1920)
-		this.io = socketio.connect();
+		this.io = socketio().connect('https://<url>', {reconnect: true, transports: ['websocket'], path:'/socket.io'})
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
@@ -249,13 +249,18 @@ export default class GameState extends Phaser.State {
 		this.shadowTexture.dirty = true;
 	}
 
-	lightningStrike(){
-		
-	}
+	/*lightningStrike(){
+		let lightningStrike = this.add.bitmapData(1920,1920)
+
+		lightningStrike.context.fillStyle = 'rgb(255,255,255)'
+		lightningStrike.context.fillRect(0, 0, 1920, 1920);
+
+		lightningStrike.destroy()
+	}*/
 
 	addRain(){
 		
-		   let rainParticle = this.game.add.bitmapData(15, 50);
+		   let rainParticle = this.add.bitmapData(15, 50);
 		
 		   rainParticle.ctx.rect(0, 0, 15, 50);
 		   rainParticle.ctx.fillStyle = '#9cc9de';
@@ -382,7 +387,7 @@ export default class GameState extends Phaser.State {
 					players.push(new Player(e.id, this, e.posX, e.posY, e.angle));
 			});
 		});
-
+		
 		this.io.on('server:all-zombies', data => {
 			data.forEach(newZombie => {
 				this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
