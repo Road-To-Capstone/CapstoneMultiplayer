@@ -55,6 +55,7 @@ export default class GameState extends Phaser.State {
 		this.load.image('building1', '../../assets/building1.png')
 		this.load.image('building2', '../../assets/building2.png')
 		this.load.image('building3', '../../assets/building3.png')
+		this.load.image('tree1', '../../assets/tree1.png')
 		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
 		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
 		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
@@ -92,6 +93,8 @@ export default class GameState extends Phaser.State {
 		this.spawnBuilding(652, 961, 'building1');
 		this.spawnBuilding(821, 1480, 'building2');
 		this.spawnBuilding(1400, 1003, 'building3');
+		this.spawnBuilding(100, 100, 'tree1');
+
 
 		this.shadowTexture = this.add.bitmapData(1920, 1920)
 
@@ -139,7 +142,7 @@ export default class GameState extends Phaser.State {
 				posY: player.sprite.y
 			});
 
-			this.updateShadowTexture(player);
+			// this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
 				this.io.emit('client:zombie-moved', {
