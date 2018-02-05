@@ -85624,8 +85624,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		const me = this.getPlayerById(this.io.id);
 
 		//load all existing players
-		this.io.emit('client:give-me-players'); //ask for it
-		this.io.emit('client:give-me-zombies'); //ask for zombies  
+		/*this.io.emit('client:give-me-players'); //ask for it
+		this.io.emit('client:give-me-zombies'); //ask for zombies  */
 
 		/*this.io.on('server:new-player', data => {
 

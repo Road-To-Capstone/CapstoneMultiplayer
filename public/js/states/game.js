@@ -421,8 +421,8 @@ export default class GameState extends Phaser.State {
 		const me = this.getPlayerById(this.io.id);
 
 		//load all existing players
-		this.io.emit('client:give-me-players'); //ask for it
-		this.io.emit('client:give-me-zombies'); //ask for zombies  
+		/*this.io.emit('client:give-me-players'); //ask for it
+		this.io.emit('client:give-me-zombies'); //ask for zombies  */
 
 		/*this.io.on('server:new-player', data => {
 
