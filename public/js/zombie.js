@@ -27,11 +27,10 @@ export default class zombie {
 
 
     this.sprite.animations.add('zombiewalk');
-    this.sprite.animations.play('zombiewalk',10, true)
+    this.sprite.animations.play('zombiewalk', 10, true)
   }
 
-  update() {
-  }
+  update() {}
 
   damage(dmg) {
     if (!this.sprite.hasOverlapped) {

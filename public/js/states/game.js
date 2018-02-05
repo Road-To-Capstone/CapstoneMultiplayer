@@ -26,7 +26,7 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	startShootingDuration = 5000;
 
 //const SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
-const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)
+const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)
 
 
 export default class GameState extends Phaser.State {
@@ -69,14 +69,18 @@ export default class GameState extends Phaser.State {
 		})
 		text.fixedToCamera = true;
 
-		this.background = this.add.tileSprite(0,0,1920,1920, 'background')
+		this.background = this.add.tileSprite(0, 0, 1920, 1920, 'background')
 		healthPercent = this.add.text(20, this.game.height - 100, '100%', {
 			fill: '#ffffff'
 		});
 		healthPercent.fixedToCamera = true;
 
 		this.world.setBounds(0, 0, 1920, 1920)
-		this.io = socketio.connect();
+		this.io = socketio().connect('https://<url>', {
+			reconnect: true,
+			transports: ['websocket'],
+			path: '/socket.io'
+		})
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
@@ -98,7 +102,7 @@ export default class GameState extends Phaser.State {
 
 		this.shadowTexture = this.add.bitmapData(1920, 1920)
 
-		var lightSprite = this.game.add.image(0,0, this.shadowTexture)
+		var lightSprite = this.game.add.image(0, 0, this.shadowTexture)
 
 		lightSprite.blendMode = Phaser.blendModes.MULTIPLY
 
@@ -107,7 +111,7 @@ export default class GameState extends Phaser.State {
 		recognition.start();
 
 		recognition.onresult = event => {
-			for (let i = event.resultIndex; i<event.results.length;i++){
+			for (let i = event.resultIndex; i < event.results.length; i++) {
 				const transcript = event.results[i][0].transcript
 				if (event.results[i].isFinal) finalTranscript += transcript + " "
 			}
@@ -119,17 +123,17 @@ export default class GameState extends Phaser.State {
 
 	update() {
 		if (this.doneLoading) {
-			
-			
+
+
 			let voiceRecCommand = transcriptArray.shift()
-			startShooting = this.pewCommand(voiceRecCommand);
-			if (startShootingTimer < this.time.now){
+			startShooting = this.pewCommand(voiceRecCommand)
+			if (startShootingTimer < this.time.now) {
 				startShooting = false;
 			}
 
-			
+
 			console.log("voiceRecCommand is", voiceRecCommand)
-			
+
 			if (!cameraSet) {
 				this.camera.follow(this.getPlayerById(this.io.id).sprite)
 				this.setUpHealthBar()
@@ -162,15 +166,15 @@ export default class GameState extends Phaser.State {
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
-
-			// console.log('===== switchWeapon', player.sprite);
-			if ((startShooting|| this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
+			if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
 				this.io.emit('client:ask-to-create-missile', {
 					id: this.io.id,
 					posX: player.sprite.x,
 					posY: player.sprite.y,
-					itemName: player.sprite.selectedItem
+					itemName: player.sprite.selectedItem,
+					toX: this.input.activePointer.worldX,
+					toY: this.input.activePointer.worldY
 				})
 			}
 			if (this.zombies.length < 2) {
@@ -184,15 +188,15 @@ export default class GameState extends Phaser.State {
 						this.io.emit('client:kill-this-zombie', e.id);
 						player.sprite.score += 1000;
 						player.giveAmmo();
-						var zombieDeath = this.add.sprite(e.sprite.x,e.sprite.y,'zombiedeath');
+						var zombieDeath = this.add.sprite(e.sprite.x, e.sprite.y, 'zombiedeath');
 						zombieDeath.anchor.setTo(0.5, 0.5);
-						zombieDeath.scale.setTo(0.12,0.12);
-				
-						var animatedDeath = zombieDeath.animations.add('zombiedeath',[4,5,6,3,8,9,10,7,0,1,2,11,11,11,11,11,11,11,11,11]  ,6, false);
+						zombieDeath.scale.setTo(0.12, 0.12);
+
+						var animatedDeath = zombieDeath.animations.add('zombiedeath', [4, 5, 6, 3, 8, 9, 10, 7, 0, 1, 2, 11, 11, 11, 11, 11, 11, 11, 11, 11], 6, false);
 						animatedDeath.killOnComplete = true;
-						
+
 						zombieDeath.animations.play('zombiedeath');
-				}
+					}
 					this.physics.arcade.collide(e.sprite, zombieGroup);
 					this.physics.arcade.collide(e.sprite, buildingGroup);
 				});
@@ -213,7 +217,7 @@ export default class GameState extends Phaser.State {
 			if (player.sprite.playerHealth <= 0) {
 				this.io.emit('client:game-over', player.id);
 				this.players.forEach((e, i) => {
-					if(e.id === player.id) {
+					if (e.id === player.id) {
 						e.sprite.destroy();
 						this.players.splice(i, 1);
 					}
@@ -240,65 +244,55 @@ export default class GameState extends Phaser.State {
 	updateShadowTexture(player) {
 		this.shadowTexture.context.fillStyle = 'rgb(0, 0, 0)'; //this number controls the outside darkness
 		this.shadowTexture.context.fillRect(0, 0, 1920, 1920);
-	
+
 		// Draw circle of light with a soft edge
 		var gradient = this.shadowTexture.context.createRadialGradient(
 			player.sprite.x, player.sprite.y, this.LIGHT_RADIUS * 0.01,
 			player.sprite.x, player.sprite.y, this.LIGHT_RADIUS);
 		gradient.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
 		gradient.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
-	
+
 		this.shadowTexture.context.beginPath();
 		this.shadowTexture.context.fillStyle = gradient;
 		this.shadowTexture.context.arc(player.sprite.x, player.sprite.y,
-			this.LIGHT_RADIUS, 0, Math.PI*2);
+			this.LIGHT_RADIUS, 0, Math.PI * 2);
 		this.shadowTexture.context.fill();
-	
+
 		// This just tells the engine it should update the texture cache
 		this.shadowTexture.dirty = true;
 	}
 
-	/*lightningStrike(){
-		let lightningStrike = this.add.bitmapData(1920,1920)
+	addRain() {
 
-		lightningStrike.context.fillStyle = 'rgb(255,255,255)'
-		lightningStrike.context.fillRect(0, 0, 1920, 1920);
+		let rainParticle = this.add.bitmapData(15, 50);
 
-		lightningStrike.destroy()
-	}*/
+		rainParticle.ctx.rect(0, 0, 15, 50);
+		rainParticle.ctx.fillStyle = '#9cc9de';
+		rainParticle.ctx.fill();
 
-	addRain(){
-		
-		   let rainParticle = this.add.bitmapData(15, 50);
-		
-		   rainParticle.ctx.rect(0, 0, 15, 50);
-		   rainParticle.ctx.fillStyle = '#9cc9de';
-		   rainParticle.ctx.fill();
-		
-		   this.emitter = this.add.emitter(this.world.centerX, -300, 400);
-		
-		   this.emitter.width = this.game.world.width;
-		   this.emitter.angle = 10;
-		
-		   this.emitter.makeParticles(rainParticle);
-		
-		   this.emitter.minParticleScale = 0.1;
-		   this.emitter.maxParticleScale = 0.3;
-		
-		   this.emitter.setYSpeed(600, 1000);
-		   this.emitter.setXSpeed(-5, 5);
-		
-		   this.emitter.minRotation = 0;
-		   this.emitter.maxRotation = 0;
-		
-		   this.emitter.start(false, 1600, 5, 0);
-		
-	   }
+		this.emitter = this.add.emitter(this.world.centerX, -300, 400);
 
-	pewCommand(speech){
-		
-		if (speech === 'pew' || speech === 'q' || speech === 'Q' || speech === 'cute' || speech === 'shoot')
-		{	
+		this.emitter.width = this.game.world.width;
+		this.emitter.angle = 10;
+
+		this.emitter.makeParticles(rainParticle);
+
+		this.emitter.minParticleScale = 0.1;
+		this.emitter.maxParticleScale = 0.3;
+
+		this.emitter.setYSpeed(600, 1000);
+		this.emitter.setXSpeed(-5, 5);
+
+		this.emitter.minRotation = 0;
+		this.emitter.maxRotation = 0;
+
+		this.emitter.start(false, 1600, 5, 0);
+
+	}
+
+	pewCommand(speech) {
+
+		if (speech === 'pew' || speech === 'q' || speech === 'Q' || speech === 'cute' || speech === 'shoot') {
 			startShootingTimer = this.time.now + startShootingDuration;
 			return true
 		}
@@ -354,8 +348,8 @@ export default class GameState extends Phaser.State {
 		player.sprite.selectedFireRate = player.sprite.fireRates[index];
 	}
 
-	fire(posX, posY, itemName, id) {
-		this.missile = new Missile(this, posX, posY, this.input.activePointer.worldX, this.input.activePointer.worldY, itemName, id)
+	fire(posX, posY, itemName, id, toX, toY) {
+		this.missile = new Missile(this, posX, posY, toX, toY, itemName, id)
 		this.missiles.push(this.missile);
 		missileGroup.add(this.missile.sprite)
 		zombieGroup.forEach((e) => {
@@ -371,7 +365,6 @@ export default class GameState extends Phaser.State {
 			let currentPlayer = this.getPlayerById(this.io.id);
 			zombie.health -= weaponDamage[currentPlayer.sprite.ammoIndex];
 			currentPlayer.sprite.score += 100;
-			//console.log('current Player====', currentPlayer.sprite.score);
 		}
 	}
 
@@ -436,7 +429,7 @@ export default class GameState extends Phaser.State {
 
 		this.io.on('server:player-disconnected', id => { //if a player has disconnected
 			this.players.forEach((e, i) => {
-				if(e.id === id) {
+				if (e.id === id) {
 					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}
@@ -449,7 +442,7 @@ export default class GameState extends Phaser.State {
 
 		this.io.on('server:game-over', id => {
 			this.players.forEach((e, i) => {
-				if(e.id === id) {
+				if (e.id === id) {
 					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}
@@ -474,7 +467,7 @@ export default class GameState extends Phaser.State {
 
 		this.io.on('server:kill-this-zombie', id => {
 			this.zombies.forEach((z, i) => {
-				if(z.id === id) {
+				if (z.id === id) {
 					z.sprite.destroy();
 					this.zombies.splice(i, 1);
 				}
@@ -482,7 +475,7 @@ export default class GameState extends Phaser.State {
 		})
 
 		this.io.on('server:missile-added', newMissile => {
-			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName, newMissile.id)
+			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName, newMissile.id, newMissile.toX, newMissile.toY)
 		});
 	}
 
@@ -500,50 +493,21 @@ export default class GameState extends Phaser.State {
 
 	zombieAI(zombie) {
 		let mindex = this.findClosestPlayer(zombie);
-		this.physics.arcade.moveToXY(zombie.sprite,this.players[mindex].sprite.position.x ,this.players[mindex].sprite.position.y, zombie.sprite.SPEED)
-		/*var targetAngle = this.math.angleBetween(
-			zombie.sprite.position.x, zombie.sprite.position.y,
-			this.players[mindex].sprite.position.x, this.players[mindex].sprite.position.y // this needs to be player x and y that updates dynamically
-		)*/
-		 
-		if(zombie.sprite.body.velocity.x <=0 && zombie.sprite.isRightFacing) {
+		this.physics.arcade.moveToXY(
+			zombie.sprite,
+			this.players[mindex].sprite.position.x,
+			this.players[mindex].sprite.position.y,
+			zombie.sprite.SPEED
+		)
+
+		if (zombie.sprite.body.velocity.x <= 0 && zombie.sprite.isRightFacing) {
 			zombie.sprite.scale.x *= -1;
 			zombie.sprite.isRightFacing = false;
-		 }
-		 else if (zombie.sprite.body.velocity.x > 0 && !zombie.sprite.isRightFacing) {
+		} else if (zombie.sprite.body.velocity.x > 0 && !zombie.sprite.isRightFacing) {
 			zombie.sprite.scale.x *= -1;
-		  	zombie.sprite.isRightFacing = true;
-		 }
-	 
-/*
-		// Gradually (this.TURN_RATE) aim the Invader towards the target angle
-		if (zombie.sprite.rotation !== targetAngle) {
-			// Calculate difference between the current angle and targetAngle
-			var delta = targetAngle - zombie.sprite.rotation
-
-			// Keep it in range from -180 to 180 to make the most efficient turns.
-			if (delta > Math.PI) delta -= Math.PI * 2
-			if (delta < -Math.PI) delta += Math.PI * 2
-
-			if (delta > 0) {
-				// Turn clockwise
-				zombie.sprite.angle += zombie.sprite.TURN_RATE
-			} else {
-				// Turn counter-clockwise
-				zombie.sprite.angle -= zombie.sprite.TURN_RATE
-			}
-
-			// Just set angle to target angle if they are close
-			if (Math.abs(delta) < this.math.degToRad(zombie.sprite.TURN_RATE)) {
-				zombie.sprite.rotation = targetAngle
-			}
-		}*/
-		//this.updateVelocity(zombie.sprite.SPEED, zombie.sprite.SPEED, zombie)
+			zombie.sprite.isRightFacing = true;
+		}
 	}
-	/*updateVelocity(xVelocity, yVelocity, zombie) {
-		zombie.sprite.body.velocity.x = xVelocity
-		zombie.sprite.body.velocity.y = yVelocity
-	}*/
 
 	findClosestPlayer(zombie) {
 		let minSet = {
@@ -567,10 +531,6 @@ export default class GameState extends Phaser.State {
 		if (this.time.now > zombiesCoolDown) {
 			zombiesCoolDown = zombiesAttack + this.time.now
 			player.playerHealth -= 10;
-		
-			//console.log(zombie.sprite);
-			/*zombie.animations.add('zombieattack')
-			zombie.animations.play('zombieattack',2)*/
 		}
 	}
 }

@@ -8,26 +8,30 @@ const bodyParser = require('body-parser');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketio(server);
+const io = socketio.listen(server);
 
-app.use('/',express.static(config.publicDir));
+app.use('/', express.static(config.publicDir));
 
 db.sync({force: true}).then(() => {
 	//console.log('Database is synced')
 });
-
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({
+	extended: true
+}));
 
-app.use('/api', require('./api'));
+//app.use('/api', require('./api'));
 
+server.listen(process.env.PORT || config.port, () => {
+	console.log(`Listening on ${process.env.PORT || config.port}`);
+});
 
 //-socket
 const players = require('./players.js');
 const missiles = require('./missiles.js');
 const zombies = require('./zombies.js');
 
-io.on('connection', socket => {
+io.sockets.on('connection', socket => {
 	players.add(socket.id);
 	console.log(`player ${socket.id} added`)
 	io.emit('server:player-added', players.get(socket.id));
@@ -89,7 +93,7 @@ io.on('connection', socket => {
 	})
 
 	socket.on('client:ask-to-create-missile', (data) => {
-		let newMissile = missiles.add(data.id, data.posX, data.posY, data.itemName);
+		let newMissile = missiles.add(data.id, data.posX, data.posY, data.itemName, data.toX, data.toY);
 		io.emit('server:missile-added', newMissile);
 	});
 
@@ -100,15 +104,12 @@ io.on('connection', socket => {
 
 });
 //=socket
-server.listen(config.port, () => {
-	console.log(`Listening on ${config.port}`);
-});
 
 //creating new zombie id
 function newZombieId() {
 	let id = new Date();
 	return id.getTime();
-  }
+}
 
 //500 error middlewear
 app.use(function (err, req, res, next) {
@@ -116,4 +117,3 @@ app.use(function (err, req, res, next) {
 	console.error(err.stack);
 	res.status(err.status || 500).send(err.message || 'Internal server error.');
 });
-
