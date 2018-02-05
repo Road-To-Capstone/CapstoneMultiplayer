@@ -85626,6 +85626,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.io.emit('client:give-me-zombies'); //ask for zombies  */
 		this.io.emit('client:ask-to-create-player', this.io.id)
 		this.io.emit('client:give-me-players');
+		this.io.emit('client:give-me-zombies');
 		console.log("this.players for real is, ", this.players)
 
 		/*this.io.on('server:new-player', data => {
@@ -85677,7 +85678,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		})
 
 		this.io.on('server:zombie-moved', data => { //data is an object with {id: z.id, posX: z.sprite.x, posY: z.sprite.y}
-			this.getZombieById(data.id).set(data.posX, data.posY);
+			if (this.getZombieById(data.id)){
+				this.getZombieById(data.id).set(data.posX, data.posY);
+			}
 		});
 
 		this.io.on('server:missile-moved', data => { //data is {posX: data.posX, posY: data.posY, velocityX: data.velocityX, velocityY: data.velocityY}
