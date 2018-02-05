@@ -52,9 +52,14 @@ export default class GameState extends Phaser.State {
 		this.load.image('Chainsaw', '/assets/Chainsaw.png')
 		this.load.image('Flame Thrower', '/assets/Flame Thrower.png')
 		this.load.image('zombie', './assets/zombieplaceholder.png')
-		this.load.spritesheet('player', '/assets/playerspritesheet.png', 24, 32)
-		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png', 430, 519, 10)
-		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png', 629, 526, 12)
+		this.load.image('building1', '../../assets/building1.png')
+		this.load.image('building2', '../../assets/building2.png')
+		this.load.image('building3', '../../assets/building3.png')
+		this.load.image('tree1', '../../assets/tree1.png')
+		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
+		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
+		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
+		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
 	}
 
 	create() {
@@ -89,9 +94,11 @@ export default class GameState extends Phaser.State {
 		song = this.add.audio('bensound-ofeliasdream');
 		this.sound.setDecodedCallback(song, this.startMusic, this);
 
-		this.spawnBuilding(652, 961)
-		this.spawnBuilding(821, 1480)
-		this.spawnBuilding(1400, 1003)
+		this.spawnBuilding(652, 961, 'building1');
+		this.spawnBuilding(821, 1480, 'building2');
+		this.spawnBuilding(1400, 1003, 'building3');
+		this.spawnBuilding(100, 100, 'tree1');
+
 
 		this.shadowTexture = this.add.bitmapData(1920, 1920)
 
@@ -133,13 +140,14 @@ export default class GameState extends Phaser.State {
 				cameraSet = true;
 			}
 			const player = this.getPlayerById(this.io.id);
+			if(voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
 			this.io.emit('client:player-moved', {
 				id: this.io.id,
 				posX: player.sprite.x,
 				posY: player.sprite.y
 			});
 
-			this.updateShadowTexture(player);
+			// this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
 				this.io.emit('client:zombie-moved', {
@@ -303,8 +311,8 @@ export default class GameState extends Phaser.State {
 		this.myHealthBar.setFixedToCamera(true)
 	}
 
-	spawnBuilding(x, y) {
-		this.building = new Building(this.game, x, y)
+	spawnBuilding(x, y, option) {
+		this.building = new Building(this.game, x, y, option)
 		buildingGroup.add(this.building.sprite);
 	}
 
@@ -312,6 +320,32 @@ export default class GameState extends Phaser.State {
 		this.zombie = new Zombie(id, this, x, y);
 		this.zombies.push(this.zombie);
 		zombieGroup.add(this.zombie.sprite)
+	}
+
+	switchWeapon(voice, player) {
+		let voiceTemp = voice.toLowerCase();
+		if(voiceTemp === 'melee') {
+			this.switchWeaponHelper(0, player);
+		} else if(voiceTemp === 'machine') {
+			this.switchWeaponHelper(1, player);
+		} else if(voiceTemp === 'flame') {
+			this.switchWeaponHelper(2, player);
+		} else if(voiceTemp === 'rocket') {
+			this.switchWeaponHelper(3, player);
+		} else if(voiceTemp === 'chain') {
+			this.switchWeaponHelper(4, player);
+		} else if(voiceTemp === 'lazer') {
+			this.switchWeaponHelper(5, player);
+		} else {
+			return;
+		}
+	}
+
+	switchWeaponHelper(index, player) {
+		player.sprite.selectedItem = player.sprite.items[index];
+		player.sprite.ammoIndex = index;
+		player.sprite.fireRateIndex = index;
+		player.sprite.selectedFireRate = player.sprite.fireRates[index];
 	}
 
 	fire(posX, posY, itemName, id, toX, toY) {
