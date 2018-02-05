@@ -32,9 +32,19 @@ const missiles = require('./missiles.js');
 const zombies = require('./zombies.js');
 
 io.sockets.on('connection', socket => {
-	players.add(socket.id);
+	/*players.add(socket.id);
 	console.log(`player ${socket.id} added`)
-	io.emit('server:player-added', players.get(socket.id));
+	io.emit('server:player-added', players.get(socket.id));*/
+
+	// Copy from super asteroid battle
+	/*socket.on('client:new-player', playerName => {
+		socket.player = {
+			name: playerName,
+			id: socket.id
+		}
+
+		socket.emit('server:all-players', players.getAllPlayers())
+	});*/
 
 	socket.on('client:give-me-players', () => {
 		socket.emit('server:all-players', players.get());
@@ -90,6 +100,12 @@ io.sockets.on('connection', socket => {
 			io.emit('server:zombie-added', newZombie);
 		}
 		return;
+	})
+
+	socket.on('client:ask-to-create-player', (id) => {
+		let newPlayer = players.add(id);
+		io.emit('server:player-added', newPlayer)
+		//io.emit('server:update-single-player-players', players.getAllPlayers())
 	})
 
 	socket.on('client:ask-to-create-missile', (data) => {

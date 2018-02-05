@@ -85226,7 +85226,9 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	transcriptArray = [],
 	startShooting = false,
 	startShootingTimer = 0,
-	startShootingDuration = 5000;
+	startShootingDuration = 5000,
+	playerGroup,
+	playerCreated = false;
 
 //const SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
 const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)
@@ -85267,6 +85269,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 	create() {
 		//this.setUpMap()
+		this.player = undefined;
 		text = this.add.text(300, this.game.height - 55, "Melee | X ", {
 			fill: '#ffffff'
 		})
@@ -85279,20 +85282,18 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		healthPercent.fixedToCamera = true;
 
 		this.world.setBounds(0, 0, 1920, 1920)
-		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default()().connect('https://<url>', {
-			reconnect: true,
-			transports: ['websocket'],
-			path: '/socket.io'
-		})
+		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default()().connect();
 		this.io.on('connect', data => {
 			this.createOnConnection(data);
 		});
 
 		this.LIGHT_RADIUS = 300;
 
+		playerGroup = this.add.group();
 		zombieGroup = this.add.group();
 		missileGroup = this.add.group();
 		buildingGroup = this.add.group();
+		
 
 		song = this.add.audio('bensound-ofeliasdream');
 		this.sound.setDecodedCallback(song, this.startMusic, this);
@@ -85322,10 +85323,18 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			finalTranscript = '';
 		}
 		this.addRain();
+		
 	}
 
 	update() {
 		if (this.doneLoading) {
+			if(!this.player) {
+				console.log("hit if")
+				this.io.emit('client:ask-to-create-player', this.io.id)
+			}
+		}
+		if (this.doneLoading && playerCreated) {
+		
 
 
 			let voiceRecCommand = transcriptArray.shift()
@@ -85335,7 +85344,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			}
 
 
-			console.log("voiceRecCommand is", voiceRecCommand)
+			//console.log("voiceRecCommand is", voiceRecCommand)
 
 			if (!cameraSet) {
 				this.camera.follow(this.getPlayerById(this.io.id).sprite)
@@ -85525,6 +85534,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		zombieGroup.add(this.zombie.sprite)
 	}
 
+	makePlayer(id,x,y){
+		this.player = new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](id, this, x, y)
+		console.log("players is", this.players)
+		this.players.push(this.player)
+		playerGroup.add(this.player.sprite)
+	}
+
 	switchWeapon(voice, player) {
 		let voiceTemp = voice.toLowerCase();
 		if(voiceTemp === 'melee') {
@@ -85601,7 +85617,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				fill: "rgba(0, 0, 0, 0.64)"
 			});
 
-
 		this.doneLoading = 1;
 	}
 
@@ -85612,10 +85627,14 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.io.emit('client:give-me-players'); //ask for it
 		this.io.emit('client:give-me-zombies'); //ask for zombies  
 
+		/*this.io.on('server:new-player', data => {
+
+		})*/
+
 		this.io.on('server:all-players', data => { //the data is the players from the server side
 			data.forEach(e => {
 				if (e.id != this.io.id) //this will prevent loading our player two times
-					players.push(new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](e.id, this, e.posX, e.posY, e.angle));
+					this.players.push(new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](e.id, this, e.posX, e.posY, e.angle));
 			});
 		});
 
@@ -85626,9 +85645,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		})
 
 		//load your player
-		this.io.on('server:player-added', data => {
-			players.push(new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](data.id, this, data.posX, data.posY, data.angle));
-		});
+	/*	this.io.on('server:player-added', data => {
+			players.push(new Player(data.id, this, data.posX, data.posY, data.angle));
+		});*/
 
 		this.io.on('server:player-disconnected', id => { //if a player has disconnected
 			this.players.forEach((e, i) => {
@@ -85680,18 +85699,36 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.io.on('server:missile-added', newMissile => {
 			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName, newMissile.id, newMissile.toX, newMissile.toY)
 		});
+
+		this.io.on('server:player-added', newPlayer => {
+			console.log("newPlayer.id is", newPlayer.id)
+			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY)
+			playerCreated = true;
+		})
+
+		this.io.on('server:update-single-player-players', updatedPlayers => {
+			console.log("updatedPlayers for you is: " , updatedPlayers)
+			this.players = updatedPlayers;
+			playerCreated = true;
+		})
+
+		this.io.on('server:update-players', updatedPlayers => {
+			console.log("updatedPlayers for others is: " , updatedPlayers)
+			this.players = updatedPlayers;
+		})
 	}
+
 
 	getPlayerById(id) {
 		return this.players.find(p => p.id === id);
 	}
 
 	getMissileByPlayerId(id) {
-		return this.missiles.find(m => m.id === id);
+		return missiles.find(m => m.id === id);
 	}
 
 	getZombieById(id) {
-		return this.zombies.find(z => z.id === id);
+		return zombies.find(z => z.id === id);
 	}
 
 	zombieAI(zombie) {
@@ -85717,7 +85754,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				dist: 1920
 			},
 			distance, playerPosX, playerPoxY;
-		this.players.forEach((p, i) => {
+			this.players.forEach((p, i) => {
 			playerPosX = p.sprite.position.x;
 			playerPoxY = p.sprite.position.y;
 			distance = Math.sqrt(Math.pow(playerPosX - zombie.sprite.position.x, 2) +
@@ -92190,7 +92227,7 @@ class game extends __WEBPACK_IMPORTED_MODULE_2_phaser___default.a.Game {
 		this.state.add('ScoreBoard', __WEBPACK_IMPORTED_MODULE_7__states_scoreboard__["a" /* default */]);
 		this.state.add('Preload', __WEBPACK_IMPORTED_MODULE_8__states_preload__["a" /* default */]);
 		this.state.add('HowToPlay', __WEBPACK_IMPORTED_MODULE_9__states_howtoplay__["a" /* default */]);
-		this.state.start('Preload');
+		this.state.start('MenuState');
 	}
 }
 
