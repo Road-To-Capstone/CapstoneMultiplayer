@@ -156,10 +156,12 @@ export default class GameState extends Phaser.State {
 			this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
+				if (z.playerId === this.io.id)
 				this.io.emit('client:zombie-moved', {
 					id: z.id,
 					posX: z.sprite.x,
-					posY: z.sprite.y
+					posY: z.sprite.y,
+					playerId: z.playerId
 				})
 			});
 
@@ -184,7 +186,7 @@ export default class GameState extends Phaser.State {
 				})
 			}
 		if (this.zombies.length < 2) {
-				this.io.emit('client:ask-to-create-zombie');
+				this.io.emit('client:ask-to-create-zombie', this.io.id);
 			}
 
 			if (!!this.zombies.length) {
@@ -322,8 +324,8 @@ export default class GameState extends Phaser.State {
 		buildingGroup.add(this.building.sprite);
 	}
 
-	makeZombies(id, x, y) {
-		this.zombie = new Zombie(id, this, x, y);
+	makeZombies(id, x, y, playerId) {
+		this.zombie = new Zombie(id, this, x, y, playerId);
 		this.zombies.push(this.zombie);
 		zombieGroup.add(this.zombie.sprite)
 	}
@@ -489,7 +491,7 @@ export default class GameState extends Phaser.State {
 		});
 
 		this.io.on('server:zombie-added', newZombie => {
-			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
+			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId);
 		});
 
 		this.io.on('server:kill-this-zombie', id => {

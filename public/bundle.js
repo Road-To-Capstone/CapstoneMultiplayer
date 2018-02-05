@@ -85359,10 +85359,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
+				if (z.playerId === this.io.id)
 				this.io.emit('client:zombie-moved', {
 					id: z.id,
 					posX: z.sprite.x,
-					posY: z.sprite.y
+					posY: z.sprite.y,
+					playerId: z.playerId
 				})
 			});
 
@@ -85387,7 +85389,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				})
 			}
 		if (this.zombies.length < 2) {
-				this.io.emit('client:ask-to-create-zombie');
+				this.io.emit('client:ask-to-create-zombie', this.io.id);
 			}
 
 			if (!!this.zombies.length) {
@@ -85525,8 +85527,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		buildingGroup.add(this.building.sprite);
 	}
 
-	makeZombies(id, x, y) {
-		this.zombie = new __WEBPACK_IMPORTED_MODULE_4__zombie__["a" /* default */](id, this, x, y);
+	makeZombies(id, x, y, playerId) {
+		this.zombie = new __WEBPACK_IMPORTED_MODULE_4__zombie__["a" /* default */](id, this, x, y, playerId);
 		this.zombies.push(this.zombie);
 		zombieGroup.add(this.zombie.sprite)
 	}
@@ -85692,7 +85694,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:zombie-added', newZombie => {
-			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
+			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId);
 		});
 
 		this.io.on('server:kill-this-zombie', id => {
@@ -92497,10 +92499,12 @@ class Player {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
+
 class zombie {
-  constructor(id, game, x, y) {
+  constructor(id, game, x, y, playerId) {
     this.id = id;
     this.game = game;
+    this.playerId = playerId
 
     this.sprite = this.game.add.sprite(50, 0, 'zombiewalk');
     this.game.physics.arcade.enableBody(this.sprite);
@@ -92524,10 +92528,11 @@ class zombie {
 
 
     this.sprite.animations.add('zombiewalk');
-    this.sprite.animations.play('zombiewalk', 10, true)
+    this.sprite.animations.play('zombiewalk',10, true)
   }
 
-  update() {}
+  update() {
+  }
 
   damage(dmg) {
     if (!this.sprite.hasOverlapped) {

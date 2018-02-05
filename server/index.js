@@ -66,10 +66,11 @@ io.sockets.on('connection', socket => {
 
 	// data is id: z.id, posX: z.sprite.x, posY: z.sprite.y
 	socket.on('client:zombie-moved', data => {
-		io.emit('server:zombie-moved', zombies.get(data.id));
+		socket.broadcast.emit('server:zombie-moved', zombies.get(data.id));
 		zombies.set(data.id, {
 			posX: data.posX,
-			posY: data.posY
+			posY: data.posY,
+			playerId: playerId
 		});
 	});
 
@@ -94,9 +95,9 @@ io.sockets.on('connection', socket => {
 		socket.emit('server:all-zombies', allZombies);
 	})
 
-	socket.on('client:ask-to-create-zombie', () => {
+	socket.on('client:ask-to-create-zombie', (playerId) => {
 		if (zombies.getLength() < 2) {
-			let newZombie = zombies.add(newZombieId());
+			let newZombie = zombies.add(newZombieId(), playerId);
 			io.emit('server:zombie-added', newZombie);
 		}
 		return;
