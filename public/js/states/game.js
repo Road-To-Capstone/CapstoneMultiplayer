@@ -144,17 +144,12 @@ export default class GameState extends Phaser.State {
 			}
 			const player = this.getPlayerById(this.io.id);
 			if(voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
-			if (this.players.length>0)
-			{
-				console.log("player moved and this.players is:" ,this.players)
-				this.players.forEach((p) => {
-					this.io.emit('client:player-moved', {
-						id: this.io.id,
-						posX: p.sprite.x,
-						posY: p.sprite.y
-					});
-				})
-			}
+			this.io.emit('client:player-moved', {
+				id: this.io.id,
+				posX: p.sprite.x,
+				posY: p.sprite.y
+			});
+		
 
 			this.updateShadowTexture(player);
 
