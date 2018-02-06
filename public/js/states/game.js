@@ -480,6 +480,7 @@ export default class GameState extends Phaser.State {
 		this.io.on('server:player-disconnected', id => { //if a player has disconnected
 			this.players.forEach((e, i) => {
 				if (e.id === id) {
+					e.removeText();
 					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}
@@ -495,7 +496,7 @@ export default class GameState extends Phaser.State {
 		this.io.on('server:game-over', id => {
 			this.players.forEach((e, i) => {
 				if (e.id === id) {
-					e.sprite.spriteText.destroy()
+					e.removeText();
 					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}

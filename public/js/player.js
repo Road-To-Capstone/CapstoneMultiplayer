@@ -125,6 +125,11 @@ export default class Player {
 		}
 	}
 
+	removeText(){
+		console.log('destroying')
+		this.sprite.spriteText.destroy();
+	}
+
 	updateTextPos(){
 		this.sprite.spriteText.x = this.sprite.x
 		this.sprite.spriteText.y = this.sprite.y-25

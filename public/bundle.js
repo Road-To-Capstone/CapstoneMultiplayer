@@ -85683,6 +85683,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.io.on('server:player-disconnected', id => { //if a player has disconnected
 			this.players.forEach((e, i) => {
 				if (e.id === id) {
+					e.removeText();
 					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}
@@ -85698,7 +85699,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.io.on('server:game-over', id => {
 			this.players.forEach((e, i) => {
 				if (e.id === id) {
-					e.sprite.spriteText.destroy()
+					e.removeText();
 					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}
@@ -92480,6 +92481,11 @@ class Player {
 			}
 
 		}
+	}
+
+	removeText(){
+		console.log('destroying')
+		this.sprite.spriteText.destroy();
 	}
 
 	updateTextPos(){
