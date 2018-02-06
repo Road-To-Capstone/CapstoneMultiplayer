@@ -85228,7 +85228,8 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	startShootingTimer = 0,
 	startShootingDuration = 5000,
 	playerGroup,
-	playerCreated = false;
+	playerCreated = false,
+	scoreTrack = 0;
 
 //const SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
 const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)
@@ -85276,10 +85277,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		text.fixedToCamera = true;
 
 		this.background = this.add.tileSprite(0, 0, 1920, 1920, 'background')
-		healthPercent = this.add.text(20, this.game.height - 100, '100%', {
-			fill: '#ffffff'
-		});
-		healthPercent.fixedToCamera = true;
 
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default()().connect();
@@ -85323,7 +85320,17 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			finalTranscript = '';
 		}
 		this.addRain();
-		
+
+		healthPercent = this.add.text(20, this.game.height - 100, '100%', {
+			fill: '#ffffff'
+		});
+		healthPercent.fixedToCamera = true;
+
+		scoreTrack = this.add.text(100, this.game.height - 100, 'SCORE: 0', {
+			fill: '#ffffff'
+		});
+
+		scoreTrack.fixedToCamera = true;
 	}
 
 	update() {
@@ -85354,7 +85361,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				posX: player.sprite.x,
 				posY: player.sprite.y
 			});
-	
+			
+			scoreTrack.setText(`SCORE: ${player.sprite.score}`)
 
 			this.updateShadowTexture(player);
 
@@ -85379,6 +85387,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
+			healthPercent.setText(`${(player.sprite.playerHealth / player.sprite.playerMaxHealth) * 100}%`);
 			if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
 				this.io.emit('client:ask-to-create-missile', {
