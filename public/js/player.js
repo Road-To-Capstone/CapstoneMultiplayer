@@ -71,8 +71,6 @@ export default class Player {
 
 	update() {
 		/* ANIMATIONS */
-		this.sprite.spriteText.x = this.sprite.x
-		this.sprite.spriteText.y = this.sprite.y-25
 		var xDiff = Math.abs(this.game.input.activePointer.worldX - this.sprite.x)
 		var yDiff = Math.abs(this.game.input.activePointer.worldY - this.sprite.y)
 		if (xDiff > yDiff) {
@@ -130,6 +128,11 @@ export default class Player {
 			}
 
 		}
+	}
+
+	updateTextPos(){
+		this.sprite.spriteText.x = this.sprite.x
+		this.sprite.spriteText.y = this.sprite.y-25
 	}
 	setX(x) {
 		this.sprite.x = x;

@@ -182,6 +182,9 @@ export default class GameState extends Phaser.State {
 			this.physics.arcade.collide(player.sprite, buildingGroup);
 
 			this.getPlayerById(this.io.id).update();
+			this.players.forEach(p=>{
+				p.updateTextPos();
+			});
 			this.topText.setText(`Your ID: ${this.io.id}
 				${this.players.length} players
 				posX: ${Math.floor(player.sprite.worldPosition.x)}

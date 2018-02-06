@@ -85385,6 +85385,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			this.physics.arcade.collide(player.sprite, buildingGroup);
 
 			this.getPlayerById(this.io.id).update();
+			this.players.forEach(p=>{
+				p.updateTextPos();
+			});
 			this.topText.setText(`Your ID: ${this.io.id}
 				${this.players.length} players
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
@@ -92425,8 +92428,6 @@ class Player {
 
 	update() {
 		/* ANIMATIONS */
-		this.sprite.spriteText.x = this.sprite.x
-		this.sprite.spriteText.y = this.sprite.y-25
 		var xDiff = Math.abs(this.game.input.activePointer.worldX - this.sprite.x)
 		var yDiff = Math.abs(this.game.input.activePointer.worldY - this.sprite.y)
 		if (xDiff > yDiff) {
@@ -92484,6 +92485,11 @@ class Player {
 			}
 
 		}
+	}
+
+	updateTextPos(){
+		this.sprite.spriteText.x = this.sprite.x
+		this.sprite.spriteText.y = this.sprite.y-25
 	}
 	setX(x) {
 		this.sprite.x = x;
