@@ -7,6 +7,7 @@ import {
 	HealthBar
 } from './../HealthBar.standalone'
 import Building from './../building'
+import NoCollide from './../noCollide'
 
 var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	cameraSet = false,
@@ -51,6 +52,8 @@ export default class GameState extends Phaser.State {
 		this.load.image('tiles', './assets/tiles.png')
 		this.load.image('background', '/assets/background.png')
 		this.load.image('building', './assets/buildingplaceholder.png')
+		this.load.image('tombstone', './assets/Tombstone.png')
+		this.load.image('road', './assets/Road.png')
 		this.load.image('Melee', '/assets/Melee.png')
 		this.load.image('Lazer', '/assets/Lazer.png')
 		this.load.image('Machine Gun', '/assets/Machine Gun.png')
@@ -69,7 +72,6 @@ export default class GameState extends Phaser.State {
 	}
 
 	create() {
-		//this.setUpMap()
 		this.player = undefined;
 		text = this.add.text(300, this.game.height - 55, "Melee | X ", {
 			fill: '#ffffff'
@@ -77,6 +79,7 @@ export default class GameState extends Phaser.State {
 		text.fixedToCamera = true;
 
 		this.background = this.add.tileSprite(0, 0, 1920, 1920, 'background')
+		this.setUpMap()
 
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = socketio().connect();
@@ -101,8 +104,7 @@ export default class GameState extends Phaser.State {
 		this.spawnBuilding(821, 1480, 'building2');
 		this.spawnBuilding(1400, 1003, 'building3');
 		this.spawnBuilding(100, 100, 'tree1');
-
-
+		
 		this.shadowTexture = this.add.bitmapData(1920, 1920)
 
 		var lightSprite = this.game.add.image(0, 0, this.shadowTexture)
@@ -143,7 +145,6 @@ export default class GameState extends Phaser.State {
 			if (startShootingTimer < this.time.now) {
 				startShooting = false;
 			}
-			//console.log("voiceRecCommand is", voiceRecCommand)
 
 			if (!cameraSet) {
 				this.camera.follow(this.getPlayerById(this.io.id).sprite)
@@ -254,10 +255,25 @@ export default class GameState extends Phaser.State {
 		SETUP FUNCTIONS
 	*/
 	setUpMap() {
-		map = this.add.tilemap('BaseMap')
-		map.addTilesetImage('Map tiles.tsx', 'tiles')
-		layer = map.createLayer('Tile Layer 1')
-		layer.resizeWorld()
+		this.spawnNoCollide(200, 700, 'tombstone')
+		this.spawnNoCollide(340, 1200, 'tombstone')
+		this.spawnNoCollide(200, 1700, 'tombstone')
+		this.spawnNoCollide(250, 250, 'tombstone')
+		this.spawnNoCollide(800, 800, 'tombstone')
+		this.spawnNoCollide(1000, 1250, 'tombstone')
+		this.spawnNoCollide(1250, 1600, 'tombstone')
+		this.spawnNoCollide(1450, 800, 'tombstone')
+		this.spawnNoCollide(1450, 1400, 'tombstone')
+		
+
+		this.spawnNoCollide(300, 400, 'road')
+		this.spawnNoCollide(1000, 400, 'road')
+		this.spawnNoCollide(1700, 400, 'road')
+
+	}
+
+	spawnNoCollide(x, y, option) {
+		this.noCollide= new NoCollide(this.game, x, y, option)
 	}
 
 	startMusic() {
