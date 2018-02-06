@@ -85221,6 +85221,7 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	zombiesCoolDown = 1000,
 	zombiesAttack = 1000,
 	text,
+	playerNameText,
 	song,
 	bossSong,
 	healthPercent,
@@ -85269,18 +85270,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.load.image('building2', '../../assets/building2.png')
 		this.load.image('building3', '../../assets/building3.png')
 		this.load.image('tree1', '../../assets/tree1.png')
-		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
-		this.load.spritesheet('player', '/assets/playerspritesheet.png', 24, 32)
-		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png', 430, 519, 10)
-		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png', 629, 526, 12)
+		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
+		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
+		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
 	}
 
 	create() {
 		this.player = undefined;
-		text = this.add.text(300, this.game.height - 55, "Melee | X ", {
-			fill: '#ffffff'
-		})
-		text.fixedToCamera = true;
 
 		this.background = this.add.tileSprite(0, 0, 1920, 1920, 'background')
 		this.setUpMap()
@@ -85342,6 +85338,16 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			fill: '#ffffff'
 		});
 
+		text = this.add.text(300, this.game.height - 55, "Melee | X ", {
+			fill: '#ffffff'
+		})
+		text.fixedToCamera = true;
+
+		/*playerNameText = this.add.text(this.game.width/2, this.game.height/2, "", {
+			fill: '#ffffff'
+		})
+		playerNameText.fixedToCamera = true;*/
+
 		scoreTrack.fixedToCamera = true;
 	}
 
@@ -85366,7 +85372,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				id: this.io.id,
 				posX: player.sprite.x,
 				posY: player.sprite.y,
-				ammo: player.sprite.ammo
+				ammo: player.sprite.ammo,
+				name: player.sprite.name
 			});
 
 			scoreTrack.setText(`SCORE: ${player.sprite.score}`)
@@ -85388,6 +85395,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			this.physics.arcade.collide(player.sprite, buildingGroup);
 
 			this.getPlayerById(this.io.id).update();
+			this.players.forEach(p=>{
+				p.updateTextPos();
+			});
 			this.topText.setText(`Your ID: ${this.io.id}
 				${this.players.length} players
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
@@ -85396,6 +85406,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			healthPercent.setText(`${(player.sprite.playerHealth / player.sprite.playerMaxHealth) * 100}%`);
 			if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
+				player.consumeAmmo();
 				this.io.emit('client:ask-to-create-missile', {
 					id: this.io.id,
 					posX: player.sprite.x,
@@ -85445,6 +85456,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			this.physics.arcade.overlap(zombieGroup, missileGroup, this.handleMissileCollision, null, this)
 			this.setHealthBarPercent();
 			this.world.bringToTop(text.setText(player.sprite.selectedItem + " | " + player.sprite.ammo[player.sprite.ammoIndex]))
+			//this.world.bringToTop(playerNameText.setText(player.sprite.name));
+
 
 			if (player.sprite.playerHealth <= 0) {
 				this.io.emit('client:game-over', player.id);
@@ -85574,9 +85587,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-	makePlayer(id, x, y, ammo) {
-		this.player = new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](id, this, x, y, ammo)
-		//	console.log("players is", this.players)
+	makePlayer(id,x,y,ammo,name){
+		this.player = new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](id, this, x, y, ammo,name)
+	//	console.log("players is", this.players)
 		this.players.push(this.player)
 		playerGroup.add(this.player.sprite)
 		playerCreated = true;
@@ -85615,7 +85628,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		zombieGroup.forEach((e) => {
 			e.hasOverlapped = false
 		})
-		this.getPlayerById(this.io.id).consumeAmmo()
 
 	}
 
@@ -85668,7 +85680,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		//load all existing players
 		/*this.io.emit('client:give-me-players'); //ask for it
 		this.io.emit('client:give-me-zombies'); //ask for zombies  */
-		this.io.emit('client:ask-to-create-player', this.io.id)
+		this.io.emit('client:ask-to-create-player', {id : this.io.id, name: this.name})
 		this.io.emit('client:give-me-players');
 		this.io.emit('client:give-me-zombies');
 		console.log("this.players for real is, ", this.players)
@@ -85681,7 +85693,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			if (data.length > 0) {
 				data.forEach(e => {
 					if (e.id != this.io.id) //this will prevent loading our player two times
-						this.players.push(new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](e.id, this, e.posX, e.posY, e.angle));
+						this.players.push(new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](e.id, this, e.posX, e.posY, e.ammo, e.name));
 				});
 			}
 		});
@@ -85702,6 +85714,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.io.on('server:player-disconnected', id => { //if a player has disconnected
 			this.players.forEach((e, i) => {
 				if (e.id === id) {
+					e.removeText();
 					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}
@@ -85709,14 +85722,15 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:player-moved', data => {
-			if (this.getPlayerById(data.id)) {
-				this.getPlayerById(data.id).setX(data.posX).setY(data.posY).setAmmo(data.ammo);
+			if (this.getPlayerById(data.id)){
+				this.getPlayerById(data.id).setX(data.posX).setY(data.posY).setAmmo(data.ammo).setName(data.name);
 			}
 		});
 
 		this.io.on('server:game-over', id => {
 			this.players.forEach((e, i) => {
 				if (e.id === id) {
+					e.removeText();
 					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}
@@ -85764,7 +85778,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 		this.io.on('server:player-added', newPlayer => {
 			console.log("newPlayer.id is", newPlayer.id)
-			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY, newPlayer.ammo)
+			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY, newPlayer.ammo, newPlayer.name)
 		})
 
 		this.io.on('server:update-single-player-players', updatedPlayers => {
@@ -92428,11 +92442,10 @@ var itemCount = 0;
 var itemSwitchCooldown = 500;
 var lastSwitch = 0;
 var maxAmmo = [Infinity, 200, 100, 5, 100, 10]
-var ammoToAdd = [Infinity, 10, 5, 1, 5, 1]
-var spriteOrientation = "";
+var ammoToAdd = [Infinity, 10, 5, 1, 5, 1];
 
 class Player {
-	constructor(id, game, x, y,ammo) {
+	constructor(id, game, x, y,ammo, name) {
 		this.id = id;
 		this.game = game;
 
@@ -92459,7 +92472,6 @@ class Player {
 			selectItem: this.game.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.B)
 		}
 
-
 		this.sprite.items = ['Melee', 'Machine Gun', 'Flame Thrower', 'Rocket Launcher', 'Chainsaw', 'Lazer']
 		this.sprite.selectedItem = 'Melee'
 		this.sprite.ammo = ammo // [Infinity, 200, 100, 5, 100, 10]
@@ -92467,6 +92479,10 @@ class Player {
 		this.sprite.fireRates = [500, 100, 250, 1000, 200, 1250]
 		this.sprite.selectedFireRate = 500
 		this.sprite.fireRateIndex = 0
+
+		this.sprite.name = name
+		this.sprite.spriteText = this.game.add.text(this.sprite.x, this.sprite.y-25, this.sprite.name, {fontSize: 10, fill: '#ffffff'})
+		this.sprite.spriteText.anchor.setTo(0.5,0.5);
 
 		this.sprite.playerSpeedY = 200
 		this.sprite.playerSpeedX = 200
@@ -92494,20 +92510,16 @@ class Player {
 		if (xDiff > yDiff) {
 			if (this.game.input.activePointer.worldX < this.sprite.x) {
 				this.sprite.animations.play('walk left')
-				spriteOrientation = "left"
 			}
 			if (this.game.input.activePointer.worldX > this.sprite.x) {
 				this.sprite.animations.play('walk right')
-				spriteOrientation = "right"
 			}
 		} else {
 			if (this.game.input.activePointer.worldY < this.sprite.y) {
-				spriteOrientation = "up"
 				this.sprite.animations.play('walk up')
 			}
 			if (this.game.input.activePointer.worldY > this.sprite.y) {
 				this.sprite.animations.play('walk down')
-				spriteOrientation = "down"
 			}
 		}
 		/* PLAYER CONTROL LOGIC */
@@ -92547,6 +92559,16 @@ class Player {
 
 		}
 	}
+
+	removeText(){
+		console.log('destroying')
+		this.sprite.spriteText.destroy();
+	}
+
+	updateTextPos(){
+		this.sprite.spriteText.x = this.sprite.x
+		this.sprite.spriteText.y = this.sprite.y-25
+	}
 	setX(x) {
 		this.sprite.x = x;
 		return this;
@@ -92557,6 +92579,10 @@ class Player {
 	}
 	setAmmo(ammo) {
 		this.sprite.ammo = ammo;
+		return this;
+	}
+	setName(name) {
+		this.sprite.name = name;
 		return this;
 	}
 

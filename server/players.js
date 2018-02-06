@@ -3,12 +3,13 @@ module.exports = new(class Players {
 	constructor() {
 		this.players = [];
 	}
-	add(id) {
+	add(id,name) {
 		const newPlayer = {
 			id: id,
 			posX: config.game.start.x,
 			posY: config.game.start.y,
-			ammo: ["Infinity", 200, 100, 5, 100, 10]
+			ammo: ["Infinity", 200, 100, 5, 100, 10],
+			name: name
 		};
 		this.players.push(newPlayer);
 		return newPlayer
