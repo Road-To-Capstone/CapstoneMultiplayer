@@ -23,6 +23,9 @@ export default class NoCollide {
         case 'vroad':
           this.sprite.scale.setTo(2)
           break;
+        case 'floor1'||'floor2':
+          this.sprite.scale.setTo(2);
+          break;
         default:
           this.sprite.scale.setTo(0.28)
           break;

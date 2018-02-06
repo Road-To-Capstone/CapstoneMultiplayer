@@ -284,27 +284,16 @@ export default class GameState extends Phaser.State {
 		this.spawnNoCollide(211, 1500, 'vroad')
 		this.spawnNoCollide(211, 1850, 'vroad')
 
+		//floor1
+		this.spawnNoCollide(340, 262, 'floor1')
+		this.spawnNoCollide(490, 262, 'floor1')
+
+
 	}
 
 	setUpBuilding() {
-		this.spawnBuilding(350, 250, 'house1');
-		
-		// this.spawnBuilding(82, 550, 'building8');
-		// this.spawnBuilding(82, 1200, 'building11');
-		// this.spawnBuilding(82, 1200, 'building11');
-		// this.spawnBuilding(200, 200, 'building3');
-		// this.spawnBuilding(400, 400, 'building4');
-		// this.spawnBuilding(600, 600, 'building5');
-		// this.spawnBuilding(750, 200, 'building6');
-		// this.spawnBuilding(900, 173, 'building7');
-		// this.spawnBuilding(1000, 1000, 'building9');
-		// this.spawnBuilding(900, 170, 'building10');
-		// this.spawnBuilding(1200, 1003, 'house1');
-		// this.spawnBuilding(500, 650, 'house2');
-		// this.spawnBuilding(820, 250, 'house3');
-		// this.spawnBuilding(690, 150, 'house4');
-		// this.spawnBuilding(1290, 460, 'house5');
-		// this.spawnBuilding(1000, 173, 'house6');
+		// this.spawnBuilding(400, 250, 'house1');
+		this.spawnBuilding(362, 253, 'building1');
 
 
 	}

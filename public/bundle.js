@@ -85488,27 +85488,16 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.spawnNoCollide(211, 1500, 'vroad')
 		this.spawnNoCollide(211, 1850, 'vroad')
 
+		//floor1
+		this.spawnNoCollide(340, 262, 'floor1')
+		this.spawnNoCollide(490, 262, 'floor1')
+
+
 	}
 
 	setUpBuilding() {
-		this.spawnBuilding(350, 250, 'house1');
-		
-		// this.spawnBuilding(82, 550, 'building8');
-		// this.spawnBuilding(82, 1200, 'building11');
-		// this.spawnBuilding(82, 1200, 'building11');
-		// this.spawnBuilding(200, 200, 'building3');
-		// this.spawnBuilding(400, 400, 'building4');
-		// this.spawnBuilding(600, 600, 'building5');
-		// this.spawnBuilding(750, 200, 'building6');
-		// this.spawnBuilding(900, 173, 'building7');
-		// this.spawnBuilding(1000, 1000, 'building9');
-		// this.spawnBuilding(900, 170, 'building10');
-		// this.spawnBuilding(1200, 1003, 'house1');
-		// this.spawnBuilding(500, 650, 'house2');
-		// this.spawnBuilding(820, 250, 'house3');
-		// this.spawnBuilding(690, 150, 'house4');
-		// this.spawnBuilding(1290, 460, 'house5');
-		// this.spawnBuilding(1000, 173, 'house6');
+		// this.spawnBuilding(400, 250, 'house1');
+		this.spawnBuilding(362, 253, 'building1');
 
 
 	}
@@ -86156,13 +86145,16 @@ class Preload extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.load.image('building2', '../../assets/building2.png')
         this.load.image('building3', '../../assets/building3.png')
         this.load.image('building4', '../../assets/building4.png')
-		this.load.image('building5', '../../assets/building5.png')
+        this.load.image('building5', '../../assets/building5.png')
+        this.load.image('building6', '../../assets/building6.png')
+		this.load.image('building7', '../../assets/building7.png')
 		this.load.image('house1', '../../assets/house1.png')
 		this.load.image('house2', '../../assets/house2.png')
 		this.load.image('house3', '../../assets/house3.png')
-		this.load.image('house4', '../../assets/house4.png')
-		this.load.image('house5', '../../assets/house5.png')
-		this.load.image('house6', '../../assets/house6.png')
+        this.load.image('house4', '../../assets/house4.png')
+        this.load.image('floor1', '../../assets/floor1.png')
+        this.load.image('floor2', '../../assets/floor2.png')
+
 
 		this.load.image('tree1', '../../assets/tree1.png')
 		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
@@ -92308,7 +92300,7 @@ class Building {
     this.sprite.game.physics.arcade.enableBody(this.sprite);
     this.sprite.body.immovable = true;
     this.sprite.anchor.setTo(0.5, 0.5)
-    this.sprite.scale.setTo(0.65)
+    this.sprite.scale.setTo(0.85)
     this.sprite.x = x
     this.sprite.y = y
 
@@ -92480,6 +92472,9 @@ class NoCollide {
           break;
         case 'vroad':
           this.sprite.scale.setTo(2)
+          break;
+        case 'floor1'||'floor2':
+          this.sprite.scale.setTo(2);
           break;
         default:
           this.sprite.scale.setTo(0.28)
