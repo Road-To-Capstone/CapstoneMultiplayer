@@ -97,8 +97,10 @@ io.sockets.on('connection', socket => {
 	})
 
 	socket.on('client:ask-to-create-zombie', (playerId) => {
+		let boss = false;
+		if(zombies.getKillCount()%10 === 2) boss = true;
 		if (zombies.getLength() < 2) {
-			let newZombie = zombies.add(newZombieId(), playerId);
+			let newZombie = zombies.add(newZombieId(), playerId, boss);
 			io.emit('server:zombie-added', newZombie);
 		}
 		return;
@@ -118,6 +120,7 @@ io.sockets.on('connection', socket => {
 
 	socket.on('client:kill-this-zombie', id => {
 		zombies.delete(id);
+		zombies.setKillCount();
 		io.emit('server:kill-this-zombie', id);
 	})
 

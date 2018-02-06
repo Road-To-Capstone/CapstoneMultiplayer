@@ -85228,7 +85228,8 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	startShootingTimer = 0,
 	startShootingDuration = 5000,
 	playerGroup,
-	playerCreated = false;
+	playerCreated = false,
+	scoreTrack = 0;
 
 //const SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
 const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)
@@ -85276,10 +85277,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		text.fixedToCamera = true;
 
 		this.background = this.add.tileSprite(0, 0, 1920, 1920, 'background')
-		healthPercent = this.add.text(20, this.game.height - 100, '100%', {
-			fill: '#ffffff'
-		});
-		healthPercent.fixedToCamera = true;
 
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default()().connect();
@@ -85323,21 +85320,27 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			finalTranscript = '';
 		}
 		this.addRain();
-		
+
+		healthPercent = this.add.text(20, this.game.height - 100, '100%', {
+			fill: '#ffffff'
+		});
+		healthPercent.fixedToCamera = true;
+
+		scoreTrack = this.add.text(100, this.game.height - 100, 'SCORE: 0', {
+			fill: '#ffffff'
+		});
+
+		scoreTrack.fixedToCamera = true;
 	}
 
 	update() {
 		if (this.doneLoading && playerCreated) {
 		
-
-
 			let voiceRecCommand = transcriptArray.shift()
 			startShooting = this.pewCommand(voiceRecCommand)
 			if (startShootingTimer < this.time.now) {
 				startShooting = false;
 			}
-
-
 			//console.log("voiceRecCommand is", voiceRecCommand)
 
 			if (!cameraSet) {
@@ -85348,14 +85351,14 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			const player = this.getPlayerById(this.io.id);
 			if(voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
 
-	
 			this.io.emit('client:player-moved', {
 				id: this.io.id,
 				posX: player.sprite.x,
 				posY: player.sprite.y,
 				ammo: player.sprite.ammo
 			});
-	
+			
+			scoreTrack.setText(`SCORE: ${player.sprite.score}`)
 
 			this.updateShadowTexture(player);
 
@@ -85379,6 +85382,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				posX: ${Math.floor(player.sprite.worldPosition.x)}
 				posY: ${Math.floor(player.sprite.worldPosition.y)}
 			`);
+			healthPercent.setText(`${(player.sprite.playerHealth / player.sprite.playerMaxHealth) * 100}%`);
 			if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
 				this.io.emit('client:ask-to-create-missile', {
@@ -85408,13 +85412,16 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 						var animatedDeath = zombieDeath.animations.add('zombiedeath', [4, 5, 6, 3, 8, 9, 10, 7, 0, 1, 2, 11, 11, 11, 11, 11, 11, 11, 11, 11], 6, false);
 						animatedDeath.killOnComplete = true;
+						let distance =__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Math.distance(player.sprite.x, player.sprite.y, e.sprite.x, e.sprite.y);
+						if(distance > 275) {
+							zombieDeath.kill()
+						}
 
 						zombieDeath.animations.play('zombiedeath');
 					}
 					this.physics.arcade.collide(e.sprite, zombieGroup);
 					this.physics.arcade.collide(e.sprite, buildingGroup);
 				});
-
 			}
 
 			if (this.time.now > nextMissileCollision) {
@@ -85530,8 +85537,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		buildingGroup.add(this.building.sprite);
 	}
 
-	makeZombies(id, x, y, playerId) {
-		this.zombie = new __WEBPACK_IMPORTED_MODULE_4__zombie__["a" /* default */](id, this, x, y, playerId);
+	makeZombies(id, x, y, playerId, boss) {
+		this.zombie = new __WEBPACK_IMPORTED_MODULE_4__zombie__["a" /* default */](id, this, x, y, playerId, boss);
 		this.zombies.push(this.zombie);
 		zombieGroup.add(this.zombie.sprite)
 	}
@@ -85651,7 +85658,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.io.on('server:all-zombies', data => {
 			if (data.length>0){
 				data.forEach(newZombie => {
-					this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
+					this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId, newZombie.boss);
 				})
 			}
 		})
@@ -85700,7 +85707,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:zombie-added', newZombie => {
-			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId);
+			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId, newZombie.boss);
 		});
 
 		this.io.on('server:kill-this-zombie', id => {
@@ -85718,7 +85725,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 		this.io.on('server:player-added', newPlayer => {
 			console.log("newPlayer.id is", newPlayer.id)
-			console.log("newPlayer.ammo is", newPlayer.ammo)
 			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY, newPlayer.ammo)
 		})
 
@@ -92508,7 +92514,7 @@ class Player {
 
 
 class zombie {
-  constructor(id, game, x, y, playerId) {
+  constructor(id, game, x, y, playerId, boss) {
     this.id = id;
     this.game = game;
     this.playerId = playerId
@@ -92518,7 +92524,14 @@ class zombie {
     this.sprite.body.fixedRotation = true;
 
     this.sprite.anchor.setTo(0.5, 0.5);
-    this.sprite.scale.setTo(0.12, 0.12);
+
+    if(boss) {
+      this.sprite.scale.setTo(0.6);
+      this.sprite.health = 1000;
+    } else {
+      this.sprite.scale.setTo(0.12, 0.12);
+      this.sprite.health = 100;
+    }
     this.sprite.checkWorldBounds = true
     this.sprite.body.collideWorldBounds = true;
 
@@ -92527,9 +92540,7 @@ class zombie {
 
     this.sprite.SPEED = 110; // Invader speed pixels/second
     this.sprite.TURN_RATE = 10; // turn rate in degrees/frame
-    this.sprite.health = 100;
     this.sprite.hasOverlapped = false;
-    this.sprite.health = 100;
     this.sprite.rotations = 0;
     this.sprite.isRightFacing = true;
 
