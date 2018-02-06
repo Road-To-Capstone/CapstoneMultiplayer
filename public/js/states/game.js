@@ -151,7 +151,8 @@ export default class GameState extends Phaser.State {
 			this.io.emit('client:player-moved', {
 				id: this.io.id,
 				posX: player.sprite.x,
-				posY: player.sprite.y
+				posY: player.sprite.y,
+				ammo: player.sprite.ammo
 			});
 			
 			scoreTrack.setText(`SCORE: ${player.sprite.score}`)
@@ -167,7 +168,6 @@ export default class GameState extends Phaser.State {
 						playerId: z.playerId
 					})
 				}
-			
 			});
 
 			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
@@ -188,7 +188,8 @@ export default class GameState extends Phaser.State {
 					posY: player.sprite.y,
 					itemName: player.sprite.selectedItem,
 					toX: this.input.activePointer.worldX,
-					toY: this.input.activePointer.worldY
+					toY: this.input.activePointer.worldY,
+					damage: weaponDamage[player.sprite.ammoIndex]
 				})
 			}
 		if (this.zombies.length < 2) {
@@ -339,9 +340,9 @@ export default class GameState extends Phaser.State {
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-	makePlayer(id,x,y){
-		this.player = new Player(id, this, x, y)
-		console.log("players is", this.players)
+	makePlayer(id,x,y,ammo){
+		this.player = new Player(id, this, x, y, ammo)
+	//	console.log("players is", this.players)
 		this.players.push(this.player)
 		playerGroup.add(this.player.sprite)
 		playerCreated = true;
@@ -373,8 +374,8 @@ export default class GameState extends Phaser.State {
 		player.sprite.selectedFireRate = player.sprite.fireRates[index];
 	}
 
-	fire(posX, posY, itemName, id, toX, toY) {
-		this.missile = new Missile(this, posX, posY, toX, toY, itemName, id)
+	fire(posX, posY, itemName, id, toX, toY, damage) {
+		this.missile = new Missile(this, posX, posY, toX, toY, itemName, id, damage)
 		this.missiles.push(this.missile);
 		missileGroup.add(this.missile.sprite)
 		zombieGroup.forEach((e) => {
@@ -388,7 +389,8 @@ export default class GameState extends Phaser.State {
 		if (!zombie.hasOverlapped) {
 			zombie.hasOverlapped = true
 			let currentPlayer = this.getPlayerById(this.io.id);
-			zombie.health -= weaponDamage[currentPlayer.sprite.ammoIndex];
+			console.log("new missile dmg is", missile.damage)
+			zombie.health -= missile.damage;
 			currentPlayer.sprite.score += 100;
 		}
 	}
@@ -474,7 +476,7 @@ export default class GameState extends Phaser.State {
 
 		this.io.on('server:player-moved', data => {
 			if (this.getPlayerById(data.id)){
-				this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
+				this.getPlayerById(data.id).setX(data.posX).setY(data.posY).setAmmo(data.ammo);
 			}
 		});
 
@@ -515,12 +517,12 @@ export default class GameState extends Phaser.State {
 		})
 
 		this.io.on('server:missile-added', newMissile => {
-			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName, newMissile.id, newMissile.toX, newMissile.toY)
+			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName, newMissile.id, newMissile.toX, newMissile.toY, newMissile.damage)
 		});
 
 		this.io.on('server:player-added', newPlayer => {
 			console.log("newPlayer.id is", newPlayer.id)
-			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY)
+			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY, newPlayer.ammo)
 		})
 
 		this.io.on('server:update-single-player-players', updatedPlayers => {

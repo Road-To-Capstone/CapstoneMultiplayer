@@ -85354,7 +85354,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			this.io.emit('client:player-moved', {
 				id: this.io.id,
 				posX: player.sprite.x,
-				posY: player.sprite.y
+				posY: player.sprite.y,
+				ammo: player.sprite.ammo
 			});
 			
 			scoreTrack.setText(`SCORE: ${player.sprite.score}`)
@@ -85370,7 +85371,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 						playerId: z.playerId
 					})
 				}
-			
 			});
 
 			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
@@ -85391,7 +85391,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 					posY: player.sprite.y,
 					itemName: player.sprite.selectedItem,
 					toX: this.input.activePointer.worldX,
-					toY: this.input.activePointer.worldY
+					toY: this.input.activePointer.worldY,
+					damage: weaponDamage[player.sprite.ammoIndex]
 				})
 			}
 		if (this.zombies.length < 2) {
@@ -85542,9 +85543,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-	makePlayer(id,x,y){
-		this.player = new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](id, this, x, y)
-		console.log("players is", this.players)
+	makePlayer(id,x,y,ammo){
+		this.player = new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](id, this, x, y, ammo)
+	//	console.log("players is", this.players)
 		this.players.push(this.player)
 		playerGroup.add(this.player.sprite)
 		playerCreated = true;
@@ -85576,8 +85577,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		player.sprite.selectedFireRate = player.sprite.fireRates[index];
 	}
 
-	fire(posX, posY, itemName, id, toX, toY) {
-		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this, posX, posY, toX, toY, itemName, id)
+	fire(posX, posY, itemName, id, toX, toY, damage) {
+		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this, posX, posY, toX, toY, itemName, id, damage)
 		this.missiles.push(this.missile);
 		missileGroup.add(this.missile.sprite)
 		zombieGroup.forEach((e) => {
@@ -85591,7 +85592,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		if (!zombie.hasOverlapped) {
 			zombie.hasOverlapped = true
 			let currentPlayer = this.getPlayerById(this.io.id);
-			zombie.health -= weaponDamage[currentPlayer.sprite.ammoIndex];
+			console.log("new missile dmg is", missile.damage)
+			zombie.health -= missile.damage;
 			currentPlayer.sprite.score += 100;
 		}
 	}
@@ -85677,7 +85679,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 		this.io.on('server:player-moved', data => {
 			if (this.getPlayerById(data.id)){
-				this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
+				this.getPlayerById(data.id).setX(data.posX).setY(data.posY).setAmmo(data.ammo);
 			}
 		});
 
@@ -85718,12 +85720,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		})
 
 		this.io.on('server:missile-added', newMissile => {
-			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName, newMissile.id, newMissile.toX, newMissile.toY)
+			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName, newMissile.id, newMissile.toX, newMissile.toY, newMissile.damage)
 		});
 
 		this.io.on('server:player-added', newPlayer => {
 			console.log("newPlayer.id is", newPlayer.id)
-			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY)
+			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY, newPlayer.ammo)
 		})
 
 		this.io.on('server:update-single-player-players', updatedPlayers => {
@@ -92263,7 +92265,7 @@ const newgame = new game();
 
 
 class Missile {
-    constructor(game, x, y, mouseX, mouseY, itemName, id) {
+    constructor(game, x, y, mouseX, mouseY, itemName, id, damage) {
         this.game = game;
         this.mouseX = mouseX
         this.mouseY = mouseY
@@ -92317,6 +92319,7 @@ class Missile {
         }
         this.sprite.x = x;
         this.sprite.y = y;
+        this.sprite.damage = damage;
 
         this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, this.missleSpeed)
     }
@@ -92352,7 +92355,7 @@ var ammoToAdd = [Infinity, 10, 5, 1, 5, 1]
 var spriteOrientation = "";
 
 class Player {
-	constructor(id, game, x, y, angle) {
+	constructor(id, game, x, y,ammo) {
 		this.id = id;
 		this.game = game;
 
@@ -92368,7 +92371,6 @@ class Player {
 		this.sprite.id = id;
 		this.sprite.x = x;
 		this.sprite.y = y;
-		this.sprite.angle = angle;
 		this.sprite.body.allowRotation = false;
 		this.sprite.score = 0;
 
@@ -92383,7 +92385,7 @@ class Player {
 
 		this.sprite.items = ['Melee', 'Machine Gun', 'Flame Thrower', 'Rocket Launcher', 'Chainsaw', 'Lazer']
 		this.sprite.selectedItem = 'Melee'
-		this.sprite.ammo = [Infinity, 200, 100, 5, 100, 10]
+		this.sprite.ammo = ammo // [Infinity, 200, 100, 5, 100, 10]
 		this.sprite.ammoIndex = 0
 		this.sprite.fireRates = [500, 100, 250, 1000, 200, 1250]
 		this.sprite.selectedFireRate = 500
@@ -92476,8 +92478,8 @@ class Player {
 		this.sprite.y = y;
 		return this;
 	}
-	setAngle(deg) {
-		this.sprite.angle = deg;
+	setAmmo(ammo) {
+		this.sprite.ammo = ammo;
 		return this;
 	}
 
@@ -92524,7 +92526,7 @@ class zombie {
     this.sprite.anchor.setTo(0.5, 0.5);
 
     if(boss) {
-      this.sprite.scale.setTo(0.75);
+      this.sprite.scale.setTo(0.6);
       this.sprite.health = 1000;
     } else {
       this.sprite.scale.setTo(0.12, 0.12);

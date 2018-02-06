@@ -10,11 +10,10 @@ export default class zombie {
     this.sprite = this.game.add.sprite(50, 0, 'zombiewalk');
     this.game.physics.arcade.enableBody(this.sprite);
     this.sprite.body.fixedRotation = true;
-
     this.sprite.anchor.setTo(0.5, 0.5);
 
     if(boss) {
-      this.sprite.scale.setTo(0.75);
+      this.sprite.scale.setTo(0.6);
       this.sprite.health = 1000;
     } else {
       this.sprite.scale.setTo(0.12, 0.12);

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 export default class Missile {
-    constructor(game, x, y, mouseX, mouseY, itemName, id) {
+    constructor(game, x, y, mouseX, mouseY, itemName, id, damage) {
         this.game = game;
         this.mouseX = mouseX
         this.mouseY = mouseY
@@ -55,6 +55,7 @@ export default class Missile {
         }
         this.sprite.x = x;
         this.sprite.y = y;
+        this.sprite.damage = damage;
 
         this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, this.missleSpeed)
     }
