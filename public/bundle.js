@@ -97,316 +97,6 @@ module.exports = g;
 /* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-
-var bind = __webpack_require__(18);
-var isBuffer = __webpack_require__(78);
-
-/*global toString:true*/
-
-// utils is a library of generic helper functions non-specific to axios
-
-var toString = Object.prototype.toString;
-
-/**
- * Determine if a value is an Array
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Array, otherwise false
- */
-function isArray(val) {
-  return toString.call(val) === '[object Array]';
-}
-
-/**
- * Determine if a value is an ArrayBuffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an ArrayBuffer, otherwise false
- */
-function isArrayBuffer(val) {
-  return toString.call(val) === '[object ArrayBuffer]';
-}
-
-/**
- * Determine if a value is a FormData
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an FormData, otherwise false
- */
-function isFormData(val) {
-  return (typeof FormData !== 'undefined') && (val instanceof FormData);
-}
-
-/**
- * Determine if a value is a view on an ArrayBuffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
- */
-function isArrayBufferView(val) {
-  var result;
-  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
-    result = ArrayBuffer.isView(val);
-  } else {
-    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
-  }
-  return result;
-}
-
-/**
- * Determine if a value is a String
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a String, otherwise false
- */
-function isString(val) {
-  return typeof val === 'string';
-}
-
-/**
- * Determine if a value is a Number
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Number, otherwise false
- */
-function isNumber(val) {
-  return typeof val === 'number';
-}
-
-/**
- * Determine if a value is undefined
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if the value is undefined, otherwise false
- */
-function isUndefined(val) {
-  return typeof val === 'undefined';
-}
-
-/**
- * Determine if a value is an Object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Object, otherwise false
- */
-function isObject(val) {
-  return val !== null && typeof val === 'object';
-}
-
-/**
- * Determine if a value is a Date
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Date, otherwise false
- */
-function isDate(val) {
-  return toString.call(val) === '[object Date]';
-}
-
-/**
- * Determine if a value is a File
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a File, otherwise false
- */
-function isFile(val) {
-  return toString.call(val) === '[object File]';
-}
-
-/**
- * Determine if a value is a Blob
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Blob, otherwise false
- */
-function isBlob(val) {
-  return toString.call(val) === '[object Blob]';
-}
-
-/**
- * Determine if a value is a Function
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Function, otherwise false
- */
-function isFunction(val) {
-  return toString.call(val) === '[object Function]';
-}
-
-/**
- * Determine if a value is a Stream
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Stream, otherwise false
- */
-function isStream(val) {
-  return isObject(val) && isFunction(val.pipe);
-}
-
-/**
- * Determine if a value is a URLSearchParams object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a URLSearchParams object, otherwise false
- */
-function isURLSearchParams(val) {
-  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
-}
-
-/**
- * Trim excess whitespace off the beginning and end of a string
- *
- * @param {String} str The String to trim
- * @returns {String} The String freed of excess whitespace
- */
-function trim(str) {
-  return str.replace(/^\s*/, '').replace(/\s*$/, '');
-}
-
-/**
- * Determine if we're running in a standard browser environment
- *
- * This allows axios to run in a web worker, and react-native.
- * Both environments support XMLHttpRequest, but not fully standard globals.
- *
- * web workers:
- *  typeof window -> undefined
- *  typeof document -> undefined
- *
- * react-native:
- *  navigator.product -> 'ReactNative'
- */
-function isStandardBrowserEnv() {
-  if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
-    return false;
-  }
-  return (
-    typeof window !== 'undefined' &&
-    typeof document !== 'undefined'
-  );
-}
-
-/**
- * Iterate over an Array or an Object invoking a function for each item.
- *
- * If `obj` is an Array callback will be called passing
- * the value, index, and complete array for each item.
- *
- * If 'obj' is an Object callback will be called passing
- * the value, key, and complete object for each property.
- *
- * @param {Object|Array} obj The object to iterate
- * @param {Function} fn The callback to invoke for each item
- */
-function forEach(obj, fn) {
-  // Don't bother if no value provided
-  if (obj === null || typeof obj === 'undefined') {
-    return;
-  }
-
-  // Force an array if not already something iterable
-  if (typeof obj !== 'object') {
-    /*eslint no-param-reassign:0*/
-    obj = [obj];
-  }
-
-  if (isArray(obj)) {
-    // Iterate over array values
-    for (var i = 0, l = obj.length; i < l; i++) {
-      fn.call(null, obj[i], i, obj);
-    }
-  } else {
-    // Iterate over object keys
-    for (var key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        fn.call(null, obj[key], key, obj);
-      }
-    }
-  }
-}
-
-/**
- * Accepts varargs expecting each argument to be an object, then
- * immutably merges the properties of each object and returns result.
- *
- * When multiple objects contain the same key the later object in
- * the arguments list will take precedence.
- *
- * Example:
- *
- * ```js
- * var result = merge({foo: 123}, {foo: 456});
- * console.log(result.foo); // outputs 456
- * ```
- *
- * @param {Object} obj1 Object to merge
- * @returns {Object} Result of all merge properties
- */
-function merge(/* obj1, obj2, obj3, ... */) {
-  var result = {};
-  function assignValue(val, key) {
-    if (typeof result[key] === 'object' && typeof val === 'object') {
-      result[key] = merge(result[key], val);
-    } else {
-      result[key] = val;
-    }
-  }
-
-  for (var i = 0, l = arguments.length; i < l; i++) {
-    forEach(arguments[i], assignValue);
-  }
-  return result;
-}
-
-/**
- * Extends object a by mutably adding to it the properties of object b.
- *
- * @param {Object} a The object to be extended
- * @param {Object} b The object to copy properties from
- * @param {Object} thisArg The object to bind function to
- * @return {Object} The resulting value of object a
- */
-function extend(a, b, thisArg) {
-  forEach(b, function assignValue(val, key) {
-    if (thisArg && typeof val === 'function') {
-      a[key] = bind(val, thisArg);
-    } else {
-      a[key] = val;
-    }
-  });
-  return a;
-}
-
-module.exports = {
-  isArray: isArray,
-  isArrayBuffer: isArrayBuffer,
-  isBuffer: isBuffer,
-  isFormData: isFormData,
-  isArrayBufferView: isArrayBufferView,
-  isString: isString,
-  isNumber: isNumber,
-  isObject: isObject,
-  isUndefined: isUndefined,
-  isDate: isDate,
-  isFile: isFile,
-  isBlob: isBlob,
-  isFunction: isFunction,
-  isStream: isStream,
-  isURLSearchParams: isURLSearchParams,
-  isStandardBrowserEnv: isStandardBrowserEnv,
-  forEach: forEach,
-  merge: merge,
-  extend: extend,
-  trim: trim
-};
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
 /* WEBPACK VAR INJECTION */(function(process) {/**
 * @author       Richard Davey <rich@photonstorm.com>
 * @copyright    2016 Photon Storm Ltd.
@@ -80771,6 +80461,316 @@ PIXI.TextureSilentFail = true;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var bind = __webpack_require__(18);
+var isBuffer = __webpack_require__(78);
+
+/*global toString:true*/
+
+// utils is a library of generic helper functions non-specific to axios
+
+var toString = Object.prototype.toString;
+
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */
+function isArray(val) {
+  return toString.call(val) === '[object Array]';
+}
+
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */
+function isFormData(val) {
+  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+}
+
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+  }
+  return result;
+}
+
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */
+function isString(val) {
+  return typeof val === 'string';
+}
+
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */
+function isNumber(val) {
+  return typeof val === 'number';
+}
+
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */
+function isURLSearchParams(val) {
+  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */
+function trim(str) {
+  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+}
+
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ */
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
+    return false;
+  }
+  return (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined'
+  );
+}
+
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */
+function forEach(obj, fn) {
+  // Don't bother if no value provided
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  // Force an array if not already something iterable
+  if (typeof obj !== 'object') {
+    /*eslint no-param-reassign:0*/
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    // Iterate over array values
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    // Iterate over object keys
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function merge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (typeof result[key] === 'object' && typeof val === 'object') {
+      result[key] = merge(result[key], val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg);
+    } else {
+      a[key] = val;
+    }
+  });
+  return a;
+}
+
+module.exports = {
+  isArray: isArray,
+  isArrayBuffer: isArrayBuffer,
+  isBuffer: isBuffer,
+  isFormData: isFormData,
+  isArrayBufferView: isArrayBufferView,
+  isString: isString,
+  isNumber: isNumber,
+  isObject: isObject,
+  isUndefined: isUndefined,
+  isDate: isDate,
+  isFile: isFile,
+  isBlob: isBlob,
+  isFunction: isFunction,
+  isStream: isStream,
+  isURLSearchParams: isURLSearchParams,
+  isStandardBrowserEnv: isStandardBrowserEnv,
+  forEach: forEach,
+  merge: merge,
+  extend: extend,
+  trim: trim
+};
+
+
+/***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -81963,7 +81963,7 @@ function localstorage(){
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
-var utils = __webpack_require__(1);
+var utils = __webpack_require__(2);
 var normalizeHeaderName = __webpack_require__(61);
 
 var DEFAULT_CONTENT_TYPE = {
@@ -82892,7 +82892,7 @@ function error(data){
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
-var utils = __webpack_require__(1);
+var utils = __webpack_require__(2);
 var settle = __webpack_require__(53);
 var buildURL = __webpack_require__(56);
 var parseHeaders = __webpack_require__(62);
@@ -85194,15 +85194,17 @@ module.exports = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_socket_io_client__ = __webpack_require__(83);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_socket_io_client__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__player__ = __webpack_require__(97);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__player__ = __webpack_require__(98);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__missile__ = __webpack_require__(96);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__zombie__ = __webpack_require__(98);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__zombie__ = __webpack_require__(99);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__HealthBar_standalone__ = __webpack_require__(34);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__building__ = __webpack_require__(94);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__noCollide__ = __webpack_require__(97);
+
 
 
 
@@ -85221,6 +85223,7 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	text,
 	playerNameText,
 	song,
+	bossSong,
 	healthPercent,
 	weaponDamage = [20, 10, 20, 100, 20, 100],
 	finalTranscript = "",
@@ -85230,10 +85233,11 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	startShootingDuration = 5000,
 	playerGroup,
 	playerCreated = false,
+	bossPlaying = false,
 	scoreTrack = 0;
 
 //const SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
-const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)
+const recognition = (navigator.userAgent.includes('Chrome')) ? new(window.SpeechRecognition || window.webkitSpeechRecognition) : null;
 
 
 class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
@@ -85248,10 +85252,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 	preload() {
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
 		this.load.audio('bensound-ofeliasdream', './assets/bensound-ofeliasdream.mp3')
+		this.load.audio('Action Radius', './assets/Action Radius.mp3')
 		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Tilemap.TILED_JSON)
 		this.load.image('tiles', './assets/tiles.png')
 		this.load.image('background', '/assets/background.png')
 		this.load.image('building', './assets/buildingplaceholder.png')
+		this.load.image('tombstone', './assets/Tombstone.png')
+		this.load.image('road', './assets/Road.png')
 		this.load.image('Melee', '/assets/Melee.png')
 		this.load.image('Lazer', '/assets/Lazer.png')
 		this.load.image('Machine Gun', '/assets/Machine Gun.png')
@@ -85263,16 +85270,23 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.load.image('building2', '../../assets/building2.png')
 		this.load.image('building3', '../../assets/building3.png')
 		this.load.image('tree1', '../../assets/tree1.png')
+<<<<<<< HEAD
 		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
 		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
 		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
+=======
+		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
+		this.load.spritesheet('player', '/assets/playerspritesheet.png', 24, 32)
+		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png', 430, 519, 10)
+		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png', 629, 526, 12)
+>>>>>>> master
 	}
 
 	create() {
-		//this.setUpMap()
 		this.player = undefined;
 
 		this.background = this.add.tileSprite(0, 0, 1920, 1920, 'background')
+		this.setUpMap()
 
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default()().connect();
@@ -85286,16 +85300,17 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		zombieGroup = this.add.group();
 		missileGroup = this.add.group();
 		buildingGroup = this.add.group();
-		
+
 
 		song = this.add.audio('bensound-ofeliasdream');
+		bossSong = this.add.audio('Action Radius');
 		this.sound.setDecodedCallback(song, this.startMusic, this);
+		this.sound.setDecodedCallback(bossSong, this.startMusic, this);
 
 		this.spawnBuilding(652, 961, 'building1');
 		this.spawnBuilding(821, 1480, 'building2');
 		this.spawnBuilding(1400, 1003, 'building3');
 		this.spawnBuilding(100, 100, 'tree1');
-
 
 		this.shadowTexture = this.add.bitmapData(1920, 1920)
 
@@ -85303,18 +85318,22 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 		lightSprite.blendMode = __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.blendModes.MULTIPLY
 
-		recognition.continuous = true;
-		recognition.lang = 'en-US'
-		recognition.start();
+		if (navigator.userAgent.includes('Chrome')) {
+			recognition.continuous = true;
+			recognition.lang = 'en-US'
+			recognition.start();
 
-		recognition.onresult = event => {
-			for (let i = event.resultIndex; i < event.results.length; i++) {
-				const transcript = event.results[i][0].transcript
-				if (event.results[i].isFinal) finalTranscript += transcript + " "
+			recognition.onresult = event => {
+				for (let i = event.resultIndex; i < event.results.length; i++) {
+					const transcript = event.results[i][0].transcript
+					if (event.results[i].isFinal) finalTranscript += transcript + " "
+				}
+				transcriptArray = finalTranscript.split(" ")
+				finalTranscript = '';
 			}
-			transcriptArray = finalTranscript.split(" ")
-			finalTranscript = '';
 		}
+
+
 		this.addRain();
 
 		healthPercent = this.add.text(20, this.game.height - 100, '100%', {
@@ -85341,13 +85360,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 	update() {
 		if (this.doneLoading && playerCreated) {
-		
+
 			let voiceRecCommand = transcriptArray.shift()
 			startShooting = this.pewCommand(voiceRecCommand)
 			if (startShootingTimer < this.time.now) {
 				startShooting = false;
 			}
-			//console.log("voiceRecCommand is", voiceRecCommand)
 
 			if (!cameraSet) {
 				this.camera.follow(this.getPlayerById(this.io.id).sprite)
@@ -85355,7 +85373,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				cameraSet = true;
 			}
 			const player = this.getPlayerById(this.io.id);
-			if(voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
+			if (voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
 
 			this.io.emit('client:player-moved', {
 				id: this.io.id,
@@ -85364,13 +85382,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				ammo: player.sprite.ammo,
 				name: player.sprite.name
 			});
-			
+
 			scoreTrack.setText(`SCORE: ${player.sprite.score}`)
 
 			this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
-				if (z.playerId === this.io.id){
+				if (z.playerId === this.io.id) {
 					this.io.emit('client:zombie-moved', {
 						id: z.id,
 						posX: z.sprite.x,
@@ -85406,7 +85424,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 					damage: weaponDamage[player.sprite.ammoIndex]
 				})
 			}
-		if (this.zombies.length < 2) {
+			if (this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie', this.io.id);
 			}
 
@@ -85423,8 +85441,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 						var animatedDeath = zombieDeath.animations.add('zombiedeath', [4, 5, 6, 3, 8, 9, 10, 7, 0, 1, 2, 11, 11, 11, 11, 11, 11, 11, 11, 11], 6, false);
 						animatedDeath.killOnComplete = true;
-						let distance =__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Math.distance(player.sprite.x, player.sprite.y, e.sprite.x, e.sprite.y);
-						if(distance > 275) {
+						let distance = __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Math.distance(player.sprite.x, player.sprite.y, e.sprite.x, e.sprite.y);
+						if (distance > 275) {
 							zombieDeath.kill()
 						}
 
@@ -85465,14 +85483,34 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		SETUP FUNCTIONS
 	*/
 	setUpMap() {
-		map = this.add.tilemap('BaseMap')
-		map.addTilesetImage('Map tiles.tsx', 'tiles')
-		layer = map.createLayer('Tile Layer 1')
-		layer.resizeWorld()
+		this.spawnNoCollide(200, 700, 'tombstone')
+		this.spawnNoCollide(340, 1200, 'tombstone')
+		this.spawnNoCollide(200, 1700, 'tombstone')
+		this.spawnNoCollide(250, 250, 'tombstone')
+		this.spawnNoCollide(800, 800, 'tombstone')
+		this.spawnNoCollide(1000, 1250, 'tombstone')
+		this.spawnNoCollide(1250, 1600, 'tombstone')
+		this.spawnNoCollide(1450, 800, 'tombstone')
+		this.spawnNoCollide(1450, 1400, 'tombstone')
+
+		this.spawnNoCollide(300, 400, 'road')
+		this.spawnNoCollide(1000, 400, 'road')
+		this.spawnNoCollide(1700, 400, 'road')
+	}
+
+	spawnNoCollide(x, y, option) {
+		this.noCollide = new __WEBPACK_IMPORTED_MODULE_7__noCollide__["a" /* default */](this.game, x, y, option)
 	}
 
 	startMusic() {
 		song.loopFull(0.2);
+		if (!bossPlaying) {
+			bossSong.pause()
+			song.loopFull(0.2);
+		} else {
+			song.pause()
+			bossSong.loopFull(0.2)
+		}
 	}
 
 	updateShadowTexture(player) {
@@ -85556,9 +85594,15 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		zombieGroup.add(this.zombie.sprite)
 	}
 
+<<<<<<< HEAD
 	makePlayer(id,x,y,ammo,name){
 		this.player = new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](id, this, x, y, ammo,name)
 	//	console.log("players is", this.players)
+=======
+	makePlayer(id, x, y, ammo) {
+		this.player = new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](id, this, x, y, ammo)
+		//	console.log("players is", this.players)
+>>>>>>> master
 		this.players.push(this.player)
 		playerGroup.add(this.player.sprite)
 		playerCreated = true;
@@ -85566,17 +85610,17 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 	switchWeapon(voice, player) {
 		let voiceTemp = voice.toLowerCase();
-		if(voiceTemp === 'melee') {
+		if (voiceTemp === 'melee') {
 			this.switchWeaponHelper(0, player);
-		} else if(voiceTemp === 'machine') {
+		} else if (voiceTemp === 'machine') {
 			this.switchWeaponHelper(1, player);
-		} else if(voiceTemp === 'flame') {
+		} else if (voiceTemp === 'flame') {
 			this.switchWeaponHelper(2, player);
-		} else if(voiceTemp === 'rocket') {
+		} else if (voiceTemp === 'rocket') {
 			this.switchWeaponHelper(3, player);
-		} else if(voiceTemp === 'chain') {
+		} else if (voiceTemp === 'chain') {
 			this.switchWeaponHelper(4, player);
-		} else if(voiceTemp === 'lazer') {
+		} else if (voiceTemp === 'lazer') {
 			this.switchWeaponHelper(5, player);
 		} else {
 			return;
@@ -85659,7 +85703,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		})*/
 
 		this.io.on('server:all-players', data => { //the data is the players from the server side
-			if (data.length>0){
+			if (data.length > 0) {
 				data.forEach(e => {
 					if (e.id != this.io.id) //this will prevent loading our player two times
 						this.players.push(new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](e.id, this, e.posX, e.posY, e.ammo, e.name));
@@ -85668,7 +85712,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:all-zombies', data => {
-			if (data.length>0){
+			if (data.length > 0) {
 				data.forEach(newZombie => {
 					this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId, newZombie.boss);
 				})
@@ -85676,9 +85720,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		})
 
 		//load your player
-	/*	this.io.on('server:player-added', data => {
-			players.push(new Player(data.id, this, data.posX, data.posY, data.angle));
-		});*/
+		/*	this.io.on('server:player-added', data => {
+				players.push(new Player(data.id, this, data.posX, data.posY, data.angle));
+			});*/
 
 		this.io.on('server:player-disconnected', id => { //if a player has disconnected
 			this.players.forEach((e, i) => {
@@ -85691,8 +85735,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:player-moved', data => {
+<<<<<<< HEAD
 			if (this.getPlayerById(data.id)){
 				this.getPlayerById(data.id).setX(data.posX).setY(data.posY).setAmmo(data.ammo).setName(data.name);
+=======
+			if (this.getPlayerById(data.id)) {
+				this.getPlayerById(data.id).setX(data.posX).setY(data.posY).setAmmo(data.ammo);
+>>>>>>> master
 			}
 		});
 
@@ -85707,7 +85756,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		})
 
 		this.io.on('server:zombie-moved', data => { //data is an object with {id: z.id, posX: z.sprite.x, posY: z.sprite.y}
-			if (this.getZombieById(data.id)){
+			if (this.getZombieById(data.id)) {
 				this.getZombieById(data.id).set(data.posX, data.posY);
 			}
 		});
@@ -85721,12 +85770,20 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:zombie-added', newZombie => {
+			if (newZombie.boss) {
+				bossPlaying = true;
+				this.startMusic()
+			}
 			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId, newZombie.boss);
 		});
 
 		this.io.on('server:kill-this-zombie', id => {
 			this.zombies.forEach((z, i) => {
 				if (z.id === id) {
+					if (z.boss) {
+						bossPlaying = false;
+						this.startMusic();
+					}
 					z.sprite.destroy();
 					this.zombies.splice(i, 1);
 				}
@@ -85743,12 +85800,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		})
 
 		this.io.on('server:update-single-player-players', updatedPlayers => {
-			console.log("updatedPlayers for you is: " , updatedPlayers)
+			console.log("updatedPlayers for you is: ", updatedPlayers)
 			this.players = updatedPlayers;
 		})
 
 		this.io.on('server:update-players', updatedPlayers => {
-			console.log("updatedPlayers for others is: " , updatedPlayers)
+			console.log("updatedPlayers for others is: ", updatedPlayers)
 			this.players = updatedPlayers;
 		})
 	}
@@ -85789,7 +85846,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				dist: 1920
 			},
 			distance, playerPosX, playerPoxY;
-			this.players.forEach((p, i) => {
+		this.players.forEach((p, i) => {
 			playerPosX = p.sprite.position.x;
 			playerPoxY = p.sprite.position.y;
 			distance = Math.sqrt(Math.pow(playerPosX - zombie.sprite.position.x, 2) +
@@ -85817,7 +85874,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_axios__ = __webpack_require__(46);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_axios___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_axios__);
@@ -85931,7 +85988,7 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
@@ -85989,7 +86046,7 @@ class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
@@ -86058,7 +86115,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
@@ -86163,7 +86220,7 @@ class Preload extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 //import axios from 'axios';
@@ -86293,7 +86350,7 @@ module.exports = __webpack_require__(47);
 "use strict";
 
 
-var utils = __webpack_require__(1);
+var utils = __webpack_require__(2);
 var bind = __webpack_require__(18);
 var Axios = __webpack_require__(49);
 var defaults = __webpack_require__(8);
@@ -86417,7 +86474,7 @@ module.exports = CancelToken;
 
 
 var defaults = __webpack_require__(8);
-var utils = __webpack_require__(1);
+var utils = __webpack_require__(2);
 var InterceptorManager = __webpack_require__(50);
 var dispatchRequest = __webpack_require__(51);
 
@@ -86502,7 +86559,7 @@ module.exports = Axios;
 "use strict";
 
 
-var utils = __webpack_require__(1);
+var utils = __webpack_require__(2);
 
 function InterceptorManager() {
   this.handlers = [];
@@ -86561,7 +86618,7 @@ module.exports = InterceptorManager;
 "use strict";
 
 
-var utils = __webpack_require__(1);
+var utils = __webpack_require__(2);
 var transformData = __webpack_require__(54);
 var isCancel = __webpack_require__(16);
 var defaults = __webpack_require__(8);
@@ -86715,7 +86772,7 @@ module.exports = function settle(resolve, reject, response) {
 "use strict";
 
 
-var utils = __webpack_require__(1);
+var utils = __webpack_require__(2);
 
 /**
  * Transform the data for a request or a response
@@ -86785,7 +86842,7 @@ module.exports = btoa;
 "use strict";
 
 
-var utils = __webpack_require__(1);
+var utils = __webpack_require__(2);
 
 function encode(val) {
   return encodeURIComponent(val).
@@ -86881,7 +86938,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
 "use strict";
 
 
-var utils = __webpack_require__(1);
+var utils = __webpack_require__(2);
 
 module.exports = (
   utils.isStandardBrowserEnv() ?
@@ -86962,7 +87019,7 @@ module.exports = function isAbsoluteURL(url) {
 "use strict";
 
 
-var utils = __webpack_require__(1);
+var utils = __webpack_require__(2);
 
 module.exports = (
   utils.isStandardBrowserEnv() ?
@@ -87037,7 +87094,7 @@ module.exports = (
 "use strict";
 
 
-var utils = __webpack_require__(1);
+var utils = __webpack_require__(2);
 
 module.exports = function normalizeHeaderName(headers, normalizedName) {
   utils.forEach(headers, function processHeader(value, name) {
@@ -87056,7 +87113,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 "use strict";
 
 
-var utils = __webpack_require__(1);
+var utils = __webpack_require__(2);
 
 // Headers whose duplicates are ignored by node
 // c.f. https://nodejs.org/api/http.html#http_message_headers
@@ -89036,7 +89093,7 @@ var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 var NodeWebSocket;
 if (typeof window === 'undefined') {
   try {
-    NodeWebSocket = __webpack_require__(99);
+    NodeWebSocket = __webpack_require__(100);
   } catch (e) { }
 }
 
@@ -92193,7 +92250,7 @@ module.exports = __webpack_amd_options__;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
@@ -92228,7 +92285,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_pixi___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_pixi__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_p2__ = __webpack_require__(35);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_p2___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_p2__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_phaser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_phaser__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_phaser__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config__ = __webpack_require__(37);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__config__);
@@ -92274,7 +92331,7 @@ const newgame = new game();
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
@@ -92355,7 +92412,45 @@ class Missile {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
+
+
+
+class NoCollide {
+  constructor(game, x, y, option) {
+
+    this.game = game
+
+    this.sprite = this.game.add.sprite(0, 0, option);
+    this.sprite.game.physics.arcade.enableBody(this.sprite);
+    this.sprite.body.immovable = true;
+    this.sprite.anchor.setTo(0.5, 0.5)
+    this.sprite.x = x
+    this.sprite.y = y
+
+    switch (option) {
+        case 'tombstone': 
+          this.sprite.scale.setTo(0.15)
+          break;
+        case 'road':
+          this.sprite.scale.setTo(4)
+          break;
+        default:
+          this.sprite.scale.setTo(0.15)
+          break;
+    }
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = NoCollide;
+
+
+/***/ }),
+/* 98 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__HealthBar_standalone__ = __webpack_require__(34);
 
@@ -92530,11 +92625,11 @@ class Player {
 
 
 /***/ }),
-/* 98 */
+/* 99 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
@@ -92544,13 +92639,14 @@ class zombie {
     this.id = id;
     this.game = game;
     this.playerId = playerId
+    this.boss = boss;
 
     this.sprite = this.game.add.sprite(50, 0, 'zombiewalk');
     this.game.physics.arcade.enableBody(this.sprite);
     this.sprite.body.fixedRotation = true;
     this.sprite.anchor.setTo(0.5, 0.5);
 
-    if(boss) {
+    if(this.boss) {
       this.sprite.scale.setTo(0.6);
       this.sprite.health = 1000;
     } else {
@@ -92602,7 +92698,7 @@ class zombie {
 
 
 /***/ }),
-/* 99 */
+/* 100 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
