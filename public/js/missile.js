@@ -8,6 +8,7 @@ export default class Missile {
         this.itemName = itemName
         this.id = id;
         this.missleSpeed = 100;
+        this.weaponDamage = [20, 10, 20, 100, 20, 100]
 
         this.sprite = this.game.add.sprite(0, 0, itemName);
         this.game.physics.arcade.enableBody(this.sprite);

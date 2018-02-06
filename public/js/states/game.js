@@ -164,7 +164,6 @@ export default class GameState extends Phaser.State {
 						playerId: z.playerId
 					})
 				}
-			
 			});
 
 			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
@@ -381,7 +380,7 @@ export default class GameState extends Phaser.State {
 		if (!zombie.hasOverlapped) {
 			zombie.hasOverlapped = true
 			let currentPlayer = this.getPlayerById(this.io.id);
-			zombie.health -= weaponDamage[currentPlayer.sprite.ammoIndex];
+			zombie.health -= missile.weaponDamage[currentPlayer.sprite.ammoIndex];
 			currentPlayer.sprite.score += 100;
 		}
 	}

@@ -85367,7 +85367,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 						playerId: z.playerId
 					})
 				}
-			
 			});
 
 			this.physics.arcade.overlap(player.sprite, zombieGroup, this.handleCollideZombie, null, this);
@@ -85584,7 +85583,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		if (!zombie.hasOverlapped) {
 			zombie.hasOverlapped = true
 			let currentPlayer = this.getPlayerById(this.io.id);
-			zombie.health -= weaponDamage[currentPlayer.sprite.ammoIndex];
+			zombie.health -= missile.weaponDamage[currentPlayer.sprite.ammoIndex];
 			currentPlayer.sprite.score += 100;
 		}
 	}
@@ -92263,6 +92262,7 @@ class Missile {
         this.itemName = itemName
         this.id = id;
         this.missleSpeed = 100;
+        this.weaponDamage = [20, 10, 20, 100, 20, 100]
 
         this.sprite = this.game.add.sprite(0, 0, itemName);
         this.game.physics.arcade.enableBody(this.sprite);
