@@ -85386,7 +85386,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 					posY: player.sprite.y,
 					itemName: player.sprite.selectedItem,
 					toX: this.input.activePointer.worldX,
-					toY: this.input.activePointer.worldY
+					toY: this.input.activePointer.worldY,
+					damage: weaponDamage[player.sprite.ammoIndex]
 				})
 			}
 		if (this.zombies.length < 2) {
@@ -85568,8 +85569,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		player.sprite.selectedFireRate = player.sprite.fireRates[index];
 	}
 
-	fire(posX, posY, itemName, id, toX, toY) {
-		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this, posX, posY, toX, toY, itemName, id)
+	fire(posX, posY, itemName, id, toX, toY, damage) {
+		this.missile = new __WEBPACK_IMPORTED_MODULE_3__missile__["a" /* default */](this, posX, posY, toX, toY, itemName, id, damage)
 		this.missiles.push(this.missile);
 		missileGroup.add(this.missile.sprite)
 		zombieGroup.forEach((e) => {
@@ -85583,7 +85584,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		if (!zombie.hasOverlapped) {
 			zombie.hasOverlapped = true
 			let currentPlayer = this.getPlayerById(this.io.id);
-			zombie.health -= missile.weaponDamage[currentPlayer.sprite.ammoIndex];
+			console.log("new missile dmg is", missile.damage)
+			zombie.health -= missile.damage;
 			currentPlayer.sprite.score += 100;
 		}
 	}
@@ -85710,7 +85712,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		})
 
 		this.io.on('server:missile-added', newMissile => {
-			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName, newMissile.id, newMissile.toX, newMissile.toY)
+			this.fire(newMissile.posX, newMissile.posY, newMissile.itemName, newMissile.id, newMissile.toX, newMissile.toY, newMissile.damage)
 		});
 
 		this.io.on('server:player-added', newPlayer => {
@@ -92255,14 +92257,13 @@ const newgame = new game();
 
 
 class Missile {
-    constructor(game, x, y, mouseX, mouseY, itemName, id) {
+    constructor(game, x, y, mouseX, mouseY, itemName, id, damage) {
         this.game = game;
         this.mouseX = mouseX
         this.mouseY = mouseY
         this.itemName = itemName
         this.id = id;
         this.missleSpeed = 100;
-        this.weaponDamage = [20, 10, 20, 100, 20, 100]
 
         this.sprite = this.game.add.sprite(0, 0, itemName);
         this.game.physics.arcade.enableBody(this.sprite);
@@ -92310,6 +92311,7 @@ class Missile {
         }
         this.sprite.x = x;
         this.sprite.y = y;
+        this.sprite.damage = damage;
 
         this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, this.missleSpeed)
     }
