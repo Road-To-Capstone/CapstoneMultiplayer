@@ -54,6 +54,6 @@ export default class GameState extends Phaser.State {
     }
 
     listener() {
-        this.state.start('GameState', true, false, textToUpdate);
+        this.state.start('HowToPlay', true, false, textToUpdate);
     }
 }
