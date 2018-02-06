@@ -85411,7 +85411,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 					this.physics.arcade.collide(e.sprite, zombieGroup);
 					this.physics.arcade.collide(e.sprite, buildingGroup);
 				});
-
 			}
 
 			if (this.time.now > nextMissileCollision) {
@@ -85527,8 +85526,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		buildingGroup.add(this.building.sprite);
 	}
 
-	makeZombies(id, x, y, playerId) {
-		this.zombie = new __WEBPACK_IMPORTED_MODULE_4__zombie__["a" /* default */](id, this, x, y, playerId);
+	makeZombies(id, x, y, playerId, boss) {
+		this.zombie = new __WEBPACK_IMPORTED_MODULE_4__zombie__["a" /* default */](id, this, x, y, playerId, boss);
 		this.zombies.push(this.zombie);
 		zombieGroup.add(this.zombie.sprite)
 	}
@@ -85647,7 +85646,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.io.on('server:all-zombies', data => {
 			if (data.length>0){
 				data.forEach(newZombie => {
-					this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
+					this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId, newZombie.boss);
 				})
 			}
 		})
@@ -85696,7 +85695,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:zombie-added', newZombie => {
-			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId);
+			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId, newZombie.boss);
 		});
 
 		this.io.on('server:kill-this-zombie', id => {
@@ -92503,7 +92502,7 @@ class Player {
 
 
 class zombie {
-  constructor(id, game, x, y, playerId) {
+  constructor(id, game, x, y, playerId, boss) {
     this.id = id;
     this.game = game;
     this.playerId = playerId
@@ -92513,7 +92512,14 @@ class zombie {
     this.sprite.body.fixedRotation = true;
 
     this.sprite.anchor.setTo(0.5, 0.5);
-    this.sprite.scale.setTo(0.12, 0.12);
+
+    if(boss) {
+      this.sprite.scale.setTo(0.75);
+      this.sprite.health = 1000;
+    } else {
+      this.sprite.scale.setTo(0.12, 0.12);
+      this.sprite.health = 100;
+    }
     this.sprite.checkWorldBounds = true
     this.sprite.body.collideWorldBounds = true;
 
@@ -92522,9 +92528,7 @@ class zombie {
 
     this.sprite.SPEED = 110; // Invader speed pixels/second
     this.sprite.TURN_RATE = 10; // turn rate in degrees/frame
-    this.sprite.health = 100;
     this.sprite.hasOverlapped = false;
-    this.sprite.health = 100;
     this.sprite.rotations = 0;
     this.sprite.isRightFacing = true;
 
