@@ -149,7 +149,8 @@ export default class GameState extends Phaser.State {
 			this.io.emit('client:player-moved', {
 				id: this.io.id,
 				posX: player.sprite.x,
-				posY: player.sprite.y
+				posY: player.sprite.y,
+				ammo: player.sprite.ammo
 			});
 	
 
@@ -332,9 +333,9 @@ export default class GameState extends Phaser.State {
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-	makePlayer(id,x,y){
-		this.player = new Player(id, this, x, y)
-		console.log("players is", this.players)
+	makePlayer(id,x,y,ammo){
+		this.player = new Player(id, this, x, y, ammo)
+	//	console.log("players is", this.players)
 		this.players.push(this.player)
 		playerGroup.add(this.player.sprite)
 		playerCreated = true;
@@ -468,7 +469,7 @@ export default class GameState extends Phaser.State {
 
 		this.io.on('server:player-moved', data => {
 			if (this.getPlayerById(data.id)){
-				this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
+				this.getPlayerById(data.id).setX(data.posX).setY(data.posY).setAmmo(data.ammo);
 			}
 		});
 
@@ -514,7 +515,7 @@ export default class GameState extends Phaser.State {
 
 		this.io.on('server:player-added', newPlayer => {
 			console.log("newPlayer.id is", newPlayer.id)
-			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY)
+			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY, newPlayer.ammo)
 		})
 
 		this.io.on('server:update-single-player-players', updatedPlayers => {

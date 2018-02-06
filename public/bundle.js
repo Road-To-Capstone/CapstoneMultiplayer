@@ -85352,7 +85352,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			this.io.emit('client:player-moved', {
 				id: this.io.id,
 				posX: player.sprite.x,
-				posY: player.sprite.y
+				posY: player.sprite.y,
+				ammo: player.sprite.ammo
 			});
 	
 
@@ -85535,9 +85536,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-	makePlayer(id,x,y){
-		this.player = new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](id, this, x, y)
-		console.log("players is", this.players)
+	makePlayer(id,x,y,ammo){
+		this.player = new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](id, this, x, y, ammo)
+	//	console.log("players is", this.players)
 		this.players.push(this.player)
 		playerGroup.add(this.player.sprite)
 		playerCreated = true;
@@ -85671,7 +85672,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 		this.io.on('server:player-moved', data => {
 			if (this.getPlayerById(data.id)){
-				this.getPlayerById(data.id).setX(data.posX).setY(data.posY);
+				this.getPlayerById(data.id).setX(data.posX).setY(data.posY).setAmmo(data.ammo);
 			}
 		});
 
@@ -85717,7 +85718,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 		this.io.on('server:player-added', newPlayer => {
 			console.log("newPlayer.id is", newPlayer.id)
-			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY)
+			console.log("newPlayer.ammo is", newPlayer.ammo)
+			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY, newPlayer.ammo)
 		})
 
 		this.io.on('server:update-single-player-players', updatedPlayers => {
@@ -92347,7 +92349,7 @@ var ammoToAdd = [Infinity, 10, 5, 1, 5, 1]
 var spriteOrientation = "";
 
 class Player {
-	constructor(id, game, x, y, angle) {
+	constructor(id, game, x, y,ammo) {
 		this.id = id;
 		this.game = game;
 
@@ -92363,7 +92365,6 @@ class Player {
 		this.sprite.id = id;
 		this.sprite.x = x;
 		this.sprite.y = y;
-		this.sprite.angle = angle;
 		this.sprite.body.allowRotation = false;
 		this.sprite.score = 0;
 
@@ -92378,7 +92379,7 @@ class Player {
 
 		this.sprite.items = ['Melee', 'Machine Gun', 'Flame Thrower', 'Rocket Launcher', 'Chainsaw', 'Lazer']
 		this.sprite.selectedItem = 'Melee'
-		this.sprite.ammo = [Infinity, 200, 100, 5, 100, 10]
+		this.sprite.ammo = ammo // [Infinity, 200, 100, 5, 100, 10]
 		this.sprite.ammoIndex = 0
 		this.sprite.fireRates = [500, 100, 250, 1000, 200, 1250]
 		this.sprite.selectedFireRate = 500
@@ -92471,8 +92472,8 @@ class Player {
 		this.sprite.y = y;
 		return this;
 	}
-	setAngle(deg) {
-		this.sprite.angle = deg;
+	setAmmo(ammo) {
+		this.sprite.ammo = ammo;
 		return this;
 	}
 
