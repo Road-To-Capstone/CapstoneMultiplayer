@@ -7,7 +7,7 @@ var itemCount = 0;
 var itemSwitchCooldown = 500;
 var lastSwitch = 0;
 var maxAmmo = [Infinity, 200, 100, 5, 100, 10]
-var ammoToAdd = [Infinity, 10, 5, 1, 5, 1]
+var ammoToAdd = [Infinity, 10, 5, 1, 5, 1];
 
 export default class Player {
 	constructor(id, game, x, y,ammo, name) {
@@ -75,20 +75,16 @@ export default class Player {
 		if (xDiff > yDiff) {
 			if (this.game.input.activePointer.worldX < this.sprite.x) {
 				this.sprite.animations.play('walk left')
-				spriteOrientation = "left"
 			}
 			if (this.game.input.activePointer.worldX > this.sprite.x) {
 				this.sprite.animations.play('walk right')
-				spriteOrientation = "right"
 			}
 		} else {
 			if (this.game.input.activePointer.worldY < this.sprite.y) {
-				spriteOrientation = "up"
 				this.sprite.animations.play('walk up')
 			}
 			if (this.game.input.activePointer.worldY > this.sprite.y) {
 				this.sprite.animations.play('walk down')
-				spriteOrientation = "down"
 			}
 		}
 		/* PLAYER CONTROL LOGIC */
