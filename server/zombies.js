@@ -2,8 +2,9 @@ const config = require('./config');
 module.exports = new(class Zombies {
 	constructor() {
 		this.zombies = [];
+		this.killCount = 0;
 	}
-	add(id,playerId) {
+	add(id,playerId,boss) {
 		const {
 			posX,
 			posY
@@ -12,7 +13,8 @@ module.exports = new(class Zombies {
 			id,
 			posX,
 			posY,
-			playerId
+			playerId,
+			boss
 		};
 		this.zombies.push(newZombie);
 		return newZombie;
@@ -31,6 +33,12 @@ module.exports = new(class Zombies {
 			}
 			return e;
 		});
+	}
+	getKillCount() {
+		return this.killCount;
+	}
+	setKillCount() {
+		this.killCount++;
 	}
 	getLength() {
 		return this.zombies.length;
