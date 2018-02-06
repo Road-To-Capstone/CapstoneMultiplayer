@@ -85698,7 +85698,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.io.on('server:game-over', id => {
 			this.players.forEach((e, i) => {
 				if (e.id === id) {
-					e.updateTextPos();
+					e.sprite.spriteText.destroy()
 					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}

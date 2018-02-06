@@ -495,7 +495,7 @@ export default class GameState extends Phaser.State {
 		this.io.on('server:game-over', id => {
 			this.players.forEach((e, i) => {
 				if (e.id === id) {
-					e.updateTextPos();
+					e.sprite.spriteText.destroy()
 					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}
