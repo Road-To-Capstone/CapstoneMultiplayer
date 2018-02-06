@@ -85663,7 +85663,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			if (data.length>0){
 				data.forEach(e => {
 					if (e.id != this.io.id) //this will prevent loading our player two times
-						this.players.push(new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](e.id, this, e.posX, e.posY, e.angle));
+						this.players.push(new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](e.id, this, e.posX, e.posY, e.ammo, e.name));
 				});
 			}
 		});
@@ -92365,7 +92365,6 @@ var itemSwitchCooldown = 500;
 var lastSwitch = 0;
 var maxAmmo = [Infinity, 200, 100, 5, 100, 10]
 var ammoToAdd = [Infinity, 10, 5, 1, 5, 1]
-var spriteOrientation = "";
 
 class Player {
 	constructor(id, game, x, y,ammo, name) {

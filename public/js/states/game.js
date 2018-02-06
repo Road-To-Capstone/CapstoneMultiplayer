@@ -460,7 +460,7 @@ export default class GameState extends Phaser.State {
 			if (data.length>0){
 				data.forEach(e => {
 					if (e.id != this.io.id) //this will prevent loading our player two times
-						this.players.push(new Player(e.id, this, e.posX, e.posY, e.angle));
+						this.players.push(new Player(e.id, this, e.posX, e.posY, e.ammo, e.name));
 				});
 			}
 		});

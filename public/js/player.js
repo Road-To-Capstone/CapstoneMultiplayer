@@ -8,7 +8,6 @@ var itemSwitchCooldown = 500;
 var lastSwitch = 0;
 var maxAmmo = [Infinity, 200, 100, 5, 100, 10]
 var ammoToAdd = [Infinity, 10, 5, 1, 5, 1]
-var spriteOrientation = "";
 
 export default class Player {
 	constructor(id, game, x, y,ammo, name) {
