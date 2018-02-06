@@ -85356,7 +85356,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			});
 	
 
-			// this.updateShadowTexture(player);
+			this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
 				if (z.playerId === this.io.id){

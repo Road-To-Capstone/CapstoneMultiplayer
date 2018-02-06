@@ -153,7 +153,7 @@ export default class GameState extends Phaser.State {
 			});
 	
 
-			// this.updateShadowTexture(player);
+			this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
 				if (z.playerId === this.io.id){
