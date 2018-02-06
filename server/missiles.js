@@ -3,14 +3,15 @@ module.exports = new(class Missiles {
 	constructor() {
 		this.missiles = [];
 	}
-	add(id, posX, posY, itemName, toX, toY) {
+	add(id, posX, posY, itemName, toX, toY,damage) {
 		const newMissile = {
 			id,
 			posX,
 			posY,
 			itemName,
 			toX,
-			toY
+			toY,
+			damage
 		};
 		this.missiles.push(newMissile);
 		if (this.missiles.length > 10) {

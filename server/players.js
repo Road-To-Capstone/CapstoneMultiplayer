@@ -7,7 +7,8 @@ module.exports = new(class Players {
 		const newPlayer = {
 			id: id,
 			posX: config.game.start.x,
-			posY: config.game.start.y
+			posY: config.game.start.y,
+			ammo: ["Infinity", 200, 100, 5, 100, 10]
 		};
 		this.players.push(newPlayer);
 		return newPlayer

@@ -11,7 +11,7 @@ var ammoToAdd = [Infinity, 10, 5, 1, 5, 1]
 var spriteOrientation = "";
 
 export default class Player {
-	constructor(id, game, x, y, angle) {
+	constructor(id, game, x, y,ammo) {
 		this.id = id;
 		this.game = game;
 
@@ -27,7 +27,6 @@ export default class Player {
 		this.sprite.id = id;
 		this.sprite.x = x;
 		this.sprite.y = y;
-		this.sprite.angle = angle;
 		this.sprite.body.allowRotation = false;
 		this.sprite.score = 0;
 
@@ -42,7 +41,7 @@ export default class Player {
 
 		this.sprite.items = ['Melee', 'Machine Gun', 'Flame Thrower', 'Rocket Launcher', 'Chainsaw', 'Lazer']
 		this.sprite.selectedItem = 'Melee'
-		this.sprite.ammo = [Infinity, 200, 100, 5, 100, 10]
+		this.sprite.ammo = ammo // [Infinity, 200, 100, 5, 100, 10]
 		this.sprite.ammoIndex = 0
 		this.sprite.fireRates = [500, 100, 250, 1000, 200, 1250]
 		this.sprite.selectedFireRate = 500
@@ -135,8 +134,8 @@ export default class Player {
 		this.sprite.y = y;
 		return this;
 	}
-	setAngle(deg) {
-		this.sprite.angle = deg;
+	setAmmo(ammo) {
+		this.sprite.ammo = ammo;
 		return this;
 	}
 
