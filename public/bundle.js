@@ -85236,7 +85236,7 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	scoreTrack = 0;
 
 //const SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
-const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)
+const recognition = (navigator.userAgent.includes('Chrome')) ? new(window.SpeechRecognition || window.webkitSpeechRecognition) : null;
 
 
 class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
@@ -85270,9 +85270,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.load.image('building3', '../../assets/building3.png')
 		this.load.image('tree1', '../../assets/tree1.png')
 		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
-		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
-		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
-		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
+		this.load.spritesheet('player', '/assets/playerspritesheet.png', 24, 32)
+		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png', 430, 519, 10)
+		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png', 629, 526, 12)
 	}
 
 	create() {
@@ -85297,7 +85297,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		zombieGroup = this.add.group();
 		missileGroup = this.add.group();
 		buildingGroup = this.add.group();
-		
+
 
 		song = this.add.audio('bensound-ofeliasdream');
 		bossSong = this.add.audio('Action Radius');
@@ -85308,25 +85308,29 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.spawnBuilding(821, 1480, 'building2');
 		this.spawnBuilding(1400, 1003, 'building3');
 		this.spawnBuilding(100, 100, 'tree1');
-		
+
 		this.shadowTexture = this.add.bitmapData(1920, 1920)
 
 		var lightSprite = this.game.add.image(0, 0, this.shadowTexture)
 
 		lightSprite.blendMode = __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.blendModes.MULTIPLY
 
-		recognition.continuous = true;
-		recognition.lang = 'en-US'
-		recognition.start();
+		if (navigator.userAgent.includes('Chrome')) {
+			recognition.continuous = true;
+			recognition.lang = 'en-US'
+			recognition.start();
 
-		recognition.onresult = event => {
-			for (let i = event.resultIndex; i < event.results.length; i++) {
-				const transcript = event.results[i][0].transcript
-				if (event.results[i].isFinal) finalTranscript += transcript + " "
+			recognition.onresult = event => {
+				for (let i = event.resultIndex; i < event.results.length; i++) {
+					const transcript = event.results[i][0].transcript
+					if (event.results[i].isFinal) finalTranscript += transcript + " "
+				}
+				transcriptArray = finalTranscript.split(" ")
+				finalTranscript = '';
 			}
-			transcriptArray = finalTranscript.split(" ")
-			finalTranscript = '';
 		}
+
+
 		this.addRain();
 
 		healthPercent = this.add.text(20, this.game.height - 100, '100%', {
@@ -85343,7 +85347,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 	update() {
 		if (this.doneLoading && playerCreated) {
-		
+
 			let voiceRecCommand = transcriptArray.shift()
 			startShooting = this.pewCommand(voiceRecCommand)
 			if (startShootingTimer < this.time.now) {
@@ -85356,7 +85360,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				cameraSet = true;
 			}
 			const player = this.getPlayerById(this.io.id);
-			if(voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
+			if (voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
 
 			this.io.emit('client:player-moved', {
 				id: this.io.id,
@@ -85364,13 +85368,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				posY: player.sprite.y,
 				ammo: player.sprite.ammo
 			});
-			
+
 			scoreTrack.setText(`SCORE: ${player.sprite.score}`)
 
 			this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
-				if (z.playerId === this.io.id){
+				if (z.playerId === this.io.id) {
 					this.io.emit('client:zombie-moved', {
 						id: z.id,
 						posX: z.sprite.x,
@@ -85402,7 +85406,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 					damage: weaponDamage[player.sprite.ammoIndex]
 				})
 			}
-		if (this.zombies.length < 2) {
+			if (this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie', this.io.id);
 			}
 
@@ -85419,8 +85423,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 						var animatedDeath = zombieDeath.animations.add('zombiedeath', [4, 5, 6, 3, 8, 9, 10, 7, 0, 1, 2, 11, 11, 11, 11, 11, 11, 11, 11, 11], 6, false);
 						animatedDeath.killOnComplete = true;
-						let distance =__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Math.distance(player.sprite.x, player.sprite.y, e.sprite.x, e.sprite.y);
-						if(distance > 275) {
+						let distance = __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Math.distance(player.sprite.x, player.sprite.y, e.sprite.x, e.sprite.y);
+						if (distance > 275) {
 							zombieDeath.kill()
 						}
 
@@ -85468,21 +85472,19 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.spawnNoCollide(1250, 1600, 'tombstone')
 		this.spawnNoCollide(1450, 800, 'tombstone')
 		this.spawnNoCollide(1450, 1400, 'tombstone')
-		
 
 		this.spawnNoCollide(300, 400, 'road')
 		this.spawnNoCollide(1000, 400, 'road')
 		this.spawnNoCollide(1700, 400, 'road')
-
 	}
 
 	spawnNoCollide(x, y, option) {
-		this.noCollide= new __WEBPACK_IMPORTED_MODULE_7__noCollide__["a" /* default */](this.game, x, y, option)
+		this.noCollide = new __WEBPACK_IMPORTED_MODULE_7__noCollide__["a" /* default */](this.game, x, y, option)
 	}
 
 	startMusic() {
 		song.loopFull(0.2);
-		if(!bossPlaying) {
+		if (!bossPlaying) {
 			bossSong.pause()
 			song.loopFull(0.2);
 		} else {
@@ -85572,9 +85574,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-	makePlayer(id,x,y,ammo){
+	makePlayer(id, x, y, ammo) {
 		this.player = new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](id, this, x, y, ammo)
-	//	console.log("players is", this.players)
+		//	console.log("players is", this.players)
 		this.players.push(this.player)
 		playerGroup.add(this.player.sprite)
 		playerCreated = true;
@@ -85582,17 +85584,17 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 	switchWeapon(voice, player) {
 		let voiceTemp = voice.toLowerCase();
-		if(voiceTemp === 'melee') {
+		if (voiceTemp === 'melee') {
 			this.switchWeaponHelper(0, player);
-		} else if(voiceTemp === 'machine') {
+		} else if (voiceTemp === 'machine') {
 			this.switchWeaponHelper(1, player);
-		} else if(voiceTemp === 'flame') {
+		} else if (voiceTemp === 'flame') {
 			this.switchWeaponHelper(2, player);
-		} else if(voiceTemp === 'rocket') {
+		} else if (voiceTemp === 'rocket') {
 			this.switchWeaponHelper(3, player);
-		} else if(voiceTemp === 'chain') {
+		} else if (voiceTemp === 'chain') {
 			this.switchWeaponHelper(4, player);
-		} else if(voiceTemp === 'lazer') {
+		} else if (voiceTemp === 'lazer') {
 			this.switchWeaponHelper(5, player);
 		} else {
 			return;
@@ -85676,7 +85678,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		})*/
 
 		this.io.on('server:all-players', data => { //the data is the players from the server side
-			if (data.length>0){
+			if (data.length > 0) {
 				data.forEach(e => {
 					if (e.id != this.io.id) //this will prevent loading our player two times
 						this.players.push(new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](e.id, this, e.posX, e.posY, e.angle));
@@ -85685,7 +85687,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:all-zombies', data => {
-			if (data.length>0){
+			if (data.length > 0) {
 				data.forEach(newZombie => {
 					this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId, newZombie.boss);
 				})
@@ -85693,9 +85695,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		})
 
 		//load your player
-	/*	this.io.on('server:player-added', data => {
-			players.push(new Player(data.id, this, data.posX, data.posY, data.angle));
-		});*/
+		/*	this.io.on('server:player-added', data => {
+				players.push(new Player(data.id, this, data.posX, data.posY, data.angle));
+			});*/
 
 		this.io.on('server:player-disconnected', id => { //if a player has disconnected
 			this.players.forEach((e, i) => {
@@ -85707,7 +85709,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:player-moved', data => {
-			if (this.getPlayerById(data.id)){
+			if (this.getPlayerById(data.id)) {
 				this.getPlayerById(data.id).setX(data.posX).setY(data.posY).setAmmo(data.ammo);
 			}
 		});
@@ -85722,7 +85724,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		})
 
 		this.io.on('server:zombie-moved', data => { //data is an object with {id: z.id, posX: z.sprite.x, posY: z.sprite.y}
-			if (this.getZombieById(data.id)){
+			if (this.getZombieById(data.id)) {
 				this.getZombieById(data.id).set(data.posX, data.posY);
 			}
 		});
@@ -85736,7 +85738,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:zombie-added', newZombie => {
-			if(newZombie.boss) {
+			if (newZombie.boss) {
 				bossPlaying = true;
 				this.startMusic()
 			}
@@ -85746,7 +85748,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.io.on('server:kill-this-zombie', id => {
 			this.zombies.forEach((z, i) => {
 				if (z.id === id) {
-					if(z.boss) {
+					if (z.boss) {
 						bossPlaying = false;
 						this.startMusic();
 					}
@@ -85766,12 +85768,12 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		})
 
 		this.io.on('server:update-single-player-players', updatedPlayers => {
-			console.log("updatedPlayers for you is: " , updatedPlayers)
+			console.log("updatedPlayers for you is: ", updatedPlayers)
 			this.players = updatedPlayers;
 		})
 
 		this.io.on('server:update-players', updatedPlayers => {
-			console.log("updatedPlayers for others is: " , updatedPlayers)
+			console.log("updatedPlayers for others is: ", updatedPlayers)
 			this.players = updatedPlayers;
 		})
 	}
@@ -85812,7 +85814,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				dist: 1920
 			},
 			distance, playerPosX, playerPoxY;
-			this.players.forEach((p, i) => {
+		this.players.forEach((p, i) => {
 			playerPosX = p.sprite.position.x;
 			playerPoxY = p.sprite.position.y;
 			distance = Math.sqrt(Math.pow(playerPosX - zombie.sprite.position.x, 2) +
