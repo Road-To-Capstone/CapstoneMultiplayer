@@ -153,7 +153,7 @@ export default class GameState extends Phaser.State {
 			});
 	
 
-			this.updateShadowTexture(player);
+			// this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
 				if (z.playerId === this.io.id){
@@ -210,7 +210,6 @@ export default class GameState extends Phaser.State {
 					this.physics.arcade.collide(e.sprite, zombieGroup);
 					this.physics.arcade.collide(e.sprite, buildingGroup);
 				});
-
 			}
 
 			if (this.time.now > nextMissileCollision) {
@@ -326,8 +325,8 @@ export default class GameState extends Phaser.State {
 		buildingGroup.add(this.building.sprite);
 	}
 
-	makeZombies(id, x, y, playerId) {
-		this.zombie = new Zombie(id, this, x, y, playerId);
+	makeZombies(id, x, y, playerId, boss) {
+		this.zombie = new Zombie(id, this, x, y, playerId, boss);
 		this.zombies.push(this.zombie);
 		zombieGroup.add(this.zombie.sprite)
 	}
@@ -446,7 +445,7 @@ export default class GameState extends Phaser.State {
 		this.io.on('server:all-zombies', data => {
 			if (data.length>0){
 				data.forEach(newZombie => {
-					this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY);
+					this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId, newZombie.boss);
 				})
 			}
 		})
@@ -495,7 +494,7 @@ export default class GameState extends Phaser.State {
 		});
 
 		this.io.on('server:zombie-added', newZombie => {
-			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId);
+			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId, newZombie.boss);
 		});
 
 		this.io.on('server:kill-this-zombie', id => {
