@@ -85270,16 +85270,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.load.image('building2', '../../assets/building2.png')
 		this.load.image('building3', '../../assets/building3.png')
 		this.load.image('tree1', '../../assets/tree1.png')
-<<<<<<< HEAD
 		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
 		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
 		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
-=======
-		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
-		this.load.spritesheet('player', '/assets/playerspritesheet.png', 24, 32)
-		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png', 430, 519, 10)
-		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png', 629, 526, 12)
->>>>>>> master
 	}
 
 	create() {
@@ -85594,15 +85587,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-<<<<<<< HEAD
 	makePlayer(id,x,y,ammo,name){
 		this.player = new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](id, this, x, y, ammo,name)
 	//	console.log("players is", this.players)
-=======
-	makePlayer(id, x, y, ammo) {
-		this.player = new __WEBPACK_IMPORTED_MODULE_2__player__["a" /* default */](id, this, x, y, ammo)
-		//	console.log("players is", this.players)
->>>>>>> master
 		this.players.push(this.player)
 		playerGroup.add(this.player.sprite)
 		playerCreated = true;
@@ -85735,13 +85722,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:player-moved', data => {
-<<<<<<< HEAD
 			if (this.getPlayerById(data.id)){
 				this.getPlayerById(data.id).setX(data.posX).setY(data.posY).setAmmo(data.ammo).setName(data.name);
-=======
-			if (this.getPlayerById(data.id)) {
-				this.getPlayerById(data.id).setX(data.posX).setY(data.posY).setAmmo(data.ammo);
->>>>>>> master
 			}
 		});
 
