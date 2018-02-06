@@ -85220,6 +85220,7 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	zombiesAttack = 1000,
 	text,
 	song,
+	bossSong,
 	healthPercent,
 	weaponDamage = [20, 10, 20, 100, 20, 100],
 	finalTranscript = "",
@@ -85228,7 +85229,8 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	startShootingTimer = 0,
 	startShootingDuration = 5000,
 	playerGroup,
-	playerCreated = false;
+	playerCreated = false,
+	bossPlaying = false;
 
 //const SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
 const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)
@@ -85246,6 +85248,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 	preload() {
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
 		this.load.audio('bensound-ofeliasdream', './assets/bensound-ofeliasdream.mp3')
+		this.load.audio('Action Radius', './assets/Action Radius.mp3')
 		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Tilemap.TILED_JSON)
 		this.load.image('tiles', './assets/tiles.png')
 		this.load.image('background', '/assets/background.png')
@@ -85296,7 +85299,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		
 
 		song = this.add.audio('bensound-ofeliasdream');
+		bossSong = this.add.audio('Action Radius');
 		this.sound.setDecodedCallback(song, this.startMusic, this);
+		this.sound.setDecodedCallback(bossSong, this.startMusic, this);
 
 		this.spawnBuilding(652, 961, 'building1');
 		this.spawnBuilding(821, 1480, 'building2');
@@ -85449,6 +85454,13 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 	startMusic() {
 		song.loopFull(0.2);
+		if(!bossPlaying) {
+			bossSong.pause()
+			song.loopFull(0.2);
+		} else {
+			song.pause()
+			bossSong.loopFull(0.2)
+		}
 	}
 
 	updateShadowTexture(player) {
@@ -85695,12 +85707,20 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:zombie-added', newZombie => {
+			if(newZombie.boss) {
+				bossPlaying = true;
+				this.startMusic()
+			}
 			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId, newZombie.boss);
 		});
 
 		this.io.on('server:kill-this-zombie', id => {
 			this.zombies.forEach((z, i) => {
 				if (z.id === id) {
+					if(z.boss) {
+						bossPlaying = false;
+						this.startMusic();
+					}
 					z.sprite.destroy();
 					this.zombies.splice(i, 1);
 				}
@@ -92506,6 +92526,7 @@ class zombie {
     this.id = id;
     this.game = game;
     this.playerId = playerId
+    this.boss = boss;
 
     this.sprite = this.game.add.sprite(50, 0, 'zombiewalk');
     this.game.physics.arcade.enableBody(this.sprite);
@@ -92513,7 +92534,7 @@ class zombie {
 
     this.sprite.anchor.setTo(0.5, 0.5);
 
-    if(boss) {
+    if(this.boss) {
       this.sprite.scale.setTo(0.75);
       this.sprite.health = 1000;
     } else {

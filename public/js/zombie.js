@@ -6,6 +6,7 @@ export default class zombie {
     this.id = id;
     this.game = game;
     this.playerId = playerId
+    this.boss = boss;
 
     this.sprite = this.game.add.sprite(50, 0, 'zombiewalk');
     this.game.physics.arcade.enableBody(this.sprite);
@@ -13,7 +14,7 @@ export default class zombie {
 
     this.sprite.anchor.setTo(0.5, 0.5);
 
-    if(boss) {
+    if(this.boss) {
       this.sprite.scale.setTo(0.75);
       this.sprite.health = 1000;
     } else {
