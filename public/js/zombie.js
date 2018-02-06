@@ -1,9 +1,11 @@
+'use strict'
 import Phaser from 'phaser'
 
 export default class zombie {
-  constructor(id, game, x, y) {
+  constructor(id, game, x, y, playerId) {
     this.id = id;
     this.game = game;
+    this.playerId = playerId
 
     this.sprite = this.game.add.sprite(50, 0, 'zombiewalk');
     this.game.physics.arcade.enableBody(this.sprite);
@@ -27,10 +29,11 @@ export default class zombie {
 
 
     this.sprite.animations.add('zombiewalk');
-    this.sprite.animations.play('zombiewalk', 10, true)
+    this.sprite.animations.play('zombiewalk',10, true)
   }
 
-  update() {}
+  update() {
+  }
 
   damage(dmg) {
     if (!this.sprite.hasOverlapped) {
