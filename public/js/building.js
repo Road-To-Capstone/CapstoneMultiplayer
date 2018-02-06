@@ -11,8 +11,7 @@ export default class Building {
     this.sprite.game.physics.arcade.enableBody(this.sprite);
     this.sprite.body.immovable = true;
     this.sprite.anchor.setTo(0.5, 0.5)
-    // this.sprite.scale.setTo(0.75, 0.75)
-    this.sprite.scale.setTo(0.85)
+    this.sprite.scale.setTo(0.65)
     this.sprite.x = x
     this.sprite.y = y
 

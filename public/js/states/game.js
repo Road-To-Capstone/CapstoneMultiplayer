@@ -7,6 +7,7 @@ import {
 	HealthBar
 } from './../HealthBar.standalone'
 import Building from './../building'
+import NoCollide from './../noCollide'
 
 var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	cameraSet = false,
@@ -45,31 +46,9 @@ export default class GameState extends Phaser.State {
 
 	preload() {
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
-		// this.load.audio('bensound-ofeliasdream', './assets/bensound-ofeliasdream.mp3')
-		// this.load.audio('Action Radius', './assets/Action Radius.mp3')
-		// this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
-		// this.load.image('tiles', './assets/tiles.png')
-		// this.load.image('background', '/assets/background.png')
-		// this.load.image('building', './assets/buildingplaceholder.png')
-		// this.load.image('Melee', '/assets/Melee.png')
-		// this.load.image('Lazer', '/assets/Lazer.png')
-		// this.load.image('Machine Gun', '/assets/Machine Gun.png')
-		// this.load.image('Rocket Launcher', '/assets/Rocket Launcher.png')
-		// this.load.image('Chainsaw', '/assets/Chainsaw.png')
-		// this.load.image('Flame Thrower', '/assets/Flame Thrower.png')
-		// this.load.image('zombie', './assets/zombieplaceholder.png')
-		// this.load.image('building1', '../../assets/building1.png')
-		// this.load.image('building2', '../../assets/building2.png')
-		// this.load.image('building3', '../../assets/building3.png')
-		// this.load.image('tree1', '../../assets/tree1.png')
-		// //this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
-		// this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
-		// this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
-		// this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
 	}
 
 	create() {
-		//this.setUpMap()
 		this.player = undefined;
 		text = this.add.text(300, this.game.height - 55, "Melee | X ", {
 			fill: '#ffffff'
@@ -77,6 +56,7 @@ export default class GameState extends Phaser.State {
 		text.fixedToCamera = true;
 
 		this.background = this.add.tileSprite(0, 0, 1920, 1920, 'background')
+		this.setUpMap()
 
 		this.world.setBounds(0, 0, 1920, 1920)
 		this.io = socketio().connect();
@@ -97,12 +77,8 @@ export default class GameState extends Phaser.State {
 		this.sound.setDecodedCallback(song, this.startMusic, this);
 		this.sound.setDecodedCallback(bossSong, this.startMusic, this);
 
-		this.spawnBuilding(652, 961, 'building1');
-		this.spawnBuilding(821, 1480, 'building2');
-		this.spawnBuilding(1400, 1003, 'building3');
-		this.spawnBuilding(100, 100, 'tree1');
-
-
+		this.setUpBuilding();
+		
 		this.shadowTexture = this.add.bitmapData(1920, 1920)
 
 		var lightSprite = this.game.add.image(0, 0, this.shadowTexture)
@@ -143,7 +119,6 @@ export default class GameState extends Phaser.State {
 			if (startShootingTimer < this.time.now) {
 				startShooting = false;
 			}
-			//console.log("voiceRecCommand is", voiceRecCommand)
 
 			if (!cameraSet) {
 				this.camera.follow(this.getPlayerById(this.io.id).sprite)
@@ -254,10 +229,88 @@ export default class GameState extends Phaser.State {
 		SETUP FUNCTIONS
 	*/
 	setUpMap() {
-		map = this.add.tilemap('BaseMap')
-		map.addTilesetImage('Map tiles.tsx', 'tiles')
-		layer = map.createLayer('Tile Layer 1')
-		layer.resizeWorld()
+		// this.spawnNoCollide(200, 700, 'tombstone')
+		// this.spawnNoCollide(340, 1200, 'tombstone')
+		// this.spawnNoCollide(200, 1700, 'tombstone')
+		// this.spawnNoCollide(250, 250, 'tombstone')
+		// this.spawnNoCollide(800, 800, 'tombstone')
+		// this.spawnNoCollide(1000, 1250, 'tombstone')
+		// this.spawnNoCollide(1250, 1600, 'tombstone')
+		// this.spawnNoCollide(1450, 800, 'tombstone')
+		// this.spawnNoCollide(1450, 1400, 'tombstone')
+
+		this.spawnNoCollide(20, 20, 'tree1');
+		this.spawnNoCollide(60, 20, 'tree1');
+		this.spawnNoCollide(100, 20, 'tree1');
+		this.spawnNoCollide(140, 20, 'tree1');
+		// this.spawnNoCollide(50, 201, 'tree1');
+		// this.spawnNoCollide(60, 201, 'tree1');
+
+		
+		//horizontal road
+		this.spawnNoCollide(100, 400, 'road')
+		this.spawnNoCollide(450, 400, 'road')
+		this.spawnNoCollide(800, 400, 'road')
+		this.spawnNoCollide(1150, 400, 'road')
+		this.spawnNoCollide(1500, 400, 'road')
+		this.spawnNoCollide(1850, 400, 'road')
+
+		this.spawnNoCollide(100, 800, 'road')
+		this.spawnNoCollide(450, 800, 'road')
+		this.spawnNoCollide(800, 800, 'road')
+		this.spawnNoCollide(1150, 800, 'road')
+		this.spawnNoCollide(1500, 800, 'road')
+		this.spawnNoCollide(1850, 800, 'road')
+
+		this.spawnNoCollide(100, 1200, 'road')
+		this.spawnNoCollide(450, 1200, 'road')
+		this.spawnNoCollide(800, 1200, 'road')
+		this.spawnNoCollide(1150, 1200, 'road')
+		this.spawnNoCollide(1500, 1200, 'road')
+		this.spawnNoCollide(1850, 1200, 'road')
+
+		this.spawnNoCollide(100, 1600, 'road')
+		this.spawnNoCollide(450, 1600, 'road')
+		this.spawnNoCollide(800, 1600, 'road')
+		this.spawnNoCollide(1150, 1600, 'road')
+		this.spawnNoCollide(1500, 1600, 'road')
+		this.spawnNoCollide(1850, 1600, 'road')
+
+		//vertical road
+		this.spawnNoCollide(211, 100, 'vroad')
+		this.spawnNoCollide(211, 450, 'vroad')
+		this.spawnNoCollide(211, 800, 'vroad')
+		this.spawnNoCollide(211, 1150, 'vroad')
+		this.spawnNoCollide(211, 1500, 'vroad')
+		this.spawnNoCollide(211, 1850, 'vroad')
+
+	}
+
+	setUpBuilding() {
+		this.spawnBuilding(350, 250, 'house1');
+		
+		// this.spawnBuilding(82, 550, 'building8');
+		// this.spawnBuilding(82, 1200, 'building11');
+		// this.spawnBuilding(82, 1200, 'building11');
+		// this.spawnBuilding(200, 200, 'building3');
+		// this.spawnBuilding(400, 400, 'building4');
+		// this.spawnBuilding(600, 600, 'building5');
+		// this.spawnBuilding(750, 200, 'building6');
+		// this.spawnBuilding(900, 173, 'building7');
+		// this.spawnBuilding(1000, 1000, 'building9');
+		// this.spawnBuilding(900, 170, 'building10');
+		// this.spawnBuilding(1200, 1003, 'house1');
+		// this.spawnBuilding(500, 650, 'house2');
+		// this.spawnBuilding(820, 250, 'house3');
+		// this.spawnBuilding(690, 150, 'house4');
+		// this.spawnBuilding(1290, 460, 'house5');
+		// this.spawnBuilding(1000, 173, 'house6');
+
+
+	}
+
+	spawnNoCollide(x, y, option) {
+		this.noCollide= new NoCollide(this.game, x, y, option)
 	}
 
 	startMusic() {
