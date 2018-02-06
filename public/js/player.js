@@ -126,7 +126,6 @@ export default class Player {
 	}
 
 	removeText(){
-		console.log('destroying')
 		this.sprite.spriteText.destroy();
 	}
 
