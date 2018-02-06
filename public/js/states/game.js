@@ -133,15 +133,11 @@ export default class GameState extends Phaser.State {
 	update() {
 		if (this.doneLoading && playerCreated) {
 		
-
-
 			let voiceRecCommand = transcriptArray.shift()
 			startShooting = this.pewCommand(voiceRecCommand)
 			if (startShootingTimer < this.time.now) {
 				startShooting = false;
 			}
-
-
 			//console.log("voiceRecCommand is", voiceRecCommand)
 
 			if (!cameraSet) {
@@ -152,7 +148,6 @@ export default class GameState extends Phaser.State {
 			const player = this.getPlayerById(this.io.id);
 			if(voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
 
-	
 			this.io.emit('client:player-moved', {
 				id: this.io.id,
 				posX: player.sprite.x,
@@ -213,6 +208,10 @@ export default class GameState extends Phaser.State {
 
 						var animatedDeath = zombieDeath.animations.add('zombiedeath', [4, 5, 6, 3, 8, 9, 10, 7, 0, 1, 2, 11, 11, 11, 11, 11, 11, 11, 11, 11], 6, false);
 						animatedDeath.killOnComplete = true;
+						let distance =Phaser.Math.distance(player.sprite.x, player.sprite.y, e.sprite.x, e.sprite.y);
+						if(distance > 275) {
+							zombieDeath.kill()
+						}
 
 						zombieDeath.animations.play('zombiedeath');
 					}
