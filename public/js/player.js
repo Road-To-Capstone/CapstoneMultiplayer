@@ -11,7 +11,7 @@ var ammoToAdd = [Infinity, 10, 5, 1, 5, 1]
 var spriteOrientation = "";
 
 export default class Player {
-	constructor(id, game, x, y,ammo) {
+	constructor(id, game, x, y,ammo, name) {
 		this.id = id;
 		this.game = game;
 
@@ -38,7 +38,6 @@ export default class Player {
 			selectItem: this.game.input.keyboard.addKey(Phaser.Keyboard.B)
 		}
 
-
 		this.sprite.items = ['Melee', 'Machine Gun', 'Flame Thrower', 'Rocket Launcher', 'Chainsaw', 'Lazer']
 		this.sprite.selectedItem = 'Melee'
 		this.sprite.ammo = ammo // [Infinity, 200, 100, 5, 100, 10]
@@ -46,6 +45,10 @@ export default class Player {
 		this.sprite.fireRates = [500, 100, 250, 1000, 200, 1250]
 		this.sprite.selectedFireRate = 500
 		this.sprite.fireRateIndex = 0
+
+		this.sprite.name = name
+		this.sprite.spriteText = this.game.add.text(this.sprite.x, this.sprite.y-25, this.sprite.name, {fontSize: 10, fill: '#ffffff'})
+		this.sprite.spriteText.anchor.setTo(0.5,0.5);
 
 		this.sprite.playerSpeedY = 200
 		this.sprite.playerSpeedX = 200
@@ -68,6 +71,8 @@ export default class Player {
 
 	update() {
 		/* ANIMATIONS */
+		this.sprite.spriteText.x = this.sprite.x
+		this.sprite.spriteText.y = this.sprite.y-25
 		var xDiff = Math.abs(this.game.input.activePointer.worldX - this.sprite.x)
 		var yDiff = Math.abs(this.game.input.activePointer.worldY - this.sprite.y)
 		if (xDiff > yDiff) {
@@ -136,6 +141,10 @@ export default class Player {
 	}
 	setAmmo(ammo) {
 		this.sprite.ammo = ammo;
+		return this;
+	}
+	setName(name) {
+		this.sprite.name = name;
 		return this;
 	}
 
