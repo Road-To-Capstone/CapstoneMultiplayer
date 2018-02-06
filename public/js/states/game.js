@@ -60,7 +60,6 @@ export default class GameState extends Phaser.State {
 		this.load.image('building2', '../../assets/building2.png')
 		this.load.image('building3', '../../assets/building3.png')
 		this.load.image('tree1', '../../assets/tree1.png')
-		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
 		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
 		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
 		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
