@@ -27,7 +27,7 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	startShootingDuration = 5000,
 	playerGroup,
 	playerCreated = false,
-	bossPlaying = false;
+	bossPlaying = false,
 	scoreTrack = 0;
 
 //const SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
