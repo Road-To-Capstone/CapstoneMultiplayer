@@ -8,6 +8,7 @@ import MenuState from './states/menu';
 import ScoreBoard from './states/scoreboard';
 import Preload from './states/preload';
 import HowToPlay from './states/howtoplay';
+import TitleMenu from './states/titleMenu';
 
 class game extends Phaser.Game {
 	constructor() {
@@ -22,7 +23,8 @@ class game extends Phaser.Game {
 		this.state.add('ScoreBoard', ScoreBoard);
 		this.state.add('Preload', Preload);
 		this.state.add('HowToPlay', HowToPlay);
-		this.state.start('MenuState');
+		this.state.add('TitleMenu', TitleMenu);
+		this.state.start('MenuState'); // 'TitleMenu' when finished
 	}
 }
 

@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 var text, textToUpdate = "",
     shouldHandleKeyDown = true,
     deleteButton;
-export default class GameState extends Phaser.State {
+export default class MenuState extends Phaser.State {
     constructor() {
         super();
     }
