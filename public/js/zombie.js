@@ -2,7 +2,7 @@
 import Phaser from 'phaser'
 
 export default class zombie {
-  constructor(id, game, x, y, playerId) {
+  constructor(id, game, x, y, playerId, boss) {
     this.id = id;
     this.game = game;
     this.playerId = playerId
@@ -12,7 +12,14 @@ export default class zombie {
     this.sprite.body.fixedRotation = true;
 
     this.sprite.anchor.setTo(0.5, 0.5);
-    this.sprite.scale.setTo(0.12, 0.12);
+
+    if(boss) {
+      this.sprite.scale.setTo(0.75);
+      this.sprite.health = 1000;
+    } else {
+      this.sprite.scale.setTo(0.12, 0.12);
+      this.sprite.health = 100;
+    }
     this.sprite.checkWorldBounds = true
     this.sprite.body.collideWorldBounds = true;
 
@@ -21,9 +28,7 @@ export default class zombie {
 
     this.sprite.SPEED = 110; // Invader speed pixels/second
     this.sprite.TURN_RATE = 10; // turn rate in degrees/frame
-    this.sprite.health = 100;
     this.sprite.hasOverlapped = false;
-    this.sprite.health = 100;
     this.sprite.rotations = 0;
     this.sprite.isRightFacing = true;
 
