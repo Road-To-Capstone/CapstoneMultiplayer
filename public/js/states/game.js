@@ -193,6 +193,7 @@ export default class GameState extends Phaser.State {
 			healthPercent.setText(`${(player.sprite.playerHealth / player.sprite.playerMaxHealth) * 100}%`);
 			if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
+				player.consumeAmmo();
 				this.io.emit('client:ask-to-create-missile', {
 					id: this.io.id,
 					posX: player.sprite.x,
@@ -394,7 +395,6 @@ export default class GameState extends Phaser.State {
 		zombieGroup.forEach((e) => {
 			e.hasOverlapped = false
 		})
-		this.getPlayerById(this.io.id).consumeAmmo()
 
 	}
 
