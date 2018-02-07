@@ -23,13 +23,19 @@ export default class GameOver extends Phaser.State {
 
     create() {
         this.setUpMap();
-        this.add.text(254, 50, 'GAME OVER', {
+        this.stage.backgroundColor = "black";
+        this.add.text(300+3, 50+3, 'GAME OVER', {
+            font: '72pt Megrim',
+            fill: '#DC0000'
+        });
+        this.add.text(300, 50, 'GAME OVER', {
             font: '72pt Megrim',
             fill: 'white'
         });
-        this.add.text(100, 126, `${this.name} SCORE: ${this.score}`, {
-            font: '84pt Megrim',
-            fill: '#cc00cc'
+        
+        this.add.text(150, 170, `${this.name} SCORE: ${this.score}`, {
+            font: '50pt Megrim',
+            fill: '#F34949'
         });
         this.add.text(430, 400, this.selectArray[this.selected], {
             font: '42pt Megrim',

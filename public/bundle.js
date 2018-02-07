@@ -85333,7 +85333,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		if (this.doneLoading && playerCreated) {
 			const player = this.getPlayerById(this.io.id);
 			
-			//this.updateShadowTexture(player);
+			this.updateShadowTexture(player);
 
 			let voiceRecCommand = transcriptArray.shift()
 			startShooting = this.pewCommand(voiceRecCommand)
@@ -86072,13 +86072,19 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
     create() {
         this.setUpMap();
-        this.add.text(254, 50, 'GAME OVER', {
+        this.stage.backgroundColor = "black";
+        this.add.text(300+3, 50+3, 'GAME OVER', {
+            font: '72pt Megrim',
+            fill: '#DC0000'
+        });
+        this.add.text(300, 50, 'GAME OVER', {
             font: '72pt Megrim',
             fill: 'white'
         });
-        this.add.text(100, 126, `${this.name} SCORE: ${this.score}`, {
-            font: '84pt Megrim',
-            fill: '#cc00cc'
+        
+        this.add.text(150, 170, `${this.name} SCORE: ${this.score}`, {
+            font: '50pt Megrim',
+            fill: '#F34949'
         });
         this.add.text(430, 400, this.selectArray[this.selected], {
             font: '42pt Megrim',
@@ -86161,7 +86167,7 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
-let map;
+let map, glow;
 class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     constructor() {
         super();
@@ -86176,6 +86182,7 @@ class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
         this.load.image('backButton', '../../assets/backbutton.png');
         this.load.image('bkey', '../../assets/bkey.png');
         this.counter = 0;
+        this.blink = false;
     }
 
     create() {
@@ -86198,12 +86205,8 @@ class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
             font: '25pt Megrim',
             fill: 'white'
         });
-        this.add.text(25, 600, 'Press Enter', {
-            font: '35pt Megrim',
-            fill: '#5C804B'
-        });
         
-        var backButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'backButton')
+        var backButton = this.add.sprite(100, this.game.height - 75, 'backButton')
         backButton.anchor.setTo(0.5, 0.5);
         backButton.scale.setTo(0.5, 0.5);
         backButton.inputEnabled = true;
@@ -86212,7 +86215,24 @@ class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
 
     update() {
+        if(!this.counter) {
+            this.blink = true;
+            glow = this.add.text(428, 48, 'How To Play', {
+                font: '50pt Megrim',
+                fill: '#DF2968'
+            });
 
+        }
+
+        if(this.blink) {
+            this.counter++;
+        }
+
+        if(this.counter > 8) {
+            this.blink = false;
+            this.counter = 0;
+            glow.destroy();
+        }
     }
 
     listener() {
@@ -86240,23 +86260,30 @@ class MenuState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
     preload() {
         this.load.image('inputfield', './assets/inputField.png')
-        this.load.image('playbutton', './assets/playnowbutton.png')
+        this.load.image('playbutton', './assets/playbutton.png')
+        this.load.image('logo', './assets/deathtorontologo.png')
     }
 
     create() {
-        this.stage.backgroundColor = "#4488AA"
-        this.add.text(this.game.width / 2, this.game.height / 2 + 100, "Enter Player Name").anchor.set(0.5)
-        var inputField = this.add.sprite(this.game.width / 2, this.game.height / 2 + 150, 'inputfield')
-        inputField.anchor.setTo(0.5, 0.5)
-        inputField.scale.setTo(1, 0.5)
+        this.stage.backgroundColor = "#313131"
+     
 
-        var playNowButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'playbutton')
+        var Logo = this.add.sprite(this.game.width / 2, this.game.height / 2-50, 'logo')
+        Logo.anchor.setTo(0.5, 0.5);
+        Logo.scale.setTo(1, 1);
+
+        var playNowButton = this.add.sprite((this.game.width / 2) - 20, this.game.height - 50, 'playbutton')
         playNowButton.anchor.setTo(0.5, 0.5);
         playNowButton.scale.setTo(0.5, 0.5);
         playNowButton.inputEnabled = true;
         playNowButton.events.onInputDown.add(this.listener, this)
 
-        text = this.add.text(this.game.width / 2 - inputField.width / 2, this.game.height / 2 + 170 - inputField.height / 2, textToUpdate, {
+        this.add.text((this.game.width / 2) - 20, this.game.height - 20 - playNowButton.height*2 - 50, "Enter Player Name", {fill: '#ffffff'}).anchor.set(0.5)
+        var inputField = this.add.sprite((this.game.width / 2) - 20, this.game.height - 20 - playNowButton.height*2, 'inputfield')
+        inputField.anchor.setTo(0.5, 0.5)
+        inputField.scale.setTo(1, 0.5)
+
+        text = this.add.text((this.game.width / 2) - inputField.width/2, this.game.height - 20 - playNowButton.height-inputField.height, textToUpdate, {fill :'#ffffff',
             boundsAlignH: "center"
         })
         text.setTextBounds(0, 0, inputField.width, inputField.height)
@@ -86285,6 +86312,7 @@ class MenuState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
 
     listener() {
+        this.stage.backgroundColor = '#000'
         this.state.start('Preload', true, false, textToUpdate);
     }
 }
@@ -86454,6 +86482,7 @@ class Preload extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 
 
+let glow;
 class ScoreBoard extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     constructor() {
         super();
@@ -86464,7 +86493,10 @@ class ScoreBoard extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
 
     create() {
-        this.colorArray = ['#ff33ff', '#66FC20', '#60FA19', '#59F810', '#51F207', '#4BDE06', '#46CE07', '#41BE07', '#3CB007', '#37A106']
+        this.counter = 0;
+        this.blink = false;
+        this.stage.backgroundColor = "black";
+        this.colorArray = ['#FB3B69', '#66FC20', '#60FA19', '#59F810', '#51F207', '#4BDE06', '#46CE07', '#41BE07', '#3CB007', '#37A106']
         this.add.text(315, 30, 'SCORE BOARD', {
             font: '60pt Megrim',
             fill: 'white'
@@ -86478,17 +86510,41 @@ class ScoreBoard extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
             });
             data = data.slice(0, 10);
             data.forEach((e,i) => {
+                if(i === 0) {
+                    this.add.text(290 + 2, 150 + i * 50 + 2, (i+1), {font: '24pt Megrim', fill: '#F70707'})
+                    this.add.text(345 + 2, 150 + i * 50 + 2, e.name, {font: '24pt Megrim', fill: '#F70707'})
+                    this.add.text(800 + 2, 150 + i * 50 + 2, e.score, {font: '24pt Megrim', fill: '#F70707'})
+                }
+                this.add.text(290, 150 + i * 50, (i+1), {font: '24pt Megrim', fill: this.colorArray[i]})
                 this.add.text(345, 150 + i * 50, e.name, {font: '24pt Megrim', fill: this.colorArray[i]})
                 this.add.text(800, 150 + i * 50, e.score, {font: '24pt Megrim', fill: this.colorArray[i]})
-                if(i === 9) {
-                    this.add.text(20, 150 + i * 50, 'Back', {font: '42pt Megrim', fill: '#5C804B'});
-                }
             });
         });
+        this.add.text(20+1, 600+1, 'Play Again', {font: '30pt Megrim', fill: 'white'});
+        this.add.text(20, 600, 'Play Again', {font: '30pt Megrim', fill: '#6F454F'});
         this.enter = this.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.ENTER);
     }
 
     update() {
+        if(!this.counter) {
+            this.blink = true;
+            glow = this.add.text(315-2, 30-2, 'SCORE BOARD', {
+                font: '60pt Megrim',
+                fill: '#6F454F'
+            })
+
+        }
+
+        if(this.blink) {
+            this.counter++;
+        }
+
+        if(this.counter > 15) {
+            this.blink = false;
+            this.counter = 0;
+            glow.destroy();
+        }
+
         if (this.enter.isDown) {
             location.reload();
         }
@@ -86511,29 +86567,29 @@ class TitleMenu extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
         super();
     }
     preload() {
-        this.load.image('logo', './assets/Logo.png')
-        this.load.image('playbutton', './assets/playnowbutton.png')
-        // this.load.image('howToPlayButton', './assets/howtoplaybutton.png')
+        this.load.image('logo', './assets/deathtorontologo.png')
+        this.load.image('playbutton', './assets/playbutton.png')
+        this.load.image('howToPlayButton', './assets/howtoplaybutton.png')
     }
 
     create() {
-        this.stage.backgroundColor = "#4488AA"
+        this.stage.backgroundColor = "#000"
 
-        var playNowButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'playbutton')
+        var playNowButton = this.add.sprite((this.game.width / 2) - 20, this.game.height - 120, 'playbutton')
         playNowButton.anchor.setTo(0.5, 0.5);
         playNowButton.scale.setTo(0.5, 0.5);
         playNowButton.inputEnabled = true;
         playNowButton.events.onInputDown.add(this.listener, this)
 
-        // var HowToPlayButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'howToPlayButton')
-        // HowToPlayButton.anchor.setTo(0.5, 0.5);
-        // HowToPlayButton.scale.setTo(0.5, 0.5);
-        // HowToPlayButton.inputEnabled = true;
-        // HowToPlayButton.events.onInputDown.add(this.HowToPlaylistener, this)
+        var HowToPlayButton = this.add.sprite((this.game.width / 2) - 20, this.game.height - 50, 'howToPlayButton')
+        HowToPlayButton.anchor.setTo(0.5, 0.5);
+        HowToPlayButton.scale.setTo(0.5, 0.5);
+        HowToPlayButton.inputEnabled = true;
+        HowToPlayButton.events.onInputDown.add(this.HowToPlaylistener, this)
 
-        var Logo = this.add.sprite(this.game.width / 2, this.game.height / 2, 'logo')
+        var Logo = this.add.sprite(this.game.width / 2, this.game.height / 2-50, 'logo')
         Logo.anchor.setTo(0.5, 0.5);
-        Logo.scale.setTo(0.5, 0.5);
+        Logo.scale.setTo(1, 1);
     }
 
     update() {

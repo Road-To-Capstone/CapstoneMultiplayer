@@ -123,7 +123,7 @@ export default class GameState extends Phaser.State {
 		if (this.doneLoading && playerCreated) {
 			const player = this.getPlayerById(this.io.id);
 			
-			//this.updateShadowTexture(player);
+			this.updateShadowTexture(player);
 
 			let voiceRecCommand = transcriptArray.shift()
 			startShooting = this.pewCommand(voiceRecCommand)

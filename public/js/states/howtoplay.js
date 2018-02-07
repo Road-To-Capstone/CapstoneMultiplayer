@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-let map;
+let map, glow;
 export default class HowToPlay extends Phaser.State {
     constructor() {
         super();
@@ -15,6 +15,7 @@ export default class HowToPlay extends Phaser.State {
         this.load.image('backButton', '../../assets/backbutton.png');
         this.load.image('bkey', '../../assets/bkey.png');
         this.counter = 0;
+        this.blink = false;
     }
 
     create() {
@@ -37,12 +38,8 @@ export default class HowToPlay extends Phaser.State {
             font: '25pt Megrim',
             fill: 'white'
         });
-        this.add.text(25, 600, 'Press Enter', {
-            font: '35pt Megrim',
-            fill: '#5C804B'
-        });
         
-        var backButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'backButton')
+        var backButton = this.add.sprite(100, this.game.height - 75, 'backButton')
         backButton.anchor.setTo(0.5, 0.5);
         backButton.scale.setTo(0.5, 0.5);
         backButton.inputEnabled = true;
@@ -51,7 +48,24 @@ export default class HowToPlay extends Phaser.State {
     }
 
     update() {
+        if(!this.counter) {
+            this.blink = true;
+            glow = this.add.text(428, 48, 'How To Play', {
+                font: '50pt Megrim',
+                fill: '#DF2968'
+            });
 
+        }
+
+        if(this.blink) {
+            this.counter++;
+        }
+
+        if(this.counter > 8) {
+            this.blink = false;
+            this.counter = 0;
+            glow.destroy();
+        }
     }
 
     listener() {
