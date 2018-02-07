@@ -25,7 +25,7 @@ export default class TitleMenu extends Phaser.State {
         HowToPlayButton.inputEnabled = true;
         HowToPlayButton.events.onInputDown.add(this.HowToPlaylistener, this)
 
-        var Logo = this.add.sprite(this.game.width / 2, this.game.height / 2, 'logo')
+        var Logo = this.add.sprite(this.game.width / 2, this.game.height / 2-50, 'logo')
         Logo.anchor.setTo(0.5, 0.5);
         Logo.scale.setTo(1, 1);
     }
