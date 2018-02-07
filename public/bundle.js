@@ -85396,7 +85396,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 					damage: weaponDamage[player.sprite.ammoIndex]
 				})
 			}
-			if (this.zombies.length < 2) {
+			if (this.zombies.length < 15) {
 				this.io.emit('client:ask-to-create-zombie', this.io.id);
 			}
 
@@ -85406,7 +85406,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 						this.zombieAI(e);
 						if (e.sprite.health <= 0  && e.sprite.alive) {
 							this.io.emit('client:kill-this-zombie', e.id);
-							player.sprite.score += 1000;
 							player.giveAmmo();
 							player.giveAmmo();
 							var zombieScale = 0.12
@@ -85823,7 +85822,9 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			let currentPlayer = this.getPlayerById(this.io.id);
 			console.log("new missile dmg is", missile.damage)
 			zombie.health -= missile.damage;
-			currentPlayer.sprite.score += 100;
+			if (missile.id === currentPlayer.sprite.id){
+				currentPlayer.sprite.score += 100;
+			}
 		}
 	}
 
@@ -92729,6 +92730,7 @@ class Missile {
         }
         this.sprite.x = x;
         this.sprite.y = y;
+        this.sprite.id = id;
         this.sprite.damage = damage;
 
         this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, this.missleSpeed)

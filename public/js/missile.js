@@ -55,6 +55,7 @@ export default class Missile {
         }
         this.sprite.x = x;
         this.sprite.y = y;
+        this.sprite.id = id;
         this.sprite.damage = damage;
 
         this.game.physics.arcade.moveToXY(this.sprite, this.mouseX, this.mouseY, this.missleSpeed)
