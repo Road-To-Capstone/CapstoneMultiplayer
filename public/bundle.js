@@ -86102,6 +86102,7 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
         this.enter = this.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.ENTER);
         this.kup = this.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.W);
         this.sdown = this.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.S);
+        this.cursors = this.input.keyboard.createCursorKeys();
         __WEBPACK_IMPORTED_MODULE_1_axios___default.a.post('/api/score-post', {
                 name: this.name,
                 score: this.score
@@ -86116,7 +86117,7 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
     update() {
         //Selecting options
-        if (this.kup.isDown) {
+        if (this.kup.isDown || this.cursors.up.isDown) {
             if (this.selectArray[this.selected] !== 'PLAY AGAIN') {
                 this.selected--;
                 shadowText.destroy();
@@ -86130,7 +86131,7 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
             }
         }
 
-        if (this.sdown.isDown) {
+        if (this.sdown.isDown || this.cursors.down.isDown) {
             if (this.selectArray[this.selected] !== 'SCORE BOARD') {
                 this.selected++;
                 shadowText.destroy();
@@ -92658,7 +92659,7 @@ class game extends __WEBPACK_IMPORTED_MODULE_2_phaser___default.a.Game {
 		this.state.add('Preload', __WEBPACK_IMPORTED_MODULE_8__states_preload__["a" /* default */]);
 		this.state.add('HowToPlay', __WEBPACK_IMPORTED_MODULE_9__states_howtoplay__["a" /* default */]);
 		this.state.add('TitleMenu', __WEBPACK_IMPORTED_MODULE_10__states_titleMenu__["a" /* default */]);
-		this.state.start('TitleMenu'); // 'TitleMenu' when finished
+		this.state.start('TitleMenu');
 	}
 }
 

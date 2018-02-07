@@ -13,7 +13,6 @@ const io = socketio.listen(server);
 app.use('/', express.static(config.publicDir));
 
 db.sync({force:true}).then(() => {
-	//console.log('Database is synced')
 });
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -26,26 +25,12 @@ server.listen(process.env.PORT || config.port, () => {
 	console.log(`Listening on ${process.env.PORT || config.port}`);
 });
 
-//-socket
+// Sockets
 const players = require('./players.js');
 const missiles = require('./missiles.js');
 const zombies = require('./zombies.js');
 
 io.sockets.on('connection', socket => {
-	/*players.add(socket.id);
-	console.log(`player ${socket.id} added`)
-	io.emit('server:player-added', players.get(socket.id));*/
-
-	// Copy from super asteroid battle
-	/*socket.on('client:new-player', playerName => {
-		socket.player = {
-			name: playerName,
-			id: socket.id
-		}
-
-		socket.emit('server:all-players', players.getAllPlayers())
-	});*/
-
 	socket.on('client:give-me-players', () => {
 		socket.emit('server:all-players', players.getAllPlayers());
 	});
@@ -66,7 +51,6 @@ io.sockets.on('connection', socket => {
 		socket.broadcast.emit('server:game-over', id);
 	})
 
-	// data is id: z.id, posX: z.sprite.x, posY: z.sprite.y
 	socket.on('client:zombie-moved', data => {
 		socket.broadcast.emit('server:zombie-moved', zombies.get(data.id));
 		zombies.set(data.id, {
@@ -81,7 +65,7 @@ io.sockets.on('connection', socket => {
 		io.emit('server:player-disconnected', socket.id);
 	});
 
-	socket.on('client:missile-fired', (data) => { // Data here is the missileGroup to be passed to other clients
+	socket.on('client:missile-fired', (data) => { 
 
 		socket.broadcast.emit('server:missile-moved', missiles.get(socket.id));
 		missiles.set(data.id, {
@@ -110,7 +94,6 @@ io.sockets.on('connection', socket => {
 	socket.on('client:ask-to-create-player', (data) => {
 		let newPlayer = players.add(data.id, data.name);
 		io.emit('server:player-added', newPlayer)
-		//io.emit('server:update-single-player-players', players.getAllPlayers())
 	})
 
 	socket.on('client:ask-to-create-missile', (data) => {
@@ -125,7 +108,6 @@ io.sockets.on('connection', socket => {
 	})
 
 });
-//=socket
 
 //creating new zombie id
 function newZombieId() {
@@ -133,7 +115,7 @@ function newZombieId() {
 	return id.getTime();
 }
 
-//500 error middlewear
+//500 error middleware
 app.use(function (err, req, res, next) {
 	console.error(err);
 	console.error(err.stack);

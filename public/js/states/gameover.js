@@ -53,6 +53,7 @@ export default class GameOver extends Phaser.State {
         this.enter = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
         this.kup = this.input.keyboard.addKey(Phaser.Keyboard.W);
         this.sdown = this.input.keyboard.addKey(Phaser.Keyboard.S);
+        this.cursors = this.input.keyboard.createCursorKeys();
         axios.post('/api/score-post', {
                 name: this.name,
                 score: this.score
@@ -67,7 +68,7 @@ export default class GameOver extends Phaser.State {
 
     update() {
         //Selecting options
-        if (this.kup.isDown) {
+        if (this.kup.isDown || this.cursors.up.isDown) {
             if (this.selectArray[this.selected] !== 'PLAY AGAIN') {
                 this.selected--;
                 shadowText.destroy();
@@ -81,7 +82,7 @@ export default class GameOver extends Phaser.State {
             }
         }
 
-        if (this.sdown.isDown) {
+        if (this.sdown.isDown || this.cursors.down.isDown) {
             if (this.selectArray[this.selected] !== 'SCORE BOARD') {
                 this.selected++;
                 shadowText.destroy();

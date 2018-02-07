@@ -26,8 +26,8 @@ module.exports = new(class Zombies {
 	}
 	set(id, json) {
 		this.zombies = this.zombies.map((e) => {
-			if (e.id == id) { //search the player with a specified id
-				Object.keys(json).forEach((k) => { //loop through all values that need to be modified
+			if (e.id == id) {
+				Object.keys(json).forEach((k) => {
 					e[k] = json[k];
 				});
 			}
