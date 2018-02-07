@@ -47,29 +47,6 @@ export default class GameState extends Phaser.State {
 
 	preload() {
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
-		this.load.audio('bensound-ofeliasdream', './assets/bensound-ofeliasdream.mp3')
-		this.load.audio('Action Radius', './assets/Action Radius.mp3')
-		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON)
-		this.load.image('tiles', './assets/tiles.png')
-		this.load.image('background', '/assets/background.png')
-		this.load.image('building', './assets/buildingplaceholder.png')
-		this.load.image('tombstone', './assets/Tombstone.png')
-		this.load.image('road', './assets/Road.png')
-		this.load.image('Melee', '/assets/Melee.png')
-		this.load.image('Lazer', '/assets/Lazer.png')
-		this.load.image('Machine Gun', '/assets/Machine Gun.png')
-		this.load.image('Rocket Launcher', '/assets/Rocket Launcher.png')
-		this.load.image('Chainsaw', '/assets/Chainsaw.png')
-		this.load.image('Flame Thrower', '/assets/Flame Thrower.png')
-		this.load.image('zombie', './assets/zombieplaceholder.png')
-		this.load.image('building1', '../../assets/building1.png')
-		this.load.image('building2', '../../assets/building2.png')
-		this.load.image('building3', '../../assets/building3.png')
-		this.load.image('tree1', '../../assets/tree1.png')
-		this.load.spritesheet('bossincoming', '/assets/bossincomingspritesheet.png',800,85,2)
-		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
-		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
-		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
 	}
 
 	create() {
@@ -97,11 +74,8 @@ export default class GameState extends Phaser.State {
 		this.sound.setDecodedCallback(song, this.startMusic, this);
 		this.sound.setDecodedCallback(bossSong, this.startMusic, this);
 
-		this.spawnBuilding(652, 961, 'building1');
-		this.spawnBuilding(821, 1480, 'building2');
-		this.spawnBuilding(1400, 1003, 'building3');
-		this.spawnBuilding(100, 100, 'tree1');
-
+		this.setUpBuilding();
+		
 		this.shadowTexture = this.add.bitmapData(1920, 1920)
 
 		var lightSprite = this.game.add.image(0, 0, this.shadowTexture)
@@ -197,8 +171,8 @@ export default class GameState extends Phaser.State {
 			});
 			this.topText.setText(`Your ID: ${this.io.id}
 				${this.players.length} players
-				posX: ${Math.floor(player.sprite.worldPosition.x)}
-				posY: ${Math.floor(player.sprite.worldPosition.y)}
+				posX: ${Math.floor(player.sprite.x)}
+				posY: ${Math.floor(player.sprite.y)}
 			`);
 			healthPercent.setText(`${(player.sprite.playerHealth / player.sprite.playerMaxHealth) * 100}%`);
 			if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
@@ -277,19 +251,149 @@ export default class GameState extends Phaser.State {
 		SETUP FUNCTIONS
 	*/
 	setUpMap() {
-		this.spawnNoCollide(200, 700, 'tombstone')
-		this.spawnNoCollide(340, 1200, 'tombstone')
-		this.spawnNoCollide(200, 1700, 'tombstone')
-		this.spawnNoCollide(250, 250, 'tombstone')
-		this.spawnNoCollide(800, 800, 'tombstone')
-		this.spawnNoCollide(1000, 1250, 'tombstone')
-		this.spawnNoCollide(1250, 1600, 'tombstone')
-		this.spawnNoCollide(1450, 800, 'tombstone')
-		this.spawnNoCollide(1450, 1400, 'tombstone')
+		//horizontal road
+		this.spawnNoCollide(100, 400, 'road')
+		this.spawnNoCollide(450, 400, 'road')
+		this.spawnNoCollide(800, 400, 'road')
+		this.spawnNoCollide(1150, 400, 'road')
+		this.spawnNoCollide(1500, 400, 'road')
+		this.spawnNoCollide(1850, 400, 'road')
 
-		this.spawnNoCollide(300, 400, 'road')
-		this.spawnNoCollide(1000, 400, 'road')
-		this.spawnNoCollide(1700, 400, 'road')
+		this.spawnNoCollide(100, 800, 'road')
+		this.spawnNoCollide(450, 800, 'road')
+		this.spawnNoCollide(800, 800, 'road')
+		this.spawnNoCollide(1150, 800, 'road')
+		this.spawnNoCollide(1500, 800, 'road')
+		this.spawnNoCollide(1850, 800, 'road')
+
+		this.spawnNoCollide(100, 1200, 'road')
+		this.spawnNoCollide(450, 1200, 'road')
+		this.spawnNoCollide(800, 1200, 'road')
+		this.spawnNoCollide(1150, 1200, 'road')
+		this.spawnNoCollide(1500, 1200, 'road')
+		this.spawnNoCollide(1850, 1200, 'road')
+
+		this.spawnNoCollide(100, 1600, 'road')
+		this.spawnNoCollide(450, 1600, 'road')
+		this.spawnNoCollide(800, 1600, 'road')
+		this.spawnNoCollide(1150, 1600, 'road')
+		this.spawnNoCollide(1500, 1600, 'road')
+		this.spawnNoCollide(1850, 1600, 'road')
+
+		//vertical road
+		this.spawnNoCollide(211, 100, 'vroad')
+		this.spawnNoCollide(211, 450, 'vroad')
+		this.spawnNoCollide(211, 800, 'vroad')
+		this.spawnNoCollide(211, 1150, 'vroad')
+		this.spawnNoCollide(211, 1500, 'vroad')
+		this.spawnNoCollide(211, 1850, 'vroad')
+
+		this.spawnNoCollide(630, 100, 'vroad')
+		this.spawnNoCollide(630, 450, 'vroad')
+		this.spawnNoCollide(630, 800, 'vroad')
+		this.spawnNoCollide(630, 1150, 'vroad')
+		this.spawnNoCollide(630, 1500, 'vroad')
+		this.spawnNoCollide(630, 1850, 'vroad')
+
+		this.spawnNoCollide(1313, 100, 'vroad')
+		this.spawnNoCollide(1313, 450, 'vroad')
+		this.spawnNoCollide(1313, 800, 'vroad')
+		this.spawnNoCollide(1313, 1150, 'vroad')
+		this.spawnNoCollide(1313, 1500, 'vroad')
+		this.spawnNoCollide(1313, 1850, 'vroad')
+
+		//tombstones
+		this.spawnNoCollide(126, 891, 'tombstone')
+		this.spawnNoCollide(340, 1300, 'tombstone')
+		this.spawnNoCollide(200, 1800, 'tombstone')
+		this.spawnNoCollide(135, 315, 'tombstone')
+		this.spawnNoCollide(800, 900, 'tombstone')
+		this.spawnNoCollide(1000, 1350, 'tombstone')
+		this.spawnNoCollide(1250, 1700, 'tombstone')
+		this.spawnNoCollide(1450, 950, 'tombstone')
+		this.spawnNoCollide(1806, 650, 'tombstone');
+
+		//trees
+		this.spawnNoCollide(20, 20, 'tree1');
+		this.spawnNoCollide(136, 20, 'tree1');
+		this.spawnNoCollide(136, 301, 'tree1');
+		this.spawnNoCollide(1766, 66, 'tree1');
+		this.spawnNoCollide(1493, 66, 'tree1');
+		this.spawnNoCollide(1629, 110, 'tree1');
+		this.spawnNoCollide(1479, 280, 'tree1');
+		this.spawnNoCollide(1766, 240, 'tree1');
+		this.spawnNoCollide(715, 461, 'tree1');
+		this.spawnNoCollide(755, 461, 'tree1');
+		this.spawnNoCollide(795, 461, 'tree1');
+		this.spawnNoCollide(835, 461, 'tree1');
+		this.spawnNoCollide(875, 461, 'tree1');
+		this.spawnNoCollide(915, 461, 'tree1');
+		this.spawnNoCollide(955, 461, 'tree1');
+		this.spawnNoCollide(995, 461, 'tree1');
+		this.spawnNoCollide(1035, 461, 'tree1');
+		this.spawnNoCollide(1075, 461, 'tree1');
+		this.spawnNoCollide(1115, 461, 'tree1');
+		this.spawnNoCollide(1155, 461, 'tree1');
+		this.spawnNoCollide(1195, 461, 'tree1');
+		this.spawnNoCollide(1235, 461, 'tree1');
+
+		this.spawnNoCollide(715, 317, 'tree1');
+		this.spawnNoCollide(755, 317, 'tree1');
+		this.spawnNoCollide(795, 317, 'tree1');
+		this.spawnNoCollide(835, 317, 'tree1');
+		this.spawnNoCollide(875, 317, 'tree1');
+		this.spawnNoCollide(915, 317, 'tree1');
+		this.spawnNoCollide(955, 317, 'tree1');
+		this.spawnNoCollide(995, 317, 'tree1');
+		this.spawnNoCollide(1035, 317, 'tree1');
+		this.spawnNoCollide(1075, 317, 'tree1');
+		this.spawnNoCollide(1115, 317, 'tree1');
+		this.spawnNoCollide(1155, 317, 'tree1');
+		this.spawnNoCollide(1195, 317, 'tree1');
+		this.spawnNoCollide(1235, 317, 'tree1');
+
+		this.spawnNoCollide(60, 201, 'tree1');
+		this.spawnNoCollide(73, 1371, 'tree1');
+
+
+		//floor1
+		this.spawnNoCollide(340, 262, 'floor1');
+		this.spawnNoCollide(490, 262, 'floor1');
+
+		this.spawnNoCollide(340, 662, 'floor1');
+		this.spawnNoCollide(490, 662, 'floor1');
+
+		this.spawnNoCollide(1426, 540, 'floor1');
+		this.spawnNoCollide(1552, 540, 'floor1');
+		this.spawnNoCollide(1650, 540, 'floor1');
+
+		//cars
+		this.spawnNoCollide(190, 376, 'car1');
+		this.spawnNoCollide(613, 660, 'car1');
+
+		this.spawnNoCollide(236, 866, 'car2');
+		this.spawnNoCollide(658, 50, 'car2');
+
+		this.spawnNoCollide(913, 374, 'car3');
+		this.spawnNoCollide(100, 374, 'car3');
+
+		this.spawnNoCollide(940, 420, 'car4');
+		this.spawnNoCollide(450, 420, 'car4');
+
+
+
+
+
+	}
+
+	setUpBuilding() {
+		// this.spawnBuilding(400, 250, 'house1');
+		this.spawnBuilding(358, 256, 'building1');
+		this.spawnBuilding(358, 661, 'building2');
+		this.spawnBuilding(989, 1393, 'house1');
+		this.spawnBuilding(1544, 530, 'house2');
+
+
 	}
 
 	bossIncoming(){
@@ -489,7 +593,7 @@ export default class GameState extends Phaser.State {
 				font: "12px Arial",
 				fill: "rgba(0, 0, 0, 0.64)"
 			});
-
+		this.topText.fixedToCamera = true;
 		this.doneLoading = 1;
 	}
 

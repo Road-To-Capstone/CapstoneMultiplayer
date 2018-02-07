@@ -5,6 +5,9 @@ export default class HowToPlay extends Phaser.State {
     constructor() {
         super();
     }
+    init(name) {
+        this.name = name;
+    }
 
     preload() {
         this.load.image('mouse', '../../assets/mouseicon.png');
@@ -42,7 +45,7 @@ export default class HowToPlay extends Phaser.State {
 
     update() {
         if (this.enter.isDown) {
-            this.state.start('MenuState');
+            this.state.start('Preload', true, false, this.name);
         }
     }
 }

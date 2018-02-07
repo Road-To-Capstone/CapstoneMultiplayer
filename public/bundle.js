@@ -85251,29 +85251,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 	preload() {
 		this.doneLoading = 0; //this is 1 at the end of createOnConnection
-		this.load.audio('bensound-ofeliasdream', './assets/bensound-ofeliasdream.mp3')
-		this.load.audio('Action Radius', './assets/Action Radius.mp3')
-		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Tilemap.TILED_JSON)
-		this.load.image('tiles', './assets/tiles.png')
-		this.load.image('background', '/assets/background.png')
-		this.load.image('building', './assets/buildingplaceholder.png')
-		this.load.image('tombstone', './assets/Tombstone.png')
-		this.load.image('road', './assets/Road.png')
-		this.load.image('Melee', '/assets/Melee.png')
-		this.load.image('Lazer', '/assets/Lazer.png')
-		this.load.image('Machine Gun', '/assets/Machine Gun.png')
-		this.load.image('Rocket Launcher', '/assets/Rocket Launcher.png')
-		this.load.image('Chainsaw', '/assets/Chainsaw.png')
-		this.load.image('Flame Thrower', '/assets/Flame Thrower.png')
-		this.load.image('zombie', './assets/zombieplaceholder.png')
-		this.load.image('building1', '../../assets/building1.png')
-		this.load.image('building2', '../../assets/building2.png')
-		this.load.image('building3', '../../assets/building3.png')
-		this.load.image('tree1', '../../assets/tree1.png')
-		this.load.spritesheet('bossincoming', '/assets/bossincomingspritesheet.png',800,85,2)
-		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
-		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
-		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
 	}
 
 	create() {
@@ -85301,11 +85278,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.sound.setDecodedCallback(song, this.startMusic, this);
 		this.sound.setDecodedCallback(bossSong, this.startMusic, this);
 
-		this.spawnBuilding(652, 961, 'building1');
-		this.spawnBuilding(821, 1480, 'building2');
-		this.spawnBuilding(1400, 1003, 'building3');
-		this.spawnBuilding(100, 100, 'tree1');
-
+		this.setUpBuilding();
+		
 		this.shadowTexture = this.add.bitmapData(1920, 1920)
 
 		var lightSprite = this.game.add.image(0, 0, this.shadowTexture)
@@ -85401,8 +85375,8 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			});
 			this.topText.setText(`Your ID: ${this.io.id}
 				${this.players.length} players
-				posX: ${Math.floor(player.sprite.worldPosition.x)}
-				posY: ${Math.floor(player.sprite.worldPosition.y)}
+				posX: ${Math.floor(player.sprite.x)}
+				posY: ${Math.floor(player.sprite.y)}
 			`);
 			healthPercent.setText(`${(player.sprite.playerHealth / player.sprite.playerMaxHealth) * 100}%`);
 			if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
@@ -85481,19 +85455,149 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		SETUP FUNCTIONS
 	*/
 	setUpMap() {
-		this.spawnNoCollide(200, 700, 'tombstone')
-		this.spawnNoCollide(340, 1200, 'tombstone')
-		this.spawnNoCollide(200, 1700, 'tombstone')
-		this.spawnNoCollide(250, 250, 'tombstone')
-		this.spawnNoCollide(800, 800, 'tombstone')
-		this.spawnNoCollide(1000, 1250, 'tombstone')
-		this.spawnNoCollide(1250, 1600, 'tombstone')
-		this.spawnNoCollide(1450, 800, 'tombstone')
-		this.spawnNoCollide(1450, 1400, 'tombstone')
+		//horizontal road
+		this.spawnNoCollide(100, 400, 'road')
+		this.spawnNoCollide(450, 400, 'road')
+		this.spawnNoCollide(800, 400, 'road')
+		this.spawnNoCollide(1150, 400, 'road')
+		this.spawnNoCollide(1500, 400, 'road')
+		this.spawnNoCollide(1850, 400, 'road')
 
-		this.spawnNoCollide(300, 400, 'road')
-		this.spawnNoCollide(1000, 400, 'road')
-		this.spawnNoCollide(1700, 400, 'road')
+		this.spawnNoCollide(100, 800, 'road')
+		this.spawnNoCollide(450, 800, 'road')
+		this.spawnNoCollide(800, 800, 'road')
+		this.spawnNoCollide(1150, 800, 'road')
+		this.spawnNoCollide(1500, 800, 'road')
+		this.spawnNoCollide(1850, 800, 'road')
+
+		this.spawnNoCollide(100, 1200, 'road')
+		this.spawnNoCollide(450, 1200, 'road')
+		this.spawnNoCollide(800, 1200, 'road')
+		this.spawnNoCollide(1150, 1200, 'road')
+		this.spawnNoCollide(1500, 1200, 'road')
+		this.spawnNoCollide(1850, 1200, 'road')
+
+		this.spawnNoCollide(100, 1600, 'road')
+		this.spawnNoCollide(450, 1600, 'road')
+		this.spawnNoCollide(800, 1600, 'road')
+		this.spawnNoCollide(1150, 1600, 'road')
+		this.spawnNoCollide(1500, 1600, 'road')
+		this.spawnNoCollide(1850, 1600, 'road')
+
+		//vertical road
+		this.spawnNoCollide(211, 100, 'vroad')
+		this.spawnNoCollide(211, 450, 'vroad')
+		this.spawnNoCollide(211, 800, 'vroad')
+		this.spawnNoCollide(211, 1150, 'vroad')
+		this.spawnNoCollide(211, 1500, 'vroad')
+		this.spawnNoCollide(211, 1850, 'vroad')
+
+		this.spawnNoCollide(630, 100, 'vroad')
+		this.spawnNoCollide(630, 450, 'vroad')
+		this.spawnNoCollide(630, 800, 'vroad')
+		this.spawnNoCollide(630, 1150, 'vroad')
+		this.spawnNoCollide(630, 1500, 'vroad')
+		this.spawnNoCollide(630, 1850, 'vroad')
+
+		this.spawnNoCollide(1313, 100, 'vroad')
+		this.spawnNoCollide(1313, 450, 'vroad')
+		this.spawnNoCollide(1313, 800, 'vroad')
+		this.spawnNoCollide(1313, 1150, 'vroad')
+		this.spawnNoCollide(1313, 1500, 'vroad')
+		this.spawnNoCollide(1313, 1850, 'vroad')
+
+		//tombstones
+		this.spawnNoCollide(126, 891, 'tombstone')
+		this.spawnNoCollide(340, 1300, 'tombstone')
+		this.spawnNoCollide(200, 1800, 'tombstone')
+		this.spawnNoCollide(135, 315, 'tombstone')
+		this.spawnNoCollide(800, 900, 'tombstone')
+		this.spawnNoCollide(1000, 1350, 'tombstone')
+		this.spawnNoCollide(1250, 1700, 'tombstone')
+		this.spawnNoCollide(1450, 950, 'tombstone')
+		this.spawnNoCollide(1806, 650, 'tombstone');
+
+		//trees
+		this.spawnNoCollide(20, 20, 'tree1');
+		this.spawnNoCollide(136, 20, 'tree1');
+		this.spawnNoCollide(136, 301, 'tree1');
+		this.spawnNoCollide(1766, 66, 'tree1');
+		this.spawnNoCollide(1493, 66, 'tree1');
+		this.spawnNoCollide(1629, 110, 'tree1');
+		this.spawnNoCollide(1479, 280, 'tree1');
+		this.spawnNoCollide(1766, 240, 'tree1');
+		this.spawnNoCollide(715, 461, 'tree1');
+		this.spawnNoCollide(755, 461, 'tree1');
+		this.spawnNoCollide(795, 461, 'tree1');
+		this.spawnNoCollide(835, 461, 'tree1');
+		this.spawnNoCollide(875, 461, 'tree1');
+		this.spawnNoCollide(915, 461, 'tree1');
+		this.spawnNoCollide(955, 461, 'tree1');
+		this.spawnNoCollide(995, 461, 'tree1');
+		this.spawnNoCollide(1035, 461, 'tree1');
+		this.spawnNoCollide(1075, 461, 'tree1');
+		this.spawnNoCollide(1115, 461, 'tree1');
+		this.spawnNoCollide(1155, 461, 'tree1');
+		this.spawnNoCollide(1195, 461, 'tree1');
+		this.spawnNoCollide(1235, 461, 'tree1');
+
+		this.spawnNoCollide(715, 317, 'tree1');
+		this.spawnNoCollide(755, 317, 'tree1');
+		this.spawnNoCollide(795, 317, 'tree1');
+		this.spawnNoCollide(835, 317, 'tree1');
+		this.spawnNoCollide(875, 317, 'tree1');
+		this.spawnNoCollide(915, 317, 'tree1');
+		this.spawnNoCollide(955, 317, 'tree1');
+		this.spawnNoCollide(995, 317, 'tree1');
+		this.spawnNoCollide(1035, 317, 'tree1');
+		this.spawnNoCollide(1075, 317, 'tree1');
+		this.spawnNoCollide(1115, 317, 'tree1');
+		this.spawnNoCollide(1155, 317, 'tree1');
+		this.spawnNoCollide(1195, 317, 'tree1');
+		this.spawnNoCollide(1235, 317, 'tree1');
+
+		this.spawnNoCollide(60, 201, 'tree1');
+		this.spawnNoCollide(73, 1371, 'tree1');
+
+
+		//floor1
+		this.spawnNoCollide(340, 262, 'floor1');
+		this.spawnNoCollide(490, 262, 'floor1');
+
+		this.spawnNoCollide(340, 662, 'floor1');
+		this.spawnNoCollide(490, 662, 'floor1');
+
+		this.spawnNoCollide(1426, 540, 'floor1');
+		this.spawnNoCollide(1552, 540, 'floor1');
+		this.spawnNoCollide(1650, 540, 'floor1');
+
+		//cars
+		this.spawnNoCollide(190, 376, 'car1');
+		this.spawnNoCollide(613, 660, 'car1');
+
+		this.spawnNoCollide(236, 866, 'car2');
+		this.spawnNoCollide(658, 50, 'car2');
+
+		this.spawnNoCollide(913, 374, 'car3');
+		this.spawnNoCollide(100, 374, 'car3');
+
+		this.spawnNoCollide(940, 420, 'car4');
+		this.spawnNoCollide(450, 420, 'car4');
+
+
+
+
+
+	}
+
+	setUpBuilding() {
+		// this.spawnBuilding(400, 250, 'house1');
+		this.spawnBuilding(358, 256, 'building1');
+		this.spawnBuilding(358, 661, 'building2');
+		this.spawnBuilding(989, 1393, 'house1');
+		this.spawnBuilding(1544, 530, 'house2');
+
+
 	}
 
 	bossIncoming(){
@@ -85693,7 +85797,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 				font: "12px Arial",
 				fill: "rgba(0, 0, 0, 0.64)"
 			});
-
+		this.topText.fixedToCamera = true;
 		this.doneLoading = 1;
 	}
 
@@ -86004,6 +86108,9 @@ class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     constructor() {
         super();
     }
+    init(name) {
+        this.name = name;
+    }
 
     preload() {
         this.load.image('mouse', '../../assets/mouseicon.png');
@@ -86041,7 +86148,7 @@ class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
     update() {
         if (this.enter.isDown) {
-            this.state.start('MenuState');
+            this.state.start('Preload', true, false, this.name);
         }
     }
 }
@@ -86111,7 +86218,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
 
     listener() {
-        this.state.start('GameState', true, false, textToUpdate);
+        this.state.start('HowToPlay', true, false, textToUpdate);
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = GameState;
@@ -86132,14 +86239,61 @@ class Preload extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
         super();
     }
 
+    init(name) {
+        this.name = name;
+    }
+
     preload() {
-        this.load.image('background', '../../assets/loadingbackground.jpg');
+        this.load.audio('bensound-ofeliasdream', './assets/bensound-ofeliasdream.mp3')
+        this.load.audio('Action Radius', './assets/Action Radius.mp3')
+        this.load.image('tombstone', './assets/Tombstone.png')
+        this.load.image('road', './assets/Road.png')
+        this.load.image('vroad', './assets/vRoad.png')
+		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Tilemap.TILED_JSON)
+		this.load.image('tiles', './assets/tiles.png')
+		this.load.image('background', '/assets/background.png')
+		this.load.image('building', './assets/buildingplaceholder.png')
+		this.load.image('Melee', '/assets/Melee.png')
+		this.load.image('Lazer', '/assets/Lazer.png')
+		this.load.image('Machine Gun', '/assets/Machine Gun.png')
+		this.load.image('Rocket Launcher', '/assets/Rocket Launcher.png')
+		this.load.image('Chainsaw', '/assets/Chainsaw.png')
+		this.load.image('Flame Thrower', '/assets/Flame Thrower.png')
+        this.load.image('zombie', './assets/zombieplaceholder.png')
+        this.load.image('building1', '../../assets/building1.png')
+		this.load.image('building2', '../../assets/building2.png')
+        this.load.image('building3', '../../assets/building3.png')
+        this.load.image('building4', '../../assets/building4.png')
+        this.load.image('building5', '../../assets/building5.png')
+        this.load.image('building6', '../../assets/building6.png')
+		this.load.image('building7', '../../assets/building7.png')
+		this.load.image('house1', '../../assets/house1.png')
+		this.load.image('house2', '../../assets/house2.png')
+		this.load.image('house3', '../../assets/house3.png')
+        this.load.image('house4', '../../assets/house4.png')
+        this.load.image('floor1', '../../assets/floor1.png')
+        this.load.image('floor2', '../../assets/floor2.png')
+        this.load.image('car1', '../../assets/car1.png')
+        this.load.image('car2', '../../assets/car2.png')
+        this.load.image('car3', '../../assets/car3.png')
+        this.load.image('car4', '../../assets/car4.png')
+
+
+
+
+		this.load.image('tree1', '../../assets/tree1.png')
+		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
+		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
+		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
+        this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
+        this.load.spritesheet('bossincoming', '/assets/bossincomingspritesheet.png',800,85,2)
+        this.load.image('loadingbackground', '../../assets/loadingbackground.jpg');
         this.load.image('logo', '../../assets/teamlogo.png');
         this.counter = 0;
     }
 
     create() {
-        let background = this.add.sprite(8, 0, 'background');
+        let background = this.add.sprite(8, 0, 'loadingbackground');
         background.scale.setTo(1.55);
         let logo = this.add.sprite(400, 50, 'logo');
         logo.alpha = 0;
@@ -86155,7 +86309,7 @@ class Preload extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     update() {
         this.counter++
             if (this.counter > 350) {
-                this.state.start('HowToPlay')
+                this.state.start('GameState', true, false, this.name);
             }
         if (this.counter % 100 === 0) {
             this.add.text(700, 580, '. ', {
@@ -92272,8 +92426,11 @@ class Building {
     this.sprite.game.physics.arcade.enableBody(this.sprite);
     this.sprite.body.immovable = true;
     this.sprite.anchor.setTo(0.5, 0.5)
-    // this.sprite.scale.setTo(0.75, 0.75)
-    this.sprite.scale.setTo(0.28)
+    if(option.indexOf('house')) {
+      this.sprite.scale.setTo(0.8)
+    }else {
+      this.sprite.scale.setTo(0.7)
+    }
     this.sprite.x = x
     this.sprite.y = y
 
@@ -92441,10 +92598,20 @@ class NoCollide {
           this.sprite.scale.setTo(0.15)
           break;
         case 'road':
-          this.sprite.scale.setTo(4)
+          this.sprite.scale.setTo(2)
+          break;
+        case 'vroad':
+          this.sprite.scale.setTo(2)
+          break;
+        case 'floor1':
+          this.sprite.scale.setTo(2);
+          break;
+        case 'car3':
+        case 'car4':
+          this.sprite.scale.setTo(0.7);
           break;
         default:
-          this.sprite.scale.setTo(0.15)
+          this.sprite.scale.setTo(0.28)
           break;
     }
   }
