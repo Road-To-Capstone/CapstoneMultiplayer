@@ -426,7 +426,6 @@ export default class GameState extends Phaser.State {
 		===============
 	*/
 	createOnConnection(data) {
-		//Zombies
 		window.zombies = [];
 		this.zombies = zombies;
 
@@ -436,7 +435,7 @@ export default class GameState extends Phaser.State {
 		window.missiles = [];
 		this.missiles = missiles;
 
-		window.io = this.io; //meafffdd
+		window.io = this.io;
 
 		this.socketCreateListeners();
 

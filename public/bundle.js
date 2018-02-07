@@ -85636,7 +85636,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		===============
 	*/
 	createOnConnection(data) {
-		//Zombies
 		window.zombies = [];
 		this.zombies = zombies;
 
@@ -85646,7 +85645,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		window.missiles = [];
 		this.missiles = missiles;
 
-		window.io = this.io; //meafffdd
+		window.io = this.io;
 
 		this.socketCreateListeners();
 
