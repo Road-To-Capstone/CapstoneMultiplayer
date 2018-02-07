@@ -6,7 +6,7 @@ const db = new Sequelize(
   }
 )
 
-const Score = db.define('Score', {
+const Score = db.define('score', {
     name: {
         type: Sequelize.STRING,
         allowNull: false
