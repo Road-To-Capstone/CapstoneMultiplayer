@@ -85821,9 +85821,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			zombie.hasOverlapped = true
 			let currentPlayer = this.getPlayerById(this.io.id);
 			zombie.health -= missile.damage;
-			console.log("your sprite ID is: ", currentPlayer.sprite.id)
 			if (missile.id === currentPlayer.sprite.id){
-				console.log("awarded points to you")
 				currentPlayer.sprite.score += 100;
 			}
 		}
@@ -85870,7 +85868,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.io.emit('client:ask-to-create-player', {id : this.io.id, name: this.name})
 		this.io.emit('client:give-me-players');
 		this.io.emit('client:give-me-zombies');
-		console.log("this.players for real is, ", this.players)
+	
 
 		/*this.io.on('server:new-player', data => {
 
@@ -85965,17 +85963,17 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		});
 
 		this.io.on('server:player-added', newPlayer => {
-			console.log("newPlayer.id is", newPlayer.id)
+		//	console.log("newPlayer.id is", newPlayer.id)
 			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY, newPlayer.ammo, newPlayer.name)
 		})
 
 		this.io.on('server:update-single-player-players', updatedPlayers => {
-			console.log("updatedPlayers for you is: ", updatedPlayers)
+		//	console.log("updatedPlayers for you is: ", updatedPlayers)
 			this.players = updatedPlayers;
 		})
 
 		this.io.on('server:update-players', updatedPlayers => {
-			console.log("updatedPlayers for others is: ", updatedPlayers)
+		//	console.log("updatedPlayers for others is: ", updatedPlayers)
 			this.players = updatedPlayers;
 		})
 	}
