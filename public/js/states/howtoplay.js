@@ -37,12 +37,8 @@ export default class HowToPlay extends Phaser.State {
             font: '25pt Megrim',
             fill: 'white'
         });
-        this.add.text(25, 600, 'Press Enter', {
-            font: '35pt Megrim',
-            fill: '#5C804B'
-        });
         
-        var backButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'backButton')
+        var backButton = this.add.sprite(100, this.game.height - 75, 'backButton')
         backButton.anchor.setTo(0.5, 0.5);
         backButton.scale.setTo(0.5, 0.5);
         backButton.inputEnabled = true;
