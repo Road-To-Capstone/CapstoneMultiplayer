@@ -5,6 +5,9 @@ export default class HowToPlay extends Phaser.State {
     constructor() {
         super();
     }
+    init(name) {
+        this.name = name;
+    }
 
     preload() {
         this.load.image('mouse', '../../assets/mouseicon.png');

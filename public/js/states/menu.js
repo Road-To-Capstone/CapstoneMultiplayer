@@ -54,6 +54,6 @@ export default class MenuState extends Phaser.State {
     }
 
     listener() {
-        this.state.start('GameState', true, false, textToUpdate);
+        this.state.start('Preload', true, false, textToUpdate);
     }
 }
