@@ -192,28 +192,32 @@ export default class GameState extends Phaser.State {
 				this.io.emit('client:ask-to-create-zombie', this.io.id);
 			}
 
-			if (!!this.zombies.length) {
+			if (this.zombies.length > 0) {
 				this.zombies.forEach(e => {
-					this.zombieAI(e);
-					if (e.sprite.health === 0) {
-						this.io.emit('client:kill-this-zombie', e.id);
-						player.sprite.score += 1000;
-						player.giveAmmo();
-						var zombieDeath = this.add.sprite(e.sprite.x, e.sprite.y, 'zombiedeath');
-						zombieDeath.anchor.setTo(0.5, 0.5);
-						zombieDeath.scale.setTo(0.12, 0.12);
-
-						var animatedDeath = zombieDeath.animations.add('zombiedeath', [4, 5, 6, 3, 8, 9, 10, 7, 0, 1, 2, 11, 11, 11, 11, 11, 11, 11, 11, 11], 6, false);
-						animatedDeath.killOnComplete = true;
-						let distance = Phaser.Math.distance(player.sprite.x, player.sprite.y, e.sprite.x, e.sprite.y);
-						if (distance > 275) {
-							zombieDeath.kill()
+					if (e.sprite && e.sprite.alive){
+						this.zombieAI(e);
+						if (e.sprite.health <= 0  && e.sprite.alive) {
+							this.io.emit('client:kill-this-zombie', e.id);
+							player.sprite.score += 1000;
+							player.giveAmmo();
+							player.giveAmmo();
+							var zombieDeath = this.add.sprite(e.sprite.x, e.sprite.y, 'zombiedeath');
+							zombieDeath.anchor.setTo(0.5, 0.5);
+							zombieDeath.scale.setTo(0.12, 0.12);
+	
+							var animatedDeath = zombieDeath.animations.add('zombiedeath', [4, 5, 6, 3, 8, 9, 10, 7, 0, 1, 2, 11, 11, 11, 11, 11, 11, 11, 11, 11], 6, false);
+							animatedDeath.killOnComplete = true;
+							let distance = Phaser.Math.distance(player.sprite.x, player.sprite.y, e.sprite.x, e.sprite.y);
+							if (distance > 275) {
+								zombieDeath.kill()
+							}
+	
+							zombieDeath.animations.play('zombiedeath');
+							e.sprite.kill();
 						}
-
-						zombieDeath.animations.play('zombiedeath');
+						this.physics.arcade.collide(e.sprite, zombieGroup);
+						this.physics.arcade.collide(e.sprite, buildingGroup);
 					}
-					this.physics.arcade.collide(e.sprite, zombieGroup);
-					this.physics.arcade.collide(e.sprite, buildingGroup);
 				});
 			}
 
@@ -391,6 +395,24 @@ export default class GameState extends Phaser.State {
 
 
 	}
+
+	bossIncoming(){
+		var thePlayer = this.getPlayerById(this.io.id)
+		var bossIncomingText = this.add.sprite(200, 200, 'bossincoming');
+		bossIncomingText.anchor.setTo(0.5, 0.5);
+		bossIncomingText.scale.setTo(0.6, 0.7);
+		bossIncomingText.x = this.game.width/2;
+		bossIncomingText.y = this.game.height/2-200;
+		bossIncomingText.fixedToCamera = true;
+
+		var animatedBossText = bossIncomingText.animations.add('bossincoming', [0,1,0,1,0,1], 1, false);
+		animatedBossText.killOnComplete = true;
+		animatedBossText.fixedToCamera = true;
+
+		bossIncomingText.animations.play('bossincoming');
+		
+	}
+
 
 	spawnNoCollide(x, y, option) {
 		this.noCollide = new NoCollide(this.game, x, y, option)
@@ -656,6 +678,7 @@ export default class GameState extends Phaser.State {
 			if (newZombie.boss) {
 				bossPlaying = true;
 				this.startMusic()
+				this.bossIncoming();
 			}
 			this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId, newZombie.boss);
 		});
@@ -708,6 +731,7 @@ export default class GameState extends Phaser.State {
 
 	zombieAI(zombie) {
 		let mindex = this.findClosestPlayer(zombie);
+	
 		this.physics.arcade.moveToXY(
 			zombie.sprite,
 			this.players[mindex].sprite.position.x,
