@@ -85822,7 +85822,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			let currentPlayer = this.getPlayerById(this.io.id);
 			zombie.health -= missile.damage;
 			if (missile.id === currentPlayer.sprite.id){
-				currentPlayer.sprite.score += 100;
+				currentPlayer.sprite.score += weaponDamage[currentPlayer.sprite.ammoIndex];
 			}
 		}
 	}

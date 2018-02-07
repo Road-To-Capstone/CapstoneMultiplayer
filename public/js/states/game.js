@@ -612,7 +612,7 @@ export default class GameState extends Phaser.State {
 			let currentPlayer = this.getPlayerById(this.io.id);
 			zombie.health -= missile.damage;
 			if (missile.id === currentPlayer.sprite.id){
-				currentPlayer.sprite.score += 100;
+				currentPlayer.sprite.score += weaponDamage[currentPlayer.sprite.ammoIndex];
 			}
 		}
 	}
