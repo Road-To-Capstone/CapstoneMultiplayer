@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 var text, textToUpdate = "",
     shouldHandleKeyDown = true,
     deleteButton;
-export default class GameState extends Phaser.State {
+export default class MenuState extends Phaser.State {
     constructor() {
         super();
     }
@@ -54,6 +54,6 @@ export default class GameState extends Phaser.State {
     }
 
     listener() {
-        this.state.start('HowToPlay', true, false, textToUpdate);
+        this.state.start('Preload', true, false, textToUpdate);
     }
 }

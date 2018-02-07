@@ -12,6 +12,7 @@ export default class HowToPlay extends Phaser.State {
     preload() {
         this.load.image('mouse', '../../assets/mouseicon.png');
         this.load.image('wasdkey', '../../assets/howtomove.png');
+        this.load.image('backButton', '../../assets/backbutton.png');
         this.load.image('bkey', '../../assets/bkey.png');
         this.counter = 0;
     }
@@ -40,12 +41,20 @@ export default class HowToPlay extends Phaser.State {
             font: '35pt Megrim',
             fill: '#5C804B'
         });
-        this.enter = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+        
+        var backButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'backButton')
+        backButton.anchor.setTo(0.5, 0.5);
+        backButton.scale.setTo(0.5, 0.5);
+        backButton.inputEnabled = true;
+        backButton.events.onInputDown.add(this.listener, this)
+
     }
 
     update() {
-        if (this.enter.isDown) {
-            this.state.start('Preload', true, false, this.name);
-        }
+
+    }
+
+    listener() {
+        this.state.start('TitleMenu');
     }
 }
