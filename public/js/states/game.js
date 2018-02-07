@@ -9,7 +9,7 @@ import {
 import Building from './../building'
 import NoCollide from './../noCollide'
 
-var map, layer, missileGroup, zombieGroup, nextFire = 0,
+var missileGroup, zombieGroup, nextFire = 0,
 	cameraSet = false,
 	buildingGroup,
 	nextMissileCollision = 0,
@@ -166,11 +166,7 @@ export default class GameState extends Phaser.State {
 			this.players.forEach(p=>{
 				p.updateTextPos();
 			});
-			this.topText.setText(`Your ID: ${this.io.id}
-				${this.players.length} players
-				posX: ${Math.floor(player.sprite.x)}
-				posY: ${Math.floor(player.sprite.y)}
-			`);
+			
 			healthPercent.setText(`${(player.sprite.playerHealth / player.sprite.playerMaxHealth) * 100}%`);
 			if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
@@ -442,15 +438,6 @@ export default class GameState extends Phaser.State {
 		this.stage.backgroundColor = '#aaa';
 		this.physics.startSystem(Phaser.Physics.ARCADE);
 
-
-		this.topText = this.add.text(
-			10,
-			10,
-			'', {
-				font: "12px Arial",
-				fill: "rgba(0, 0, 0, 0.64)"
-			});
-		this.topText.fixedToCamera = true;
 	}
 
 	socketCreateListeners() {

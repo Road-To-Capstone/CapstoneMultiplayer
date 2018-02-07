@@ -85219,7 +85219,7 @@ module.exports = {
 
 
 
-var map, layer, missileGroup, zombieGroup, nextFire = 0,
+var missileGroup, zombieGroup, nextFire = 0,
 	cameraSet = false,
 	buildingGroup,
 	nextMissileCollision = 0,
@@ -85376,11 +85376,7 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 			this.players.forEach(p=>{
 				p.updateTextPos();
 			});
-			this.topText.setText(`Your ID: ${this.io.id}
-				${this.players.length} players
-				posX: ${Math.floor(player.sprite.x)}
-				posY: ${Math.floor(player.sprite.y)}
-			`);
+			
 			healthPercent.setText(`${(player.sprite.playerHealth / player.sprite.playerMaxHealth) * 100}%`);
 			if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
@@ -85652,15 +85648,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 		this.stage.backgroundColor = '#aaa';
 		this.physics.startSystem(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Physics.ARCADE);
 
-
-		this.topText = this.add.text(
-			10,
-			10,
-			'', {
-				font: "12px Arial",
-				fill: "rgba(0, 0, 0, 0.64)"
-			});
-		this.topText.fixedToCamera = true;
 	}
 
 	socketCreateListeners() {
@@ -86055,7 +86042,6 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
 
     preload() {
-        this.load.tilemap('BaseMap', './assets/BaseMap.json', null, __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Tilemap.TILED_JSON);
         this.selected = 0;
         this.selectArray = ['PLAY AGAIN', 'SCORE BOARD'];
         this.isGlowing = false;
@@ -86064,7 +86050,6 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
 
     create() {
-        this.setUpMap();
         this.stage.backgroundColor = "black";
         this.add.text(300+3, 50+3, 'GAME OVER', {
             font: '72pt Megrim',
@@ -86102,10 +86087,6 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
             })
             .then(res => res.data)
             .then(result => console.log('axios =========', result));
-    }
-
-    setUpMap() {
-        map = this.add.tilemap('BaseMap');
     }
 
     update() {
@@ -86338,7 +86319,6 @@ class Preload extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
         this.load.image('tombstone', './assets/Tombstone.png')
         this.load.image('road', './assets/Road.png')
         this.load.image('vroad', './assets/vRoad.png')
-		this.load.tilemap('BaseMap', './assets/BaseMap.json', null, __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Tilemap.TILED_JSON)
 		this.load.image('tiles', './assets/tiles.png')
 		this.load.image('background', '/assets/background.png')
 		this.load.image('building', './assets/buildingplaceholder.png')
@@ -86351,26 +86331,14 @@ class Preload extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
         this.load.image('zombie', './assets/zombieplaceholder.png')
         this.load.image('building1', '../../assets/building1.png')
 		this.load.image('building2', '../../assets/building2.png')
-        this.load.image('building3', '../../assets/building3.png')
-        this.load.image('building4', '../../assets/building4.png')
-        this.load.image('building5', '../../assets/building5.png')
-        this.load.image('building6', '../../assets/building6.png')
-		this.load.image('building7', '../../assets/building7.png')
 		this.load.image('house1', '../../assets/house1.png')
 		this.load.image('house2', '../../assets/house2.png')
-		this.load.image('house3', '../../assets/house3.png')
         this.load.image('floor1', '../../assets/floor1.png')
-        this.load.image('floor2', '../../assets/floor2.png')
         this.load.image('car1', '../../assets/car1.png')
         this.load.image('car2', '../../assets/car2.png')
         this.load.image('car3', '../../assets/car3.png')
         this.load.image('car4', '../../assets/car4.png')
-
-
-
-
 		this.load.image('tree1', '../../assets/tree1.png')
-		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
 		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
 		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
         this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)

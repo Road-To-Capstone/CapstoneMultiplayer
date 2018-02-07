@@ -13,7 +13,6 @@ export default class GameOver extends Phaser.State {
     }
 
     preload() {
-        this.load.tilemap('BaseMap', './assets/BaseMap.json', null, Phaser.Tilemap.TILED_JSON);
         this.selected = 0;
         this.selectArray = ['PLAY AGAIN', 'SCORE BOARD'];
         this.isGlowing = false;
@@ -22,7 +21,6 @@ export default class GameOver extends Phaser.State {
     }
 
     create() {
-        this.setUpMap();
         this.stage.backgroundColor = "black";
         this.add.text(300+3, 50+3, 'GAME OVER', {
             font: '72pt Megrim',
@@ -60,10 +58,6 @@ export default class GameOver extends Phaser.State {
             })
             .then(res => res.data)
             .then(result => console.log('axios =========', result));
-    }
-
-    setUpMap() {
-        map = this.add.tilemap('BaseMap');
     }
 
     update() {
