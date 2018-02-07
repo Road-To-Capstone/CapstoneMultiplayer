@@ -610,9 +610,10 @@ export default class GameState extends Phaser.State {
 		if (!zombie.hasOverlapped) {
 			zombie.hasOverlapped = true
 			let currentPlayer = this.getPlayerById(this.io.id);
-			console.log("new missile dmg is", missile.damage)
 			zombie.health -= missile.damage;
+			console.log("your sprite ID is: ", currentPlayer.sprite.id)
 			if (missile.id === currentPlayer.sprite.id){
+				console.log("awarded points to you")
 				currentPlayer.sprite.score += 100;
 			}
 		}
