@@ -8,11 +8,6 @@ router.get('/score', (req, res, next) => {
       .then(scores => res.json(scores))
       .catch(next)
   });
-  
-// Prevent api post request from user
-// router.post('/scorepost-detector', (req, res, next) => {
-
-// });
 
 router.post('/score-post', (req, res, next) => {
     Score.create(req.body)
