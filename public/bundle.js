@@ -85427,7 +85427,6 @@ class GameState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 					if (e.sprite && e.sprite.alive){
 						this.zombieAI(e);
 						if (e.sprite.health <= 0  && e.sprite.alive) {
-							console.log("killed")
 							this.io.emit('client:kill-this-zombie', e.id);
 							player.sprite.score += 1000;
 							player.giveAmmo();
