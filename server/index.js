@@ -12,7 +12,7 @@ const io = socketio.listen(server);
 
 app.use('/', express.static(config.publicDir));
 
-db.sync().then(() => {
+db.sync({force:true}).then(() => {
 	//console.log('Database is synced')
 });
 app.use(bodyParser.json());
@@ -99,8 +99,8 @@ io.sockets.on('connection', socket => {
 
 	socket.on('client:ask-to-create-zombie', (playerId) => {
 		let boss = false;
-		if(zombies.getKillCount()%30 === 2) boss = true;
-		if (zombies.getLength() < 15) {
+		if(zombies.getKillCount()%20 === 19) boss = true;
+		if (zombies.getLength() < 10) {
 			let newZombie = zombies.add(newZombieId(), playerId, boss);
 			io.emit('server:zombie-added', newZombie);
 		}
