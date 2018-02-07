@@ -86146,12 +86146,8 @@ class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
             font: '25pt Megrim',
             fill: 'white'
         });
-        this.add.text(25, 600, 'Press Enter', {
-            font: '35pt Megrim',
-            fill: '#5C804B'
-        });
         
-        var backButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'backButton')
+        var backButton = this.add.sprite(100, this.game.height - 75, 'backButton')
         backButton.anchor.setTo(0.5, 0.5);
         backButton.scale.setTo(0.5, 0.5);
         backButton.inputEnabled = true;
@@ -86188,15 +86184,20 @@ class MenuState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
     preload() {
         this.load.image('inputfield', './assets/inputField.png')
-        this.load.image('playbutton', './assets/playnowbutton.png')
+        this.load.image('playbutton', './assets/playbutton.png')
+        this.load.image('logo', './assets/deathtorontologo.png')
     }
 
     create() {
-        this.stage.backgroundColor = "#4488AA"
+        this.stage.backgroundColor = "#313131"
         this.add.text(this.game.width / 2, this.game.height / 2 + 100, "Enter Player Name").anchor.set(0.5)
         var inputField = this.add.sprite(this.game.width / 2, this.game.height / 2 + 150, 'inputfield')
         inputField.anchor.setTo(0.5, 0.5)
         inputField.scale.setTo(1, 0.5)
+
+        var Logo = this.add.sprite((this.game.width / 2) + 20, 250, 'logo')
+        Logo.anchor.setTo(0.5, 0.5);
+        Logo.scale.setTo(1, 1);
 
         var playNowButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'playbutton')
         playNowButton.anchor.setTo(0.5, 0.5);
@@ -86233,6 +86234,7 @@ class MenuState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
 
     listener() {
+        this.stage.backgroundColor = '#000'
         this.state.start('Preload', true, false, textToUpdate);
     }
 }
