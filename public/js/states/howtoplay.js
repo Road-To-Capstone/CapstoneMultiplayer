@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-let map, glow, enterKey, click;
+let map, glow;
 export default class HowToPlay extends Phaser.State {
     constructor() {
         super();
@@ -38,12 +38,8 @@ export default class HowToPlay extends Phaser.State {
             font: '25pt Megrim',
             fill: 'white'
         });
-        this.add.text(25, 600, 'Press Enter', {
-            font: '35pt Megrim',
-            fill: 'white'
-        });
         
-        var backButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'backButton')
+        var backButton = this.add.sprite(100, this.game.height - 75, 'backButton')
         backButton.anchor.setTo(0.5, 0.5);
         backButton.scale.setTo(0.5, 0.5);
         backButton.inputEnabled = true;
@@ -56,11 +52,6 @@ export default class HowToPlay extends Phaser.State {
             this.blink = true;
             glow = this.add.text(428, 48, 'How To Play', {
                 font: '50pt Megrim',
-                fill: '#DF2968'
-            });
-
-            enterKey = this.add.text(23, 598, 'Press Enter', {
-                font: '35pt Megrim',
                 fill: '#DF2968'
             });
 

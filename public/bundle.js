@@ -86115,7 +86115,7 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
-let map, glow, enterKey, click;
+let map, glow;
 class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     constructor() {
         super();
@@ -86153,12 +86153,8 @@ class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
             font: '25pt Megrim',
             fill: 'white'
         });
-        this.add.text(25, 600, 'Press Enter', {
-            font: '35pt Megrim',
-            fill: 'white'
-        });
         
-        var backButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'backButton')
+        var backButton = this.add.sprite(100, this.game.height - 75, 'backButton')
         backButton.anchor.setTo(0.5, 0.5);
         backButton.scale.setTo(0.5, 0.5);
         backButton.inputEnabled = true;
@@ -86171,11 +86167,6 @@ class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
             this.blink = true;
             glow = this.add.text(428, 48, 'How To Play', {
                 font: '50pt Megrim',
-                fill: '#DF2968'
-            });
-
-            enterKey = this.add.text(23, 598, 'Press Enter', {
-                font: '35pt Megrim',
                 fill: '#DF2968'
             });
 
@@ -86217,15 +86208,20 @@ class MenuState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
     preload() {
         this.load.image('inputfield', './assets/inputField.png')
-        this.load.image('playbutton', './assets/playnowbutton.png')
+        this.load.image('playbutton', './assets/playbutton.png')
+        this.load.image('logo', './assets/deathtorontologo.png')
     }
 
     create() {
-        this.stage.backgroundColor = "#4488AA"
+        this.stage.backgroundColor = "#313131"
         this.add.text(this.game.width / 2, this.game.height / 2 + 100, "Enter Player Name").anchor.set(0.5)
         var inputField = this.add.sprite(this.game.width / 2, this.game.height / 2 + 150, 'inputfield')
         inputField.anchor.setTo(0.5, 0.5)
         inputField.scale.setTo(1, 0.5)
+
+        var Logo = this.add.sprite((this.game.width / 2) + 20, 250, 'logo')
+        Logo.anchor.setTo(0.5, 0.5);
+        Logo.scale.setTo(1, 1);
 
         var playNowButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'playbutton')
         playNowButton.anchor.setTo(0.5, 0.5);
@@ -86262,6 +86258,7 @@ class MenuState extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
 
     listener() {
+        this.stage.backgroundColor = '#000'
         this.state.start('Preload', true, false, textToUpdate);
     }
 }
@@ -86516,29 +86513,29 @@ class TitleMenu extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
         super();
     }
     preload() {
-        this.load.image('logo', './assets/Logo.png')
-        this.load.image('playbutton', './assets/playnowbutton.png')
-        // this.load.image('howToPlayButton', './assets/howtoplaybutton.png')
+        this.load.image('logo', './assets/deathtorontologo.png')
+        this.load.image('playbutton', './assets/playbutton.png')
+        this.load.image('howToPlayButton', './assets/howtoplaybutton.png')
     }
 
     create() {
-        this.stage.backgroundColor = "#4488AA"
+        this.stage.backgroundColor = "#000"
 
-        var playNowButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'playbutton')
+        var playNowButton = this.add.sprite((this.game.width / 2) - 20, this.game.height - 120, 'playbutton')
         playNowButton.anchor.setTo(0.5, 0.5);
         playNowButton.scale.setTo(0.5, 0.5);
         playNowButton.inputEnabled = true;
         playNowButton.events.onInputDown.add(this.listener, this)
 
-        // var HowToPlayButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'howToPlayButton')
-        // HowToPlayButton.anchor.setTo(0.5, 0.5);
-        // HowToPlayButton.scale.setTo(0.5, 0.5);
-        // HowToPlayButton.inputEnabled = true;
-        // HowToPlayButton.events.onInputDown.add(this.HowToPlaylistener, this)
+        var HowToPlayButton = this.add.sprite((this.game.width / 2) - 20, this.game.height - 50, 'howToPlayButton')
+        HowToPlayButton.anchor.setTo(0.5, 0.5);
+        HowToPlayButton.scale.setTo(0.5, 0.5);
+        HowToPlayButton.inputEnabled = true;
+        HowToPlayButton.events.onInputDown.add(this.HowToPlaylistener, this)
 
         var Logo = this.add.sprite(this.game.width / 2, this.game.height / 2, 'logo')
         Logo.anchor.setTo(0.5, 0.5);
-        Logo.scale.setTo(0.5, 0.5);
+        Logo.scale.setTo(1, 1);
     }
 
     update() {
