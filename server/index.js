@@ -12,7 +12,7 @@ const io = socketio.listen(server);
 
 app.use('/', express.static(config.publicDir));
 
-db.sync({force: true}).then(() => {
+db.sync().then(() => {
 	//console.log('Database is synced')
 });
 app.use(bodyParser.json());
@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({
 	extended: true
 }));
 
-//app.use('/api', require('./api'));
+app.use('/api', require('./api'));
 
 server.listen(process.env.PORT || config.port, () => {
 	console.log(`Listening on ${process.env.PORT || config.port}`);
