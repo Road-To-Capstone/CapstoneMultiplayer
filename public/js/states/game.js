@@ -114,16 +114,16 @@ export default class GameState extends Phaser.State {
 		})
 		text.fixedToCamera = true;
 
-		/*playerNameText = this.add.text(this.game.width/2, this.game.height/2, "", {
-			fill: '#ffffff'
-		})
-		playerNameText.fixedToCamera = true;*/
-
 		scoreTrack.fixedToCamera = true;
+
+		this.doneLoading = 1;
 	}
 
 	update() {
 		if (this.doneLoading && playerCreated) {
+			const player = this.getPlayerById(this.io.id);
+			
+			//this.updateShadowTexture(player);
 
 			let voiceRecCommand = transcriptArray.shift()
 			startShooting = this.pewCommand(voiceRecCommand)
@@ -136,7 +136,7 @@ export default class GameState extends Phaser.State {
 				this.setUpHealthBar()
 				cameraSet = true;
 			}
-			const player = this.getPlayerById(this.io.id);
+			
 			if (voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
 
 			this.io.emit('client:player-moved', {
@@ -148,8 +148,6 @@ export default class GameState extends Phaser.State {
 			});
 
 			scoreTrack.setText(`SCORE: ${player.sprite.score}`)
-
-			this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
 				if (z.playerId === this.io.id) {
@@ -201,9 +199,13 @@ export default class GameState extends Phaser.State {
 							player.sprite.score += 1000;
 							player.giveAmmo();
 							player.giveAmmo();
+							var zombieScale = 0.12
+							if (e.boss){
+								zombieScale = 0.5
+							}
 							var zombieDeath = this.add.sprite(e.sprite.x, e.sprite.y, 'zombiedeath');
 							zombieDeath.anchor.setTo(0.5, 0.5);
-							zombieDeath.scale.setTo(0.12, 0.12);
+							zombieDeath.scale.setTo(zombieScale, zombieScale);
 	
 							var animatedDeath = zombieDeath.animations.add('zombiedeath', [4, 5, 6, 3, 8, 9, 10, 7, 0, 1, 2, 11, 11, 11, 11, 11, 11, 11, 11, 11], 6, false);
 							animatedDeath.killOnComplete = true;
@@ -305,7 +307,7 @@ export default class GameState extends Phaser.State {
 		//tombstones
 		this.spawnNoCollide(126, 891, 'tombstone')
 		this.spawnNoCollide(340, 1300, 'tombstone')
-		this.spawnNoCollide(200, 1800, 'tombstone')
+		this.spawnNoCollide(80, 1800, 'tombstone')
 		this.spawnNoCollide(135, 315, 'tombstone')
 		this.spawnNoCollide(800, 900, 'tombstone')
 		this.spawnNoCollide(1000, 1350, 'tombstone')
@@ -367,18 +369,69 @@ export default class GameState extends Phaser.State {
 		this.spawnNoCollide(1552, 540, 'floor1');
 		this.spawnNoCollide(1650, 540, 'floor1');
 
-		//cars
+
+	
+		//vroads at 211, 630, 1313
+		//cars 
 		this.spawnNoCollide(190, 376, 'car1');
+		this.spawnNoCollide(190, 650, 'car1');//vertical car
 		this.spawnNoCollide(613, 660, 'car1');
+		this.spawnNoCollide(613, 1800, 'car1');
+		this.spawnNoCollide(613, 1000, 'car1');
+		this.spawnNoCollide(613, 1600, 'car1');
+		this.spawnNoCollide(613, 200, 'car1');
+		this.spawnNoCollide(1296, 500, 'car1');
+		this.spawnNoCollide(1296, 200, 'car1');
+		this.spawnNoCollide(1296, 900, 'car1');
 
-		this.spawnNoCollide(236, 866, 'car2');
+		this.spawnNoCollide(236, 866, 'car2');// vertical car
+		this.spawnNoCollide(236, 1700, 'car2');
+		this.spawnNoCollide(236, 700, 'car2');
+		this.spawnNoCollide(236, 50, 'car2');
 		this.spawnNoCollide(658, 50, 'car2');
+		this.spawnNoCollide(658, 1000, 'car2');
+		this.spawnNoCollide(658, 1100, 'car2');
+		this.spawnNoCollide(1341, 900, 'car2');
+		this.spawnNoCollide(1341, 1500, 'car2');
+		this.spawnNoCollide(1341, 50, 'car2');
 
+
+		//hroads at 400,800,1200,1600
 		this.spawnNoCollide(913, 374, 'car3');
+		this.spawnNoCollide(1600, 374, 'car3');
+		this.spawnNoCollide(1700, 374, 'car3');
 		this.spawnNoCollide(100, 374, 'car3');
+		this.spawnNoCollide(170, 774, 'car3');
+		this.spawnNoCollide(576, 774, 'car3');
+		this.spawnNoCollide(676, 774, 'car3');
+		this.spawnNoCollide(1000, 774, 'car3');
+		this.spawnNoCollide(1600, 774, 'car3');
+		this.spawnNoCollide(1700, 774, 'car3');
+		this.spawnNoCollide(300, 1174, 'car3');
+		this.spawnNoCollide(400, 1174, 'car3');
+		this.spawnNoCollide(500, 1174, 'car3');	
+		this.spawnNoCollide(600, 1174, 'car3');
+		this.spawnNoCollide(400, 1574, 'car3');
+		this.spawnNoCollide(1600, 1574, 'car3');
+		this.spawnNoCollide(1800, 1574, 'car3');
+		this.spawnNoCollide(789, 1574, 'car3');
+		this.spawnNoCollide(168, 1574, 'car3');
 
 		this.spawnNoCollide(940, 420, 'car4');
 		this.spawnNoCollide(450, 420, 'car4');
+		this.spawnNoCollide(1060, 420, 'car4');
+		this.spawnNoCollide(1600, 420, 'car4');
+		this.spawnNoCollide(50, 420, 'car4');
+		this.spawnNoCollide(50, 820, 'car4');
+		this.spawnNoCollide(150, 820, 'car4');
+		this.spawnNoCollide(250, 820, 'car4');
+		this.spawnNoCollide(1579, 820, 'car4');
+		this.spawnNoCollide(1679, 820, 'car4');
+		this.spawnNoCollide(345, 1220, 'car4');
+		this.spawnNoCollide(445, 1220, 'car4');
+		this.spawnNoCollide(645, 1220, 'car4');
+		this.spawnNoCollide(345, 1220, 'car4');
+		this.spawnNoCollide(345, 1220, 'car4');
 
 
 
@@ -425,7 +478,7 @@ export default class GameState extends Phaser.State {
 			song.loopFull(0.2);
 		} else {
 			song.pause()
-			bossSong.loopFull(0.2)
+			bossSong.loopFull(0.1)
 		}
 	}
 
@@ -594,7 +647,6 @@ export default class GameState extends Phaser.State {
 				fill: "rgba(0, 0, 0, 0.64)"
 			});
 		this.topText.fixedToCamera = true;
-		this.doneLoading = 1;
 	}
 
 	socketCreateListeners() {

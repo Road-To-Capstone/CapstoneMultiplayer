@@ -14,7 +14,7 @@ export default class zombie {
     this.sprite.anchor.setTo(0.5, 0.5);
 
     if(this.boss) {
-      this.sprite.scale.setTo(0.6);
+      this.sprite.scale.setTo(0.5);
       this.sprite.health = 1000;
     } else {
       this.sprite.scale.setTo(0.12, 0.12);
