@@ -23,8 +23,12 @@ export default class NoCollide {
         case 'vroad':
           this.sprite.scale.setTo(2)
           break;
-        case 'floor1'||'floor2':
+        case 'floor1':
           this.sprite.scale.setTo(2);
+          break;
+        case 'car3':
+        case 'car4':
+          this.sprite.scale.setTo(0.7);
           break;
         default:
           this.sprite.scale.setTo(0.28)

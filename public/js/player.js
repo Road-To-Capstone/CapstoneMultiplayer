@@ -7,11 +7,10 @@ var itemCount = 0;
 var itemSwitchCooldown = 500;
 var lastSwitch = 0;
 var maxAmmo = [Infinity, 200, 100, 5, 100, 10]
-var ammoToAdd = [Infinity, 10, 5, 1, 5, 1]
-var spriteOrientation = "";
+var ammoToAdd = [Infinity, 10, 5, 1, 5, 1];
 
 export default class Player {
-	constructor(id, game, x, y,ammo) {
+	constructor(id, game, x, y,ammo, name) {
 		this.id = id;
 		this.game = game;
 
@@ -38,7 +37,6 @@ export default class Player {
 			selectItem: this.game.input.keyboard.addKey(Phaser.Keyboard.B)
 		}
 
-
 		this.sprite.items = ['Melee', 'Machine Gun', 'Flame Thrower', 'Rocket Launcher', 'Chainsaw', 'Lazer']
 		this.sprite.selectedItem = 'Melee'
 		this.sprite.ammo = ammo // [Infinity, 200, 100, 5, 100, 10]
@@ -46,6 +44,10 @@ export default class Player {
 		this.sprite.fireRates = [500, 100, 250, 1000, 200, 1250]
 		this.sprite.selectedFireRate = 500
 		this.sprite.fireRateIndex = 0
+
+		this.sprite.name = name
+		this.sprite.spriteText = this.game.add.text(this.sprite.x, this.sprite.y-25, this.sprite.name, {fontSize: 10, fill: '#ffffff'})
+		this.sprite.spriteText.anchor.setTo(0.5,0.5);
 
 		this.sprite.playerSpeedY = 200
 		this.sprite.playerSpeedX = 200
@@ -73,20 +75,16 @@ export default class Player {
 		if (xDiff > yDiff) {
 			if (this.game.input.activePointer.worldX < this.sprite.x) {
 				this.sprite.animations.play('walk left')
-				spriteOrientation = "left"
 			}
 			if (this.game.input.activePointer.worldX > this.sprite.x) {
 				this.sprite.animations.play('walk right')
-				spriteOrientation = "right"
 			}
 		} else {
 			if (this.game.input.activePointer.worldY < this.sprite.y) {
-				spriteOrientation = "up"
 				this.sprite.animations.play('walk up')
 			}
 			if (this.game.input.activePointer.worldY > this.sprite.y) {
 				this.sprite.animations.play('walk down')
-				spriteOrientation = "down"
 			}
 		}
 		/* PLAYER CONTROL LOGIC */
@@ -126,6 +124,15 @@ export default class Player {
 
 		}
 	}
+
+	removeText(){
+		this.sprite.spriteText.destroy();
+	}
+
+	updateTextPos(){
+		this.sprite.spriteText.x = this.sprite.x
+		this.sprite.spriteText.y = this.sprite.y-25
+	}
 	setX(x) {
 		this.sprite.x = x;
 		return this;
@@ -136,6 +143,10 @@ export default class Player {
 	}
 	setAmmo(ammo) {
 		this.sprite.ammo = ammo;
+		return this;
+	}
+	setName(name) {
+		this.sprite.name = name;
 		return this;
 	}
 

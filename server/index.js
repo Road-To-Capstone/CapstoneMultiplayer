@@ -55,7 +55,8 @@ io.sockets.on('connection', socket => {
 		players.set(data.id, {
 			posX: data.posX,
 			posY: data.posY,
-			ammo: data.ammo
+			ammo: data.ammo,
+			name: data.name
 		});
 	});
 
@@ -106,9 +107,8 @@ io.sockets.on('connection', socket => {
 		return;
 	})
 
-	socket.on('client:ask-to-create-player', (id) => {
-		let newPlayer = players.add(id);
-		console.log("newPlayer ammo", newPlayer.ammo)
+	socket.on('client:ask-to-create-player', (data) => {
+		let newPlayer = players.add(data.id, data.name);
 		io.emit('server:player-added', newPlayer)
 		//io.emit('server:update-single-player-players', players.getAllPlayers())
 	})

@@ -40,6 +40,12 @@ export default class Preload extends Phaser.State {
         this.load.image('house4', '../../assets/house4.png')
         this.load.image('floor1', '../../assets/floor1.png')
         this.load.image('floor2', '../../assets/floor2.png')
+        this.load.image('car1', '../../assets/car1.png')
+        this.load.image('car2', '../../assets/car2.png')
+        this.load.image('car3', '../../assets/car3.png')
+        this.load.image('car4', '../../assets/car4.png')
+
+
 
 
 		this.load.image('tree1', '../../assets/tree1.png')

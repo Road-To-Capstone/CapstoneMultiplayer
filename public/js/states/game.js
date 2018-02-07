@@ -17,6 +17,7 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	zombiesCoolDown = 1000,
 	zombiesAttack = 1000,
 	text,
+	playerNameText,
 	song,
 	bossSong,
 	healthPercent,
@@ -32,7 +33,7 @@ var map, layer, missileGroup, zombieGroup, nextFire = 0,
 	scoreTrack = 0;
 
 //const SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
-const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)
+const recognition = (navigator.userAgent.includes('Chrome')) ? new(window.SpeechRecognition || window.webkitSpeechRecognition) : null;
 
 
 export default class GameState extends Phaser.State {
@@ -50,10 +51,6 @@ export default class GameState extends Phaser.State {
 
 	create() {
 		this.player = undefined;
-		text = this.add.text(300, this.game.height - 55, "Melee | X ", {
-			fill: '#ffffff'
-		})
-		text.fixedToCamera = true;
 
 		this.background = this.add.tileSprite(0, 0, 1920, 1920, 'background')
 		this.setUpMap()
@@ -70,7 +67,7 @@ export default class GameState extends Phaser.State {
 		zombieGroup = this.add.group();
 		missileGroup = this.add.group();
 		buildingGroup = this.add.group();
-		
+
 
 		song = this.add.audio('bensound-ofeliasdream');
 		bossSong = this.add.audio('Action Radius');
@@ -85,18 +82,22 @@ export default class GameState extends Phaser.State {
 
 		lightSprite.blendMode = Phaser.blendModes.MULTIPLY
 
-		recognition.continuous = true;
-		recognition.lang = 'en-US'
-		recognition.start();
+		if (navigator.userAgent.includes('Chrome')) {
+			recognition.continuous = true;
+			recognition.lang = 'en-US'
+			recognition.start();
 
-		recognition.onresult = event => {
-			for (let i = event.resultIndex; i < event.results.length; i++) {
-				const transcript = event.results[i][0].transcript
-				if (event.results[i].isFinal) finalTranscript += transcript + " "
+			recognition.onresult = event => {
+				for (let i = event.resultIndex; i < event.results.length; i++) {
+					const transcript = event.results[i][0].transcript
+					if (event.results[i].isFinal) finalTranscript += transcript + " "
+				}
+				transcriptArray = finalTranscript.split(" ")
+				finalTranscript = '';
 			}
-			transcriptArray = finalTranscript.split(" ")
-			finalTranscript = '';
 		}
+
+
 		this.addRain();
 
 		healthPercent = this.add.text(20, this.game.height - 100, '100%', {
@@ -108,12 +109,22 @@ export default class GameState extends Phaser.State {
 			fill: '#ffffff'
 		});
 
+		text = this.add.text(300, this.game.height - 55, "Melee | X ", {
+			fill: '#ffffff'
+		})
+		text.fixedToCamera = true;
+
+		/*playerNameText = this.add.text(this.game.width/2, this.game.height/2, "", {
+			fill: '#ffffff'
+		})
+		playerNameText.fixedToCamera = true;*/
+
 		scoreTrack.fixedToCamera = true;
 	}
 
 	update() {
 		if (this.doneLoading && playerCreated) {
-		
+
 			let voiceRecCommand = transcriptArray.shift()
 			startShooting = this.pewCommand(voiceRecCommand)
 			if (startShootingTimer < this.time.now) {
@@ -126,21 +137,22 @@ export default class GameState extends Phaser.State {
 				cameraSet = true;
 			}
 			const player = this.getPlayerById(this.io.id);
-			if(voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
+			if (voiceRecCommand) this.switchWeapon(voiceRecCommand, player);
 
 			this.io.emit('client:player-moved', {
 				id: this.io.id,
 				posX: player.sprite.x,
 				posY: player.sprite.y,
-				ammo: player.sprite.ammo
+				ammo: player.sprite.ammo,
+				name: player.sprite.name
 			});
-			
+
 			scoreTrack.setText(`SCORE: ${player.sprite.score}`)
 
-			// this.updateShadowTexture(player);
+			this.updateShadowTexture(player);
 
 			this.zombies.forEach((z) => {
-				if (z.playerId === this.io.id){
+				if (z.playerId === this.io.id) {
 					this.io.emit('client:zombie-moved', {
 						id: z.id,
 						posX: z.sprite.x,
@@ -154,14 +166,18 @@ export default class GameState extends Phaser.State {
 			this.physics.arcade.collide(player.sprite, buildingGroup);
 
 			this.getPlayerById(this.io.id).update();
+			this.players.forEach(p=>{
+				p.updateTextPos();
+			});
 			this.topText.setText(`Your ID: ${this.io.id}
 				${this.players.length} players
-				posX: ${Math.floor(player.sprite.worldPosition.x)}
-				posY: ${Math.floor(player.sprite.worldPosition.y)}
+				posX: ${Math.floor(player.sprite.x)}
+				posY: ${Math.floor(player.sprite.y)}
 			`);
 			healthPercent.setText(`${(player.sprite.playerHealth / player.sprite.playerMaxHealth) * 100}%`);
 			if ((startShooting || this.input.activePointer.isDown) && (this.time.now > nextFire && player.sprite.ammo[player.sprite.ammoIndex] > 0)) {
 				nextFire = this.time.now + player.sprite.selectedFireRate;
+				player.consumeAmmo();
 				this.io.emit('client:ask-to-create-missile', {
 					id: this.io.id,
 					posX: player.sprite.x,
@@ -172,7 +188,7 @@ export default class GameState extends Phaser.State {
 					damage: weaponDamage[player.sprite.ammoIndex]
 				})
 			}
-		if (this.zombies.length < 2) {
+			if (this.zombies.length < 2) {
 				this.io.emit('client:ask-to-create-zombie', this.io.id);
 			}
 
@@ -189,8 +205,8 @@ export default class GameState extends Phaser.State {
 
 						var animatedDeath = zombieDeath.animations.add('zombiedeath', [4, 5, 6, 3, 8, 9, 10, 7, 0, 1, 2, 11, 11, 11, 11, 11, 11, 11, 11, 11], 6, false);
 						animatedDeath.killOnComplete = true;
-						let distance =Phaser.Math.distance(player.sprite.x, player.sprite.y, e.sprite.x, e.sprite.y);
-						if(distance > 275) {
+						let distance = Phaser.Math.distance(player.sprite.x, player.sprite.y, e.sprite.x, e.sprite.y);
+						if (distance > 275) {
 							zombieDeath.kill()
 						}
 
@@ -211,6 +227,8 @@ export default class GameState extends Phaser.State {
 			this.physics.arcade.overlap(zombieGroup, missileGroup, this.handleMissileCollision, null, this)
 			this.setHealthBarPercent();
 			this.world.bringToTop(text.setText(player.sprite.selectedItem + " | " + player.sprite.ammo[player.sprite.ammoIndex]))
+			//this.world.bringToTop(playerNameText.setText(player.sprite.name));
+
 
 			if (player.sprite.playerHealth <= 0) {
 				this.io.emit('client:game-over', player.id);
@@ -229,24 +247,6 @@ export default class GameState extends Phaser.State {
 		SETUP FUNCTIONS
 	*/
 	setUpMap() {
-		// this.spawnNoCollide(200, 700, 'tombstone')
-		// this.spawnNoCollide(340, 1200, 'tombstone')
-		// this.spawnNoCollide(200, 1700, 'tombstone')
-		// this.spawnNoCollide(250, 250, 'tombstone')
-		// this.spawnNoCollide(800, 800, 'tombstone')
-		// this.spawnNoCollide(1000, 1250, 'tombstone')
-		// this.spawnNoCollide(1250, 1600, 'tombstone')
-		// this.spawnNoCollide(1450, 800, 'tombstone')
-		// this.spawnNoCollide(1450, 1400, 'tombstone')
-
-		this.spawnNoCollide(20, 20, 'tree1');
-		this.spawnNoCollide(60, 20, 'tree1');
-		this.spawnNoCollide(100, 20, 'tree1');
-		this.spawnNoCollide(140, 20, 'tree1');
-		// this.spawnNoCollide(50, 201, 'tree1');
-		// this.spawnNoCollide(60, 201, 'tree1');
-
-		
 		//horizontal road
 		this.spawnNoCollide(100, 400, 'road')
 		this.spawnNoCollide(450, 400, 'road')
@@ -284,27 +284,121 @@ export default class GameState extends Phaser.State {
 		this.spawnNoCollide(211, 1500, 'vroad')
 		this.spawnNoCollide(211, 1850, 'vroad')
 
+		this.spawnNoCollide(630, 100, 'vroad')
+		this.spawnNoCollide(630, 450, 'vroad')
+		this.spawnNoCollide(630, 800, 'vroad')
+		this.spawnNoCollide(630, 1150, 'vroad')
+		this.spawnNoCollide(630, 1500, 'vroad')
+		this.spawnNoCollide(630, 1850, 'vroad')
+
+		this.spawnNoCollide(1313, 100, 'vroad')
+		this.spawnNoCollide(1313, 450, 'vroad')
+		this.spawnNoCollide(1313, 800, 'vroad')
+		this.spawnNoCollide(1313, 1150, 'vroad')
+		this.spawnNoCollide(1313, 1500, 'vroad')
+		this.spawnNoCollide(1313, 1850, 'vroad')
+
+		//tombstones
+		this.spawnNoCollide(126, 891, 'tombstone')
+		this.spawnNoCollide(340, 1300, 'tombstone')
+		this.spawnNoCollide(200, 1800, 'tombstone')
+		this.spawnNoCollide(135, 315, 'tombstone')
+		this.spawnNoCollide(800, 900, 'tombstone')
+		this.spawnNoCollide(1000, 1350, 'tombstone')
+		this.spawnNoCollide(1250, 1700, 'tombstone')
+		this.spawnNoCollide(1450, 950, 'tombstone')
+		this.spawnNoCollide(1806, 650, 'tombstone');
+
+		//trees
+		this.spawnNoCollide(20, 20, 'tree1');
+		this.spawnNoCollide(136, 20, 'tree1');
+		this.spawnNoCollide(136, 301, 'tree1');
+		this.spawnNoCollide(1766, 66, 'tree1');
+		this.spawnNoCollide(1493, 66, 'tree1');
+		this.spawnNoCollide(1629, 110, 'tree1');
+		this.spawnNoCollide(1479, 280, 'tree1');
+		this.spawnNoCollide(1766, 240, 'tree1');
+		this.spawnNoCollide(715, 461, 'tree1');
+		this.spawnNoCollide(755, 461, 'tree1');
+		this.spawnNoCollide(795, 461, 'tree1');
+		this.spawnNoCollide(835, 461, 'tree1');
+		this.spawnNoCollide(875, 461, 'tree1');
+		this.spawnNoCollide(915, 461, 'tree1');
+		this.spawnNoCollide(955, 461, 'tree1');
+		this.spawnNoCollide(995, 461, 'tree1');
+		this.spawnNoCollide(1035, 461, 'tree1');
+		this.spawnNoCollide(1075, 461, 'tree1');
+		this.spawnNoCollide(1115, 461, 'tree1');
+		this.spawnNoCollide(1155, 461, 'tree1');
+		this.spawnNoCollide(1195, 461, 'tree1');
+		this.spawnNoCollide(1235, 461, 'tree1');
+
+		this.spawnNoCollide(715, 317, 'tree1');
+		this.spawnNoCollide(755, 317, 'tree1');
+		this.spawnNoCollide(795, 317, 'tree1');
+		this.spawnNoCollide(835, 317, 'tree1');
+		this.spawnNoCollide(875, 317, 'tree1');
+		this.spawnNoCollide(915, 317, 'tree1');
+		this.spawnNoCollide(955, 317, 'tree1');
+		this.spawnNoCollide(995, 317, 'tree1');
+		this.spawnNoCollide(1035, 317, 'tree1');
+		this.spawnNoCollide(1075, 317, 'tree1');
+		this.spawnNoCollide(1115, 317, 'tree1');
+		this.spawnNoCollide(1155, 317, 'tree1');
+		this.spawnNoCollide(1195, 317, 'tree1');
+		this.spawnNoCollide(1235, 317, 'tree1');
+
+		this.spawnNoCollide(60, 201, 'tree1');
+		this.spawnNoCollide(73, 1371, 'tree1');
+
+
 		//floor1
-		this.spawnNoCollide(340, 262, 'floor1')
-		this.spawnNoCollide(490, 262, 'floor1')
+		this.spawnNoCollide(340, 262, 'floor1');
+		this.spawnNoCollide(490, 262, 'floor1');
+
+		this.spawnNoCollide(340, 662, 'floor1');
+		this.spawnNoCollide(490, 662, 'floor1');
+
+		this.spawnNoCollide(1426, 540, 'floor1');
+		this.spawnNoCollide(1552, 540, 'floor1');
+		this.spawnNoCollide(1650, 540, 'floor1');
+
+		//cars
+		this.spawnNoCollide(190, 376, 'car1');
+		this.spawnNoCollide(613, 660, 'car1');
+
+		this.spawnNoCollide(236, 866, 'car2');
+		this.spawnNoCollide(658, 50, 'car2');
+
+		this.spawnNoCollide(913, 374, 'car3');
+		this.spawnNoCollide(100, 374, 'car3');
+
+		this.spawnNoCollide(940, 420, 'car4');
+		this.spawnNoCollide(450, 420, 'car4');
+
+
+
 
 
 	}
 
 	setUpBuilding() {
 		// this.spawnBuilding(400, 250, 'house1');
-		this.spawnBuilding(362, 253, 'building1');
+		this.spawnBuilding(358, 256, 'building1');
+		this.spawnBuilding(358, 661, 'building2');
+		this.spawnBuilding(989, 1393, 'house1');
+		this.spawnBuilding(1544, 530, 'house2');
 
 
 	}
 
 	spawnNoCollide(x, y, option) {
-		this.noCollide= new NoCollide(this.game, x, y, option)
+		this.noCollide = new NoCollide(this.game, x, y, option)
 	}
 
 	startMusic() {
 		song.loopFull(0.2);
-		if(!bossPlaying) {
+		if (!bossPlaying) {
 			bossSong.pause()
 			song.loopFull(0.2);
 		} else {
@@ -394,8 +488,8 @@ export default class GameState extends Phaser.State {
 		zombieGroup.add(this.zombie.sprite)
 	}
 
-	makePlayer(id,x,y,ammo){
-		this.player = new Player(id, this, x, y, ammo)
+	makePlayer(id,x,y,ammo,name){
+		this.player = new Player(id, this, x, y, ammo,name)
 	//	console.log("players is", this.players)
 		this.players.push(this.player)
 		playerGroup.add(this.player.sprite)
@@ -404,17 +498,17 @@ export default class GameState extends Phaser.State {
 
 	switchWeapon(voice, player) {
 		let voiceTemp = voice.toLowerCase();
-		if(voiceTemp === 'melee') {
+		if (voiceTemp === 'melee') {
 			this.switchWeaponHelper(0, player);
-		} else if(voiceTemp === 'machine') {
+		} else if (voiceTemp === 'machine') {
 			this.switchWeaponHelper(1, player);
-		} else if(voiceTemp === 'flame') {
+		} else if (voiceTemp === 'flame') {
 			this.switchWeaponHelper(2, player);
-		} else if(voiceTemp === 'rocket') {
+		} else if (voiceTemp === 'rocket') {
 			this.switchWeaponHelper(3, player);
-		} else if(voiceTemp === 'chain') {
+		} else if (voiceTemp === 'chain') {
 			this.switchWeaponHelper(4, player);
-		} else if(voiceTemp === 'lazer') {
+		} else if (voiceTemp === 'lazer') {
 			this.switchWeaponHelper(5, player);
 		} else {
 			return;
@@ -435,7 +529,6 @@ export default class GameState extends Phaser.State {
 		zombieGroup.forEach((e) => {
 			e.hasOverlapped = false
 		})
-		this.getPlayerById(this.io.id).consumeAmmo()
 
 	}
 
@@ -478,7 +571,7 @@ export default class GameState extends Phaser.State {
 				font: "12px Arial",
 				fill: "rgba(0, 0, 0, 0.64)"
 			});
-
+		this.topText.fixedToCamera = true;
 		this.doneLoading = 1;
 	}
 
@@ -488,7 +581,7 @@ export default class GameState extends Phaser.State {
 		//load all existing players
 		/*this.io.emit('client:give-me-players'); //ask for it
 		this.io.emit('client:give-me-zombies'); //ask for zombies  */
-		this.io.emit('client:ask-to-create-player', this.io.id)
+		this.io.emit('client:ask-to-create-player', {id : this.io.id, name: this.name})
 		this.io.emit('client:give-me-players');
 		this.io.emit('client:give-me-zombies');
 		console.log("this.players for real is, ", this.players)
@@ -498,16 +591,16 @@ export default class GameState extends Phaser.State {
 		})*/
 
 		this.io.on('server:all-players', data => { //the data is the players from the server side
-			if (data.length>0){
+			if (data.length > 0) {
 				data.forEach(e => {
 					if (e.id != this.io.id) //this will prevent loading our player two times
-						this.players.push(new Player(e.id, this, e.posX, e.posY, e.angle));
+						this.players.push(new Player(e.id, this, e.posX, e.posY, e.ammo, e.name));
 				});
 			}
 		});
 
 		this.io.on('server:all-zombies', data => {
-			if (data.length>0){
+			if (data.length > 0) {
 				data.forEach(newZombie => {
 					this.makeZombies(newZombie.id, newZombie.posX, newZombie.posY, newZombie.playerId, newZombie.boss);
 				})
@@ -515,13 +608,14 @@ export default class GameState extends Phaser.State {
 		})
 
 		//load your player
-	/*	this.io.on('server:player-added', data => {
-			players.push(new Player(data.id, this, data.posX, data.posY, data.angle));
-		});*/
+		/*	this.io.on('server:player-added', data => {
+				players.push(new Player(data.id, this, data.posX, data.posY, data.angle));
+			});*/
 
 		this.io.on('server:player-disconnected', id => { //if a player has disconnected
 			this.players.forEach((e, i) => {
 				if (e.id === id) {
+					e.removeText();
 					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}
@@ -530,13 +624,14 @@ export default class GameState extends Phaser.State {
 
 		this.io.on('server:player-moved', data => {
 			if (this.getPlayerById(data.id)){
-				this.getPlayerById(data.id).setX(data.posX).setY(data.posY).setAmmo(data.ammo);
+				this.getPlayerById(data.id).setX(data.posX).setY(data.posY).setAmmo(data.ammo).setName(data.name);
 			}
 		});
 
 		this.io.on('server:game-over', id => {
 			this.players.forEach((e, i) => {
 				if (e.id === id) {
+					e.removeText();
 					e.sprite.destroy();
 					this.players.splice(i, 1);
 				}
@@ -544,7 +639,7 @@ export default class GameState extends Phaser.State {
 		})
 
 		this.io.on('server:zombie-moved', data => { //data is an object with {id: z.id, posX: z.sprite.x, posY: z.sprite.y}
-			if (this.getZombieById(data.id)){
+			if (this.getZombieById(data.id)) {
 				this.getZombieById(data.id).set(data.posX, data.posY);
 			}
 		});
@@ -558,7 +653,7 @@ export default class GameState extends Phaser.State {
 		});
 
 		this.io.on('server:zombie-added', newZombie => {
-			if(newZombie.boss) {
+			if (newZombie.boss) {
 				bossPlaying = true;
 				this.startMusic()
 			}
@@ -568,7 +663,7 @@ export default class GameState extends Phaser.State {
 		this.io.on('server:kill-this-zombie', id => {
 			this.zombies.forEach((z, i) => {
 				if (z.id === id) {
-					if(z.boss) {
+					if (z.boss) {
 						bossPlaying = false;
 						this.startMusic();
 					}
@@ -584,16 +679,16 @@ export default class GameState extends Phaser.State {
 
 		this.io.on('server:player-added', newPlayer => {
 			console.log("newPlayer.id is", newPlayer.id)
-			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY, newPlayer.ammo)
+			this.makePlayer(newPlayer.id, newPlayer.posX, newPlayer.posY, newPlayer.ammo, newPlayer.name)
 		})
 
 		this.io.on('server:update-single-player-players', updatedPlayers => {
-			console.log("updatedPlayers for you is: " , updatedPlayers)
+			console.log("updatedPlayers for you is: ", updatedPlayers)
 			this.players = updatedPlayers;
 		})
 
 		this.io.on('server:update-players', updatedPlayers => {
-			console.log("updatedPlayers for others is: " , updatedPlayers)
+			console.log("updatedPlayers for others is: ", updatedPlayers)
 			this.players = updatedPlayers;
 		})
 	}
@@ -634,7 +729,7 @@ export default class GameState extends Phaser.State {
 				dist: 1920
 			},
 			distance, playerPosX, playerPoxY;
-			this.players.forEach((p, i) => {
+		this.players.forEach((p, i) => {
 			playerPosX = p.sprite.position.x;
 			playerPoxY = p.sprite.position.y;
 			distance = Math.sqrt(Math.pow(playerPosX - zombie.sprite.position.x, 2) +
