@@ -52,7 +52,8 @@ export default class Preload extends Phaser.State {
 		//this.load.spritesheet('zombieattack', '/assets/zombieattackspritesheet.png',430,519,8)
 		this.load.spritesheet('player', '/assets/playerspritesheet.png',24,32)
 		this.load.spritesheet('zombiewalk', '/assets/zombiewalkspritesheet.png',430,519,10)
-		this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
+        this.load.spritesheet('zombiedeath', '/assets/zombiedeathspritesheet.png',629,526,12)
+        this.load.spritesheet('bossincoming', '/assets/bossincomingspritesheet.png',800,85,2)
         this.load.image('loadingbackground', '../../assets/loadingbackground.jpg');
         this.load.image('logo', '../../assets/teamlogo.png');
         this.counter = 0;
