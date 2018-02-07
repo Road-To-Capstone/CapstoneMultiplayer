@@ -86020,13 +86020,19 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
     create() {
         this.setUpMap();
-        this.add.text(254, 50, 'GAME OVER', {
+        this.stage.backgroundColor = "black";
+        this.add.text(300+3, 50+3, 'GAME OVER', {
+            font: '72pt Megrim',
+            fill: '#DC0000'
+        });
+        this.add.text(300, 50, 'GAME OVER', {
             font: '72pt Megrim',
             fill: 'white'
         });
-        this.add.text(100, 126, `${this.name} SCORE: ${this.score}`, {
-            font: '84pt Megrim',
-            fill: '#cc00cc'
+        
+        this.add.text(150, 170, `${this.name} SCORE: ${this.score}`, {
+            font: '50pt Megrim',
+            fill: '#F34949'
         });
         this.add.text(430, 400, this.selectArray[this.selected], {
             font: '42pt Megrim',
@@ -86109,7 +86115,7 @@ class GameOver extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_phaser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_phaser__);
 
 
-let map;
+let map, glow, enterKey, click;
 class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     constructor() {
         super();
@@ -86124,6 +86130,7 @@ class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
         this.load.image('backButton', '../../assets/backbutton.png');
         this.load.image('bkey', '../../assets/bkey.png');
         this.counter = 0;
+        this.blink = false;
     }
 
     create() {
@@ -86148,7 +86155,7 @@ class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
         });
         this.add.text(25, 600, 'Press Enter', {
             font: '35pt Megrim',
-            fill: '#5C804B'
+            fill: 'white'
         });
         
         var backButton = this.add.sprite(this.game.width / 2, this.game.height - 50, 'backButton')
@@ -86160,7 +86167,29 @@ class HowToPlay extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
 
     update() {
+        if(!this.counter) {
+            this.blink = true;
+            glow = this.add.text(428, 48, 'How To Play', {
+                font: '50pt Megrim',
+                fill: '#DF2968'
+            });
 
+            enterKey = this.add.text(23, 598, 'Press Enter', {
+                font: '35pt Megrim',
+                fill: '#DF2968'
+            });
+
+        }
+
+        if(this.blink) {
+            this.counter++;
+        }
+
+        if(this.counter > 8) {
+            this.blink = false;
+            this.counter = 0;
+            glow.destroy();
+        }
     }
 
     listener() {
@@ -86402,6 +86431,7 @@ class Preload extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
 
 
 
+let glow;
 class ScoreBoard extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     constructor() {
         super();
@@ -86412,7 +86442,10 @@ class ScoreBoard extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
     }
 
     create() {
-        this.colorArray = ['#ff33ff', '#66FC20', '#60FA19', '#59F810', '#51F207', '#4BDE06', '#46CE07', '#41BE07', '#3CB007', '#37A106']
+        this.counter = 0;
+        this.blink = false;
+        this.stage.backgroundColor = "black";
+        this.colorArray = ['#FB3B69', '#66FC20', '#60FA19', '#59F810', '#51F207', '#4BDE06', '#46CE07', '#41BE07', '#3CB007', '#37A106']
         this.add.text(315, 30, 'SCORE BOARD', {
             font: '60pt Megrim',
             fill: 'white'
@@ -86426,17 +86459,41 @@ class ScoreBoard extends __WEBPACK_IMPORTED_MODULE_0_phaser___default.a.State {
             });
             data = data.slice(0, 10);
             data.forEach((e,i) => {
+                if(i === 0) {
+                    this.add.text(290 + 2, 150 + i * 50 + 2, (i+1), {font: '24pt Megrim', fill: '#F70707'})
+                    this.add.text(345 + 2, 150 + i * 50 + 2, e.name, {font: '24pt Megrim', fill: '#F70707'})
+                    this.add.text(800 + 2, 150 + i * 50 + 2, e.score, {font: '24pt Megrim', fill: '#F70707'})
+                }
+                this.add.text(290, 150 + i * 50, (i+1), {font: '24pt Megrim', fill: this.colorArray[i]})
                 this.add.text(345, 150 + i * 50, e.name, {font: '24pt Megrim', fill: this.colorArray[i]})
                 this.add.text(800, 150 + i * 50, e.score, {font: '24pt Megrim', fill: this.colorArray[i]})
-                if(i === 9) {
-                    this.add.text(20, 150 + i * 50, 'Back', {font: '42pt Megrim', fill: '#5C804B'});
-                }
             });
         });
+        this.add.text(20+1, 600+1, 'Play Again', {font: '30pt Megrim', fill: 'white'});
+        this.add.text(20, 600, 'Play Again', {font: '30pt Megrim', fill: '#6F454F'});
         this.enter = this.input.keyboard.addKey(__WEBPACK_IMPORTED_MODULE_0_phaser___default.a.Keyboard.ENTER);
     }
 
     update() {
+        if(!this.counter) {
+            this.blink = true;
+            glow = this.add.text(315-2, 30-2, 'SCORE BOARD', {
+                font: '60pt Megrim',
+                fill: '#6F454F'
+            })
+
+        }
+
+        if(this.blink) {
+            this.counter++;
+        }
+
+        if(this.counter > 15) {
+            this.blink = false;
+            this.counter = 0;
+            glow.destroy();
+        }
+
         if (this.enter.isDown) {
             location.reload();
         }
