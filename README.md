@@ -1,6 +1,6 @@
 # Death Road to Toronto
 
-![Menu](https://imgur.com/a/mPYiw)
+![Menu](https://imgur.com/a/mPYiw.jpg)
 
 Inspired by Death Road to Canada: http://store.steampowered.com/app/252610/Death_Road_to_Canada/
 
