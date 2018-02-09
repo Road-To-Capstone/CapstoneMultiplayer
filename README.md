@@ -1,13 +1,20 @@
-# Phaser and Socket.io multimplayer game :video_game:
+# Death Road to Toronto
 
-A simple [Phaser](https://phaser.io/) and [Socket.io](http://socket.io/) game based on websockets for multiplayer support
+Inspired by Death Road to Canada: http://store.steampowered.com/app/252610/Death_Road_to_Canada/
 
-## Getting started
+Sky Mason - [Github](https://github.com/darthjacen)
+Albert Oh - [Github](https://github.com/albertopha)
+Stephen Nguyen - [Github](https://github.com/Stlnguyen)
 
-- `npm install`
-- `npm run devsv` to start dev server based on nodemon
-- `npm run sv` to start the standard server
-- `npm run wbp` to compile everything into bundle.js
+## Our game is deployed at https://death-road-to-toronto.herokuapp.com/
 
+## Introduction to voice recognition
 
-##### Let me know what you think! :smile:
+Our app can detect if you say "Shoot" or any weapon such as "Machine gun" to shoot or switch weapons using the WebSpeechAPI.
+
+## Credits
+
+Our instructors: John McDonald, Erik Shuttlesworth, and Jordan Park
+Skeleton code: https://github.com/alexcambose/Phaser-and-Socket.io-multimplayer-game 
+
+## We hope you enjoy the game
